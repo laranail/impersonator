@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    level: max
+    paths:
+        - src
+    excludePaths:
+        - vendor
+    ignoreErrors:
+        # `Impersonates` is a public-API trait — it exists to be `use`-d by
+        # consumers' own user models. PHPStan scans only src/ and cannot observe
+        # them, so it always reports the trait as used zero times. The fixtures in
+        # tests/Fixtures/ apply it and tests/Feature/ImpersonatesTraitTest.php
+        # proves every method behaves.
+        - '#Trait Simtabi\\Laranail\\Impersonator\\Laravel\\Concerns\\Impersonates is used zero times#'
+        # Generic array value types in docblocks are not enforced.
+        -
+            identifier: missingType.iterableValue
+    treatPhpDocTypesAsCertain: false

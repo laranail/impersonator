@@ -1,0 +1,9 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Documentation
+    url: https://opensource.simtabi.com/documentation/laranail/impersonator/
+    about: Configuration, drivers, adapters, modes, and the audit trail.
+  - name: Security vulnerability
+    url: https://github.com/laranail/impersonator/security/policy
+    about: Do not open a public issue. Report privately to opensource@simtabi.com.

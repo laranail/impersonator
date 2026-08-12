@@ -1,0 +1,121 @@
+{
+    "name": "laranail/impersonator",
+    "description": "Production-grade Laravel user impersonation — pluggable drivers and auth adapters, impersonation modes, action-level audit trails, RBAC, remote revocation, and an optional REST API.",
+    "keywords": [
+        "laravel",
+        "impersonation",
+        "impersonate",
+        "laranail",
+        "audit-trail",
+        "rbac",
+        "multitenancy"
+    ],
+    "homepage": "https://opensource.simtabi.com/products/laranail/impersonator",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Simtabi LLC",
+            "email": "opensource@simtabi.com",
+            "homepage": "https://opensource.simtabi.com",
+            "role": "Organization"
+        },
+        {
+            "name": "Imani Manyara",
+            "email": "imani@simtabi.com",
+            "role": "Maintainer"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/laranail/impersonator/issues",
+        "source": "https://github.com/laranail/impersonator",
+        "docs": "https://opensource.simtabi.com/documentation/laranail/impersonator/"
+    },
+    "require": {
+        "php": "^8.3",
+        "illuminate/auth": "^13.0",
+        "illuminate/console": "^13.0",
+        "illuminate/contracts": "^13.0",
+        "illuminate/database": "^13.0",
+        "illuminate/http": "^13.0",
+        "illuminate/routing": "^13.0",
+        "illuminate/support": "^13.0",
+        "psr/clock": "^1.0",
+        "psr/event-dispatcher": "^1.0",
+        "psr/log": "^3.0"
+    },
+    "require-dev": {
+        "larastan/larastan": "^3.0",
+        "laravel/passport": "^13.7",
+        "laravel/pint": "^1.18",
+        "laravel/sanctum": "^4.3",
+        "mockery/mockery": "^1.6",
+        "orchestra/testbench": "^11.0",
+        "pestphp/pest": "^3.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.0",
+        "rector/rector": "^2.0",
+        "roave/security-advisories": "dev-latest",
+        "spatie/pest-plugin-test-time": "^2.2",
+        "stancl/tenancy": "^3.10",
+        "tymon/jwt-auth": "^2.3"
+    },
+    "suggest": {
+        "stancl/tenancy": "Enables the TenancyDriver for cross-domain impersonation in multi-tenant apps (^3.8).",
+        "laravel/sanctum": "Enables the SanctumTokenAdapter, issuing short-lived scoped tokens for API impersonation.",
+        "laravel/passport": "Enables the PassportAdapter and its custom impersonation grant.",
+        "tymon/jwt-auth": "Enables the JwtAdapter, minting short-lived JWTs with impersonation claims.",
+        "spatie/laravel-permission": "Enables the RBAC layer: enter/mode permissions, protected roles, and role hierarchy rules.",
+        "spatie/laravel-activitylog": "Attributes logged activity to the impersonator rather than the target.",
+        "owen-it/laravel-auditing": "Attributes audit records to the impersonator rather than the target."
+    },
+    "autoload": {
+        "psr-4": {
+            "Simtabi\\Laranail\\Impersonator\\": "src/"
+        },
+        "files": [
+            "src/Laravel/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Simtabi\\Laranail\\Impersonator\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/pest --colors=always",
+        "test-coverage": "@test --coverage",
+        "test-dirty": "@test --dirty --compact",
+        "lint": [
+            "@pint",
+            "@phpstan",
+            "@rector"
+        ],
+        "pint": "vendor/bin/pint --test",
+        "pint-fix": "vendor/bin/pint",
+        "phpstan": "vendor/bin/phpstan analyse --no-progress",
+        "rector": "vendor/bin/rector process --dry-run",
+        "rector-fix": "vendor/bin/rector process",
+        "audit": "@composer audit"
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-main": "0.1.x-dev"
+        },
+        "laravel": {
+            "providers": [
+                "Simtabi\\Laranail\\Impersonator\\Laravel\\Providers\\ImpersonatorServiceProvider"
+            ],
+            "aliases": {
+                "Impersonator": "Simtabi\\Laranail\\Impersonator\\Laravel\\Facades\\ImpersonatorFacade"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}

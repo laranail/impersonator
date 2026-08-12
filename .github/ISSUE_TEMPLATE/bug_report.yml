@@ -1,0 +1,91 @@
+name: Bug report
+description: Something does not behave as documented.
+labels: [bug]
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        **Do not report a security vulnerability here.** If the problem lets somebody impersonate an
+        account they should not reach, escalate a mode, replay a token, or read a credential, email
+        `opensource@simtabi.com` instead — see [SECURITY.md](../../blob/main/SECURITY.md).
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you expected, and what happened instead.
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: How to reproduce
+      description: |
+        The smallest set of steps that shows it. A failing test is the fastest possible bug report.
+      placeholder: |
+        1. Set `impersonator.driver` to `token`
+        2. Enter as an operator holding `impersonator.enter`
+        3. Follow the accept URL twice
+    validations:
+      required: true
+
+  - type: textarea
+    id: doctor
+    attributes:
+      label: Doctor output
+      description: |
+        Run `php artisan laranail::impersonator.doctor` and paste the output. It reports the
+        configuration problems that produce no error, which is most of them.
+      render: text
+
+  - type: input
+    id: package-version
+    attributes:
+      label: Package version
+      placeholder: 0.1.0
+    validations:
+      required: true
+
+  - type: input
+    id: php-laravel
+    attributes:
+      label: PHP and Laravel versions
+      placeholder: PHP 8.4.3, Laravel 13.2
+    validations:
+      required: true
+
+  - type: dropdown
+    id: driver
+    attributes:
+      label: Driver
+      options: [session, token, tenancy, a custom driver]
+    validations:
+      required: true
+
+  - type: dropdown
+    id: adapter
+    attributes:
+      label: Auth adapter
+      options: [session, sanctum, passport, jwt, a custom adapter]
+    validations:
+      required: true
+
+  - type: input
+    id: session-driver
+    attributes:
+      label: Laravel session driver
+      description: |
+        Relevant more often than it looks — `cookie` and `array` keep no server-side record, so a
+        revocation cannot be enforced out of band and ends the session on its next request instead.
+      placeholder: database
+
+  - type: textarea
+    id: config
+    attributes:
+      label: Relevant configuration
+      description: |
+        The parts of `config/impersonator.php` you changed from the defaults. **Redact
+        `audit.hash_key` and any webhook URL** — both are secrets.
+      render: php

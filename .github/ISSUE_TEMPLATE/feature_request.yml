@@ -1,0 +1,48 @@
+name: Feature request
+description: Suggest a capability or an extension point.
+labels: [enhancement]
+
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: |
+        What are you trying to do that the package makes hard? Describe the situation rather than
+        the feature — the best outcome is often an extension point rather than the specific thing
+        you had in mind.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+    validations:
+      required: true
+
+  - type: textarea
+    id: extension-points
+    attributes:
+      label: What you have already tried
+      description: |
+        Most additions are already reachable without a change here. Worth checking first:
+
+        - `Impersonator::extend()` / `extendAdapter()` for a custom driver or auth adapter
+        - `registerMode()` with your own `ModeEnforcer` for a new privilege scope
+        - `registerTarget()` for another impersonatable model, with its own guard
+        - `authorization.policy` to extend `BasePolicy` or `RbacPolicy`
+        - the event surface, for anything that reacts to the lifecycle
+
+        If one of these nearly works but not quite, say where it falls short — that is usually the
+        more useful bug.
+
+  - type: checkboxes
+    id: security
+    attributes:
+      label: Security
+      options:
+        - label: This would not let anybody impersonate an account they cannot reach today, escalate a mode mid-session, or read a credential.
+          required: false
+        - label: I understand a proposal that weakens a control will be declined, or accepted only behind an explicit opt-in that is off by default.
+          required: true
