@@ -1,0 +1,836 @@
+openapi: 3.1.0
+
+info:
+  title: laranail/impersonator
+  version: 0.1.0
+  description: |
+    User impersonation for Laravel: start, inspect and end impersonations, and read the audit trail.
+
+    **This API is disabled by default.** Set `impersonator.api.enabled` to true to expose it. It is a
+    remote-control surface for every account in the system, so it is something an operator switches
+    on deliberately rather than something acquired by upgrading a package.
+
+    **Credentials appear exactly once.** `POST /impersonations` is the only endpoint that ever returns
+    an `accept_url` or a `credential.secret`. Both are single-use and short-lived, and neither is
+    retrievable afterwards — only a SHA-256 digest is stored. Treat that response as a secret: do not
+    log it, and do not persist it.
+
+    **No endpoint returns a credential hash or a session id.** A digest is still a verifier — a holder
+    can confirm a guessed token against it — so neither appears in any listing, detail view or export.
+
+    **Three separate permissions.** Entering, revoking and reading the trail are distinct: an auditor
+    who may read every impersonation cannot end one, and an operator who may end one does not thereby
+    gain the trail.
+  license:
+    name: MIT
+
+servers:
+  - url: https://your-app.example.com/impersonator/api/v1
+    description: Default prefix; configurable via `impersonator.api.prefix`.
+
+security:
+  - sanctum: []
+
+tags:
+  - name: Impersonations
+    description: Starting, inspecting and ending impersonations.
+  - name: Audits
+    description: Reading the audit trail.
+  - name: Approvals
+    description: The break-glass queue — four-eyes authorisation for an impersonation.
+
+paths:
+  /impersonations:
+    post:
+      tags: [Impersonations]
+      summary: Start an impersonation
+      description: |
+        Requires the `impersonator.enter` permission **and** the permission for the requested mode —
+        both, not either. Every impersonation carries a mode, and each mode is gated separately.
+
+        The response has two shapes. `pending: true` means a single-use token was issued and **nobody
+        is impersonating yet** — the operator must follow `accept_url`. `pending: false` means the
+        target is authenticated now.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/StartImpersonation'
+      responses:
+        '201':
+          description: Started, or a pending handoff.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/StartedImpersonation'
+        '202':
+          description: |
+            **Approval required.** Nothing was started and no credential was issued — a break-glass
+            request is now waiting on a second operator. A 202 rather than a 403 on purpose: the
+            caller holds every permission the request needed and nothing was refused, so rendering
+            this as a denial would send an operator asking for permissions they already have.
+
+            The requester retries this same call once the request is approved. The permit is bound
+            to requester, target and mode, so retrying with a higher mode opens a new request
+            instead of spending the old permit.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message: { type: string }
+                  reason:
+                    type: string
+                    enum: [approval_required]
+                  approval:
+                    type: object
+                    properties:
+                      id: { type: string }
+                      expires_at: { type: string, format: date-time }
+        '403':
+          $ref: '#/components/responses/Denied'
+        '404':
+          description: The target does not exist.
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /impersonations/current:
+    get:
+      tags: [Impersonations]
+      summary: The impersonation active on this request
+      responses:
+        '200':
+          description: The active impersonation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Impersonation'
+        '204':
+          description: |
+            Not impersonating. A 204 rather than a 404: the resource is the caller's own state, which
+            exists and is simply empty.
+    delete:
+      tags: [Impersonations]
+      summary: Leave the current impersonation
+      description: |
+        Requires no permission, deliberately. Leaving only de-escalates, and an operator whose access
+        was revoked mid-session must still be able to stop.
+      responses:
+        '200':
+          description: The closed impersonation, including how it ended.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Impersonation'
+        '204':
+          description: There was nothing to leave.
+
+  /impersonations/current/extend:
+    post:
+      tags: [Impersonations]
+      summary: Buy more time on the caller's own impersonation
+      description: |
+        Moves the deadline forward by `limits.extension.minutes`, subject to two independent bounds —
+        a count and a total elapsed ceiling, stricter wins. The last extension before the ceiling is
+        clamped rather than refused, so `seconds` may be less than the configured window.
+
+        There is deliberately no `{audit}` parameter: an operator may extend the session they are in
+        and no other. Prolonging somebody else's access to an account on their behalf is not exposed.
+
+        Applied inside a locked transaction, so two concurrent calls spend one allowance.
+      responses:
+        '200':
+          description: Extended. `seconds` is what was actually added.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Extension'
+        '403':
+          $ref: '#/components/responses/Denied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /impersonations/{audit}/revoke:
+    post:
+      tags: [Impersonations]
+      summary: End somebody else's impersonation
+      description: |
+        Requires the `impersonator.revoke` permission.
+
+        `meta.terminated` distinguishes the two outcomes, and the difference is operational. For a
+        token credential the revocation takes effect immediately. For a session it is *recorded*, and
+        the session ends on its next request — a session can only be terminated from inside itself,
+        unless the session driver keeps a server-side record that can be destroyed out of band.
+      parameters:
+        - $ref: '#/components/parameters/audit'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 500
+                  description: Recorded on the audit row.
+      responses:
+        '200':
+          description: Revoked, or revocation recorded.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Impersonation'
+                  meta:
+                    type: object
+                    properties:
+                      terminated:
+                        type: boolean
+                      message:
+                        type: string
+        '403':
+          $ref: '#/components/responses/Denied'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /audits:
+    get:
+      tags: [Audits]
+      summary: List impersonations
+      description: |
+        Requires the `impersonator.audit.view` permission. Newest first.
+
+        Unknown filter values are a 422 rather than an empty page: a silently empty result reads as
+        "no impersonations happened", which is the worst possible answer to an audit query.
+      parameters:
+        - name: impersonator
+          in: query
+          schema: { type: string }
+          description: '`type:id`, or a bare id to match on the id alone.'
+        - name: target
+          in: query
+          schema: { type: string }
+        - name: tenant
+          in: query
+          schema: { type: string }
+        - name: mode
+          in: query
+          schema: { type: string }
+          description: Must be a registered mode.
+        - name: driver
+          in: query
+          schema: { type: string }
+        - name: ended_by
+          in: query
+          schema:
+            type: string
+            enum: [left, expired, revoked, session_lost]
+        - name: active
+          in: query
+          schema: { type: boolean }
+        - name: from
+          in: query
+          schema: { type: string, format: date-time }
+          description: Bounded on `started_at`, not `created_at`.
+        - name: to
+          in: query
+          schema: { type: string, format: date-time }
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1 }
+          description: |
+            Bounded by `impersonator.api.max_per_page` (100 by default). Asking for more is a 422
+            rather than a silent downgrade, so a client paging through a long trail cannot conclude
+            it read everything from a page smaller than the one it requested.
+      responses:
+        '200':
+          description: A page of impersonations.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Impersonation'
+                  links: { type: object }
+                  meta: { type: object }
+        '403':
+          $ref: '#/components/responses/Denied'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /audits/{audit}:
+    get:
+      tags: [Audits]
+      summary: One impersonation with its action trail
+      description: |
+        The trail is paged even here — a long-running impersonation can have thousands of recorded
+        actions, and returning them all would turn one request into an outage.
+      parameters:
+        - $ref: '#/components/parameters/audit'
+        - name: trail_limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 500, default: 100 }
+      responses:
+        '200':
+          description: The impersonation and a page of its trail.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Impersonation'
+                  trail:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TrailEvent'
+                  meta:
+                    type: object
+                    properties:
+                      trail_events: { type: integer }
+                      trail_limit: { type: integer }
+        '403':
+          $ref: '#/components/responses/Denied'
+        '404':
+          description: No impersonation with that id.
+
+  /audits/{audit}/export:
+    get:
+      tags: [Audits]
+      summary: Export an impersonation and its full trail
+      description: |
+        Returned as a download, since the caller is producing a document for a compliance request.
+        Contains no credential hash and no session id.
+      parameters:
+        - $ref: '#/components/parameters/audit'
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum: [json, csv]
+            default: json
+      responses:
+        '200':
+          description: The export document.
+          content:
+            application/json:
+              schema: { type: object }
+            text/csv:
+              schema: { type: string }
+        '403':
+          $ref: '#/components/responses/Denied'
+        '404':
+          description: No impersonation with that id.
+
+  /approvals:
+    get:
+      tags: [Approvals]
+      summary: Requests awaiting a decision
+      description: |
+        Requires the `impersonator.approve` permission — not the audit permission. They answer
+        different questions ("may you decide these" versus "may you read what happened"), and an
+        auditor who can read every impersonation has no reason to see live requests.
+
+        Expired requests are omitted. A queue listing dead requests invites somebody to approve one
+        and wonder why nothing happened.
+      parameters:
+        - name: per_page
+          in: query
+          schema: { type: integer, minimum: 1 }
+        - name: offset
+          in: query
+          schema: { type: integer, minimum: 0 }
+      responses:
+        '200':
+          description: The queue.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Approval'
+                  meta:
+                    type: object
+                    properties:
+                      count: { type: integer }
+                      offset: { type: integer }
+        '403':
+          $ref: '#/components/responses/Denied'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+
+  /approvals/mine:
+    get:
+      tags: [Approvals]
+      summary: The caller's own requests
+      description: |
+        No permission required, and every state is included. An operator can always see what they
+        themselves asked for — withholding it would leave somebody unable to tell whether their
+        request was refused or simply never answered.
+      responses:
+        '200':
+          description: The caller's requests, newest first.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Approval'
+                  meta:
+                    type: object
+                    properties:
+                      count: { type: integer }
+        '401':
+          description: Not authenticated.
+
+  /approvals/{approval}:
+    get:
+      tags: [Approvals]
+      summary: One request
+      parameters:
+        - $ref: '#/components/parameters/approval'
+      responses:
+        '200':
+          description: The request.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Approval'
+        '404':
+          description: No approval request with that id.
+
+  /approvals/{approval}/grant:
+    post:
+      tags: [Approvals]
+      summary: Approve a request
+      description: |
+        Requires the `impersonator.approve` permission, and the approver must not be the requester —
+        a flow where one pair of eyes can be both pairs is a delay, not a control. Holding
+        `impersonator.enter` does **not** confer approving; otherwise any two support staff could
+        clear each other's requests.
+
+        Granting does not start the impersonation. It authorises the *requester* to enter once, from
+        their own session, so the audit trail names the operator who did the work rather than the one
+        who permitted it.
+      parameters:
+        - $ref: '#/components/parameters/approval'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Approved.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalEnvelope'
+        '403':
+          $ref: '#/components/responses/Denied'
+        '409':
+          $ref: '#/components/responses/NotDecidable'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+  /approvals/{approval}/deny:
+    post:
+      tags: [Approvals]
+      summary: Refuse a request
+      description: |
+        Same guards as granting, because both are decisions of record. A denied request is terminal —
+        an approver who said no cannot be overruled by a later yes.
+      parameters:
+        - $ref: '#/components/parameters/approval'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                note:
+                  type: string
+                  maxLength: 500
+      responses:
+        '200':
+          description: Denied.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApprovalEnvelope'
+        '403':
+          $ref: '#/components/responses/Denied'
+        '409':
+          $ref: '#/components/responses/NotDecidable'
+        '422':
+          $ref: '#/components/responses/ValidationError'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+
+components:
+  securitySchemes:
+    sanctum:
+      type: http
+      scheme: bearer
+      description: |
+        The default stack is `auth:sanctum`, configurable via `impersonator.api.middleware`.
+
+  parameters:
+    audit:
+      name: audit
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The audit row's ULID.
+    approval:
+      name: approval
+      in: path
+      required: true
+      schema:
+        type: string
+      description: The approval request's ULID.
+
+  responses:
+    Denied:
+      description: |
+        Refused. `message` is for a human; `reason` is a stable code to branch on. Branch on `reason`
+        rather than on the message text, which is translatable and will change.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              reason:
+                type: string
+                enum:
+                  - self_impersonation
+                  - nested_impersonation
+                  - target_soft_deleted
+                  - target_not_allowlisted
+                  - target_opted_out
+                  - impersonator_not_permitted
+                  - missing_permission
+                  - missing_mode_permission
+                  - protected_role
+                  - hierarchy_violation
+                  - gate_denied
+                  - reason_required
+                  - rate_limited
+                  - concurrency_limit
+                  - target_busy
+                  - approval_required
+                  - disabled
+                  - mode_forbids_write
+                  - session_terminated
+                  - not_impersonating
+                  - extension_disabled
+                  - extension_limit
+                  - extension_ceiling
+                  - extension_too_early
+    ValidationError:
+      description: Validation failed.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              errors:
+                type: object
+                additionalProperties:
+                  type: array
+                  items: { type: string }
+    RateLimited:
+      description: |
+        Too many attempts. Entering is limited per operator rather than per address: the risk is one
+        authorised person enumerating accounts, and they do it from a single address.
+    NotDecidable:
+      description: |
+        The request cannot be decided as asked — it was already answered, it expired while the
+        approver was reading it, or it is the approver's own request.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              message: { type: string }
+              reason:
+                type: string
+                enum: [unknown, already_decided, expired, self_approval]
+
+  schemas:
+    Identity:
+      type: object
+      description: A morph-keyed reference to a user, stable across class renames.
+      properties:
+        type:
+          type: string
+          description: The morph alias, e.g. `user`.
+        id:
+          oneOf: [{ type: string }, { type: integer }]
+        label:
+          type: [string, 'null']
+          description: Who the account was at the time, recorded on the row.
+
+    StartImpersonation:
+      type: object
+      required: [target_type, target_id]
+      properties:
+        target_type:
+          type: string
+          description: |
+            A registered morph alias. Anything else is rejected — this is what stops an arbitrary
+            model class being named.
+        target_id:
+          type: string
+        mode:
+          type: [string, 'null']
+          description: 'A registered mode: `read_only`, `limited`, `full`, or one the application added.'
+        reason:
+          type: [string, 'null']
+          description: Required when `impersonator.reason.require` is on.
+        redirect_to:
+          type: [string, 'null']
+          description: |
+            Relative paths only unless a host is allowlisted. An open redirect here is a
+            credential-phishing primitive.
+        guard:
+          type: [string, 'null']
+          description: Must exist in `config('auth.guards')`.
+
+    Impersonation:
+      type: object
+      description: |
+        Never includes `credential_hash` or `session_id`.
+
+        `active` and `revoked_at` can both be set: revocation is recorded first, and the session ends
+        on its next request.
+      properties:
+        id: { type: string }
+        impersonator: { $ref: '#/components/schemas/Identity' }
+        target: { $ref: '#/components/schemas/Identity' }
+        mode: { type: string }
+        guards:
+          type: object
+          properties:
+            impersonator: { type: string }
+            target: { type: string }
+        driver: { type: string, description: '`session`, `token` or `tenancy`.' }
+        adapter: { type: string, description: '`session`, `sanctum`, `passport` or `jwt`.' }
+        tenant_id: { type: [string, 'null'] }
+        reason: { type: [string, 'null'] }
+        started_at: { type: string, format: date-time }
+        ended_at: { type: [string, 'null'], format: date-time }
+        ended_by:
+          type: [string, 'null']
+          enum: [left, expired, revoked, session_lost, null]
+        expires_at:
+          type: [string, 'null']
+          format: date-time
+          description: |
+            From `impersonator.limits.max_duration`, moved forward by any extensions.
+        revoked_at: { type: [string, 'null'], format: date-time }
+        extensions:
+          type: integer
+          description: How many times the deadline has been extended.
+        active: { type: boolean }
+        metadata: { type: object }
+
+    ApprovalEnvelope:
+      type: object
+      description: |
+        An approval plus its chain. The chain sits in `meta` rather than `data`: `data` is the request's
+        own shape and a client may reasonably persist it, while progress and decisions change underneath
+        them and cost two extra queries.
+      properties:
+        data:
+          $ref: '#/components/schemas/Approval'
+        meta:
+          type: object
+          properties:
+            message: { type: string }
+            progress:
+              $ref: '#/components/schemas/ApprovalProgress'
+            decisions:
+              type: array
+              items:
+                $ref: '#/components/schemas/ApprovalDecision'
+
+    ApprovalDecision:
+      type: object
+      description: |
+        One reviewer's answer. `role` is the **slot** the decision filled, not the roles the reviewer
+        holds — somebody holding two required roles fills one, settled when the verdict is recorded.
+
+        Never carries the request's fingerprint: that is the value a permit is matched on, and an
+        approval queue is a screen operators holding `approve` but not `enter` can see.
+      properties:
+        id: { type: [string, 'null'] }
+        reviewer: { $ref: '#/components/schemas/Identity' }
+        verdict:
+          type: string
+          enum: [approved, denied]
+        role:
+          type: [string, 'null']
+          description: The role slot filled, or null when the policy names no roles.
+        note: { type: [string, 'null'] }
+        decided_at: { type: string, format: date-time }
+
+    ApprovalProgress:
+      type: object
+      description: |
+        How far along a chain is. Returned in `meta` rather than `data`, because it is progress that
+        changes underneath a client rather than part of the request's own shape.
+      properties:
+        required:
+          type: integer
+          description: '`max(quorum, sum of role slots)`.'
+        approved: { type: integer }
+        outstanding: { type: integer }
+        outstanding_roles:
+          type: object
+          additionalProperties: { type: integer }
+          description: Role slug => how many more approvals that slot needs.
+        policy:
+          type: object
+          properties:
+            quorum: { type: integer }
+            roles:
+              type: object
+              additionalProperties: { type: integer }
+            required: { type: integer }
+
+    Extension:
+      type: object
+      description: |
+        The result of an extension. `seconds` is what was **actually** added, which may be less than
+        `limits.extension.minutes` — the last extension before the ceiling is clamped rather than
+        refused, so the whole allowance stays usable.
+      properties:
+        granted: { type: boolean }
+        expires_at:
+          type: [string, 'null']
+          format: date-time
+          description: The new deadline.
+        seconds:
+          type: integer
+          description: Seconds added, after clamping to the ceiling.
+        extensions:
+          type: integer
+          description: How many extensions this impersonation has now had, in total.
+        code: { type: [string, 'null'] }
+        reason: { type: [string, 'null'] }
+
+    StartedImpersonation:
+      type: object
+      description: The only response that ever carries a credential or an accept URL.
+      properties:
+        pending:
+          type: boolean
+          description: True means a token was issued and nobody is impersonating yet.
+        impersonation: { $ref: '#/components/schemas/Impersonation' }
+        redirect_to: { type: [string, 'null'] }
+        accept_url:
+          type: [string, 'null']
+          description: |
+            Present only for a pending handoff. Contains a live single-use token — treat the whole
+            response as a secret and do not log it.
+        credential:
+          type: [object, 'null']
+          description: Present only for an API adapter. `secret` is readable exactly once.
+          properties:
+            type:
+              type: string
+              enum: [session, sanctum_token, passport_token, jwt]
+            secret: { type: string }
+            expires_at: { type: [string, 'null'], format: date-time }
+            metadata: { type: object }
+
+    Approval:
+      type: object
+      description: |
+        A break-glass request.
+
+        Carries no fingerprint and no stored request payload. The fingerprint is a verifier, and this
+        is a screen visible to operators who hold `approve` but not `enter` — they have no business
+        holding anything spendable.
+      properties:
+        id: { type: string }
+        requester: { $ref: '#/components/schemas/Identity' }
+        target: { $ref: '#/components/schemas/Identity' }
+        mode: { type: string }
+        state:
+          type: string
+          enum: [pending, partially_approved, approved, consumed, denied, expired]
+          description: |
+            `partially_approved` means at least one reviewer approved and the chain is still short of
+            quorum. It is **open**, and a permit cannot be spent in it — treat only `approved` as
+            authorising an entry.
+          description: |
+            `approved` and `consumed` are separate because an approval is a **one-time permit**:
+            "a second operator said yes" and "that yes has been spent" are different facts, and
+            collapsing them would make one approval reusable indefinitely.
+        reason: { type: [string, 'null'] }
+        decided_by:
+          oneOf:
+            - $ref: '#/components/schemas/Identity'
+            - type: 'null'
+        decision_note: { type: [string, 'null'] }
+        decided_at: { type: [string, 'null'], format: date-time }
+        audit_id:
+          type: [string, 'null']
+          description: The impersonation this approval ultimately produced, once it was spent.
+        expires_at: { type: string, format: date-time }
+        created_at: { type: [string, 'null'], format: date-time }
+
+    TrailEvent:
+      type: object
+      description: One action taken during an impersonation.
+      properties:
+        audit_id: { type: string }
+        method: { type: string }
+        path: { type: string }
+        route_name: { type: [string, 'null'] }
+        status: { type: [integer, 'null'] }
+        duration_ms: { type: [number, 'null'] }
+        payload:
+          type: [object, 'null']
+          description: |
+            Null unless `impersonator.trail.record_payloads` is on. When present it has already been
+            redacted recursively — but redaction is a filter, not a guarantee, which is why it is off
+            by default.
+        occurred_at: { type: [string, 'null'], format: date-time }

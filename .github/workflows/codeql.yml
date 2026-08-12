@@ -1,0 +1,52 @@
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    # Weekly, so a newly published query finds an old problem without waiting on a commit.
+    - cron: '17 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # `actions` is the only CodeQL language this repository has source for.
+  #
+  # CodeQL does not support PHP, so it cannot analyse the package itself — PHPStan at level max
+  # with no baseline is the SAST for that, in `static-analysis.yml`. What CodeQL adds here is a
+  # scan of the workflows, which is where a supply-chain problem in a package this size would
+  # actually live: an unpinned action, an injectable `${{ github.event.* }}` interpolation, or a
+  # token scope wider than the job needs.
+  analyze:
+    name: Analyze actions
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    permissions:
+      contents: read
+      # Granted only on this job, and only because uploading results requires it.
+      security-events: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@5595ccaf912efad79be6eef63a5619ff05969be3 # v4
+        with:
+          languages: actions
+          build-mode: none
+          queries: security-extended
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@5595ccaf912efad79be6eef63a5619ff05969be3 # v4
+        with:
+          category: /language:actions

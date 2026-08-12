@@ -1,0 +1,23 @@
+# GitGuardian configuration.
+#
+# The one historical finding in this repository was a Laravel APP_KEY literal in `phpunit.xml`. It
+# was a structurally valid AES-256 key, so the detector was right to fire — but it existed only so
+# Orchestra Testbench could boot an encrypter, and it encrypted nothing but an in-memory SQLite test
+# session. It has been removed: `tests/TestCase.php` now generates a key per run, which eliminates
+# the detector surface rather than suppressing it.
+#
+# Nothing is excluded by path below. A scan of every blob in this repository's object database,
+# reachable and unreachable, found no private keys, no token-format matches, and no `.env` ever
+# committed. If a finding appears here, treat it as real.
+
+version: 2
+
+secret:
+  # Deliberate, asserted-absent fixtures. Each of these is a *negative* test: the value is planted so
+  # a test can prove it does NOT reach a log, an export, or the `about` output. Removing them would
+  # remove the assertion.
+  ignored_matches: []
+
+  ignored_paths:
+    - vendor/**
+    - .phpunit.cache/**

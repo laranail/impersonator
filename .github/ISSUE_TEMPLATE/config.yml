@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Documentation
+    url: https://github.com/laranail/impersonator/tree/main/docs
+    about: Configuration, drivers, adapters, modes, and the audit trail.
+  - name: Run the doctor first
+    url: https://github.com/laranail/impersonator/blob/main/docs/tools/commands.md
+    about: laranail::impersonator.doctor reports the configuration problems that produce no error.
+  - name: Security vulnerability
+    url: https://github.com/laranail/impersonator/security/policy
+    about: Do not open a public issue. Report privately to opensource@simtabi.com.

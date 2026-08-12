@@ -1,0 +1,317 @@
+<?php
+
+declare(strict_types=1);
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::connection($this->connection())->create(
+            config('impersonator.audit.table', 'impersonator_audits'),
+            function (Blueprint $table): void {
+                // ULID rather than an auto-increment: the id is handed out in URLs
+                // and API responses, and a sequential one leaks how much
+                // impersonation an installation does.
+                $table->ulid('id')->primary();
+
+                // Morph pairs, declared through the helper below so `morphs.key_type`
+                // governs the `*_id` half. The `*_type` half always holds a morph
+                // **alias**, never a class name — that is what stops a crafted type
+                // from naming an arbitrary class.
+                //
+                // The impersonated account is `impersonatable_*`, matching the ability
+                // it is granted by (`canBeImpersonated()`) rather than the role it
+                // plays in one request. The operator stays `impersonator_*`: it is an
+                // actor, and an actor has no `-able` form.
+                $this->morphs($table, 'impersonator');
+                $this->morphs($table, 'impersonatable');
+
+                // Who each account *was* at the time. Denormalised deliberately: an audit
+                // row has to stay readable after a rename or a deletion, and a compliance
+                // export that resolves names by joining live tables reports today's names
+                // against yesterday's actions — or nothing at all once the row is gone.
+                $table->string('impersonator_label')->nullable();
+                $table->string('target_label')->nullable();
+
+                $table->string('driver');
+                $table->string('adapter');
+                $table->string('impersonator_guard');
+                $table->string('target_guard');
+                $table->string('mode');
+
+                $table->string('tenant_id')->nullable();
+
+                // Never the raw value. The session id is stored so revocation can
+                // find the session; the credential hash is a SHA-256 digest, so a
+                // database leak yields nothing redeemable.
+                $table->string('session_id')->nullable();
+                $table->string('credential_hash', 64)->nullable();
+
+                $table->string('ip', 45)->nullable();
+                $table->text('user_agent')->nullable();
+                $table->text('reason')->nullable();
+                $table->json('metadata')->nullable();
+
+                $table->timestamp('started_at');
+                $table->timestamp('expires_at')->nullable();
+                $table->timestamp('ended_at')->nullable();
+                $table->string('ended_by')->nullable();
+
+                // Time bought after the fact. `expires_at` moves; the count and the last
+                // timestamp are what make that visible — a row reading fifty minutes tells
+                // you nothing about whether anyone decided to stay, and "extended three
+                // times" is the fact a reviewer actually asks about.
+                //
+                // Neither column is covered by the hash chain below, which is what allows the
+                // expiry to move at all without tamper verification reporting a break.
+                $table->unsignedSmallInteger('extensions')->default(0);
+                $table->timestamp('extended_at')->nullable();
+
+                // The kill switch. Set independently of ended_at: revocation is
+                // recorded here, and the session's next request is what actually
+                // closes the row.
+                $table->timestamp('revoked_at')->nullable();
+                $this->morphs($table, 'revoked_by', nullable: true);
+                $table->text('revocation_note')->nullable();
+
+                // Keyed HMAC over the previous row's digest plus this row's payload.
+                // Keyed rather than a bare hash: a plain chain is recomputable by
+                // anyone holding the algorithm, which is anyone with write access to
+                // this table — the very attacker it is meant to detect.
+                $table->string('hash', 64)->nullable();
+                $table->string('previous_hash', 64)->nullable();
+
+                $table->timestamps();
+
+                // The middleware looks a session up on every impersonated request,
+                // so this lookup has to be an index hit rather than a scan.
+                $table->index(['session_id', 'ended_at'], 'impersonator_audits_session_idx');
+                $table->index(['credential_hash', 'ended_at'], 'impersonator_audits_credential_idx');
+
+                // Backs the concurrency caps and the "who is in this account" query.
+                $table->index(
+                    ['impersonator_type', 'impersonator_id', 'ended_at'],
+                    'impersonator_audits_impersonator_idx',
+                );
+                $table->index(
+                    ['impersonatable_type', 'impersonatable_id', 'ended_at'],
+                    'impersonator_audits_target_idx',
+                );
+
+                $table->index('started_at', 'impersonator_audits_started_idx');
+                $table->index('tenant_id', 'impersonator_audits_tenant_idx');
+            },
+        );
+
+        Schema::connection($this->connection())->create(
+            config('impersonator.trail.table', 'impersonator_audit_events'),
+            function (Blueprint $table): void {
+                $table->ulid('id')->primary();
+                $table->ulid('audit_id');
+
+                $table->string('method', 10);
+                $table->text('path');
+                $table->string('route_name')->nullable();
+                $table->unsignedSmallInteger('status')->nullable();
+                $table->unsignedInteger('duration_ms')->nullable();
+
+                // Null unless trail.record_payloads is on, and already redacted
+                // before it reaches here.
+                $table->json('payload')->nullable();
+
+                $table->timestamp('occurred_at');
+
+                // Cascades so a retention sweep on the parent cannot orphan its
+                // children — an event pointing at a deleted impersonation is a row
+                // nobody can interpret.
+                $table->foreign('audit_id')
+                    ->references('id')
+                    ->on(config('impersonator.audit.table', 'impersonator_audits'))
+                    ->cascadeOnDelete();
+
+                $table->index(['audit_id', 'occurred_at'], 'impersonator_events_audit_idx');
+                $table->index('occurred_at', 'impersonator_events_occurred_idx');
+            },
+        );
+
+        Schema::connection($this->connection())->create(
+            config('impersonator.tokens.table', 'impersonator_tokens'),
+            function (Blueprint $table): void {
+                $table->ulid('id')->primary();
+
+                // The digest is the lookup key and it is unique, which is what makes
+                // redemption single-use under concurrency: the winning request
+                // marks it spent in the same statement that claims it.
+                $table->string('token_hash', 64)->unique();
+
+                $table->ulid('audit_id')->nullable();
+                $table->json('request');
+
+                $table->timestamp('expires_at');
+                $table->timestamp('consumed_at')->nullable();
+                $table->timestamp('revoked_at')->nullable();
+                $table->timestamps();
+
+                $table->index(['expires_at', 'consumed_at'], 'impersonator_tokens_prune_idx');
+                $table->index('audit_id', 'impersonator_tokens_audit_idx');
+            },
+        );
+
+        Schema::connection($this->connection())->create(
+            config('impersonator.approval.table', 'impersonator_approval_requests'),
+            function (Blueprint $table): void {
+                $table->ulid('id')->primary();
+
+                $this->morphs($table, 'requester');
+                $this->morphs($table, 'impersonatable');
+                $table->string('mode');
+                $table->text('reason')->nullable();
+
+                // The full impersonation request as approved, so the entry that follows uses
+                // the parameters a second operator actually agreed to rather than whatever the
+                // requester submits on their way back.
+                $table->json('request');
+
+                // Binds the permit to requester + target + mode. Everything a permit is
+                // checked against is here, so widening any of the three needs a new approval.
+                $table->string('fingerprint', 64);
+
+                // pending | partially_approved | approved | consumed | denied | expired
+                $table->string('state')->default('pending');
+
+                // The rollup only. Each reviewer's own answer lives in
+                // impersonator_approval_decisions: three columns on this row could hold exactly one
+                // answer, so a second reviewer would have overwritten the first — losing the fact
+                // that anybody else had looked, which is the one thing an audit of a four-eyes
+                // control is about.
+                $table->timestamp('decided_at')->nullable();
+
+                // Separate from decided_at: an approval is a one-time permit, so "approved"
+                // and "spent" are different facts and collapsing them makes it reusable.
+                $table->timestamp('consumed_at')->nullable();
+
+                $table->ulid('audit_id')->nullable();
+                $table->timestamp('expires_at');
+                $table->timestamps();
+
+                $table->index(['state', 'expires_at'], 'impersonator_approvals_state_idx');
+                $table->index(['requester_type', 'requester_id'], 'impersonator_approvals_requester_idx');
+
+                // The lookup on the hot path: spending a permit reads by fingerprint + state.
+                $table->index(['fingerprint', 'state'], 'impersonator_approvals_permit_idx');
+            },
+        );
+        Schema::connection($this->connection())->create(
+            config('impersonator.approval.decisions_table', 'impersonator_approval_decisions'),
+            function (Blueprint $table): void {
+                $table->ulid('id')->primary();
+                $table->ulid('approval_id');
+
+                $this->morphs($table, 'reviewer');
+
+                // Which **slot** this decision filled, not what roles the reviewer holds. A person
+                // who is both a manager and an auditor fills one slot, and which one is settled when
+                // their verdict is recorded — recomputing it later from live roles would let a role
+                // change retroactively satisfy a policy for a request already decided.
+                //
+                // Null when the policy names no roles, where every reviewer is interchangeable.
+                $table->string('reviewer_role')->nullable();
+
+                // approved | denied
+                $table->string('verdict');
+                $table->text('note')->nullable();
+                $table->timestamp('decided_at');
+                $table->timestamps();
+
+                /*
+                 * One decision per reviewer per request, enforced by the **database**.
+                 *
+                 * A guard in PHP cannot close this: two requests from the same approver read the
+                 * same state, both see no prior decision, and both insert — so one reviewer counts
+                 * twice toward quorum and a two-reviewer policy is satisfied by one person. The
+                 * unique index is what makes that impossible rather than unlikely, which is why the
+                 * store treats its violation as the answer instead of an error.
+                 */
+                $table->unique(
+                    ['approval_id', 'reviewer_type', 'reviewer_id'],
+                    'impersonator_decisions_reviewer_unq',
+                );
+
+                // The chain is always read whole, by parent.
+                $table->index(['approval_id', 'verdict'], 'impersonator_decisions_chain_idx');
+
+                $table->foreign('approval_id', 'impersonator_decisions_approval_fk')
+                    ->references('id')
+                    ->on(config('impersonator.approval.table', 'impersonator_approval_requests'))
+                    ->cascadeOnDelete();
+            },
+        );
+    }
+
+    public function down(): void
+    {
+        $schema = Schema::connection($this->connection());
+
+        // Children first: the trail holds a foreign key onto the audit table, and the decisions
+        // table holds one onto the approvals table.
+        $schema->dropIfExists(config('impersonator.approval.decisions_table', 'impersonator_approval_decisions'));
+        $schema->dropIfExists(config('impersonator.approval.table', 'impersonator_approval_requests'));
+        $schema->dropIfExists(config('impersonator.tokens.table', 'impersonator_tokens'));
+        $schema->dropIfExists(config('impersonator.trail.table', 'impersonator_audit_events'));
+        $schema->dropIfExists(config('impersonator.audit.table', 'impersonator_audits'));
+    }
+
+    /**
+     * One polymorphic column pair, with the `*_id` half typed by `morphs.key_type`.
+     *
+     * **Columns only — no index.** Two reasons, both concrete:
+     *
+     *  - Laravel's `morphs()` family auto-names its index
+     *    `{table}_{name}_type_{name}_id_index`, and
+     *    `impersonator_approval_requests_impersonatable_type_impersonatable_id_index` is 74
+     *    characters. MySQL's identifier limit is 64, so the migration would fail outright
+     *    there — on a name nobody chose.
+     *  - Where these pairs are queried they are queried *with* something else, so the
+     *    useful index is a three-column composite (`… , ended_at`) that each table
+     *    declares itself with a short explicit name. A two-column index alongside it is a
+     *    redundant prefix that costs write throughput on the hot path.
+     *
+     * **`string` is the default id type, not `unsignedBigInteger`.** `morphs()` would give
+     * the latter, which makes the table unable to hold a UUID-keyed model — and holding
+     * several differently-keyed models in one trail is the point of a multi-model
+     * allowlist. `Identity` compares ids loosely on their PHP type to match.
+     */
+    private function morphs(Blueprint $table, string $name, bool $nullable = false): void
+    {
+        $keyType = config('impersonator.morphs.key_type', 'string');
+
+        $type = $table->string($name . '_type');
+
+        $id = match (is_string($keyType) ? $keyType : 'string') {
+            'numeric' => $table->unsignedBigInteger($name . '_id'),
+            'uuid' => $table->uuid($name . '_id'),
+            'ulid' => $table->ulid($name . '_id'),
+            default => $table->string($name . '_id'),
+        };
+
+        if ($nullable) {
+            $type->nullable();
+            $id->nullable();
+        }
+    }
+
+    /**
+     * The audit connection, so a multi-tenant install can keep impersonation
+     * records centrally while the application runs per-tenant.
+     */
+    private function connection(): ?string
+    {
+        $connection = config('impersonator.audit.connection');
+
+        return is_string($connection) && $connection !== '' ? $connection : null;
+    }
+};

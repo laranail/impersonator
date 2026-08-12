@@ -1,0 +1,292 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # The full suite with every optional integration installed. Sanctum, Passport, JWT and
+  # stancl/tenancy are dev dependencies precisely so their adapters are integration-tested
+  # against the real packages rather than against a hand-written approximation.
+  test:
+    name: PHP ${{ matrix.php }} · L${{ matrix.laravel }} · ${{ matrix.stability }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+        laravel: ['13']
+        stability: [prefer-stable]
+        include:
+          # One lowest-dependency run, on the floor. This is what catches a constraint that
+          # claims a floor the code does not actually hold to, or a `^13.0` that only works
+          # against the newest 13.x patch.
+          #
+          # The floor is 8.4.1 rather than 8.4.0, inherited from laranail/console's dependency
+          # on symfony/tui. setup-php resolves '8.4' to the latest 8.4.x, so this run does not
+          # prove 8.4.1 specifically — the constraint in composer.json is what does.
+          - php: '8.4'
+            laravel: '13'
+            stability: prefer-lowest
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: |
+          composer require "illuminate/contracts:^${{ matrix.laravel }}.0" --no-interaction --no-update
+          composer update --${{ matrix.stability }} --prefer-dist --no-interaction --no-progress
+
+      - name: Run the suite
+        run: vendor/bin/pest --ci --display-deprecations | tee pest.txt
+
+      # A budget for deprecation notices, so a real one cannot hide behind the known ones.
+      #
+      # Seven tests report DEPRECATED and none is this package's fault: `pest-plugin-arch` calls
+      # `ReflectionProperty::setAccessible()`, which PHP 8.5 deprecated because it has had no effect
+      # since 8.1. Two things were tried and rejected rather than assumed:
+      #
+      #   - `<source ignoreIndirectDeprecations="true">` in phpunit.xml is exactly the right control —
+      #     the deprecation is *indirect*, third-party triggering third-party — and it has no effect,
+      #     because Pest collects deprecations itself rather than through the PHPUnit path that honours
+      #     those flags. Leaving it set would have been config that looks like a fix and is not.
+      #   - `pest-plugin-arch` v4 and v5 fix it, but both are gated by Pest 4, which requires PHPUnit
+      #     `^12`. That is a coordinated Pest 3 → 4 and PHPUnit 11 → 12 migration of the whole suite,
+      #     not a bump, and disproportionate to a cosmetic notice.
+      #
+      # So the noise is accepted and *bounded* instead. The danger of accepted noise is not the noise —
+      # it is a new deprecation, one this package could actually fix, arriving unnoticed among the seven.
+      # This fails when a deprecation appears that is not the known one, or when the count grows.
+      #
+      # When the Pest 4 migration happens this step should start failing on the count. That is the
+      # signal to delete it.
+      - name: Bound the deprecation notices
+        run: |
+          if grep -E 'is deprecated' pest.txt | grep -v 'ReflectionProperty::setAccessible' | grep -q .; then
+            echo '::error::A deprecation appeared that is not the known pest-plugin-arch one.'
+            grep -E 'is deprecated' pest.txt | grep -v 'ReflectionProperty::setAccessible'
+            exit 1
+          fi
+          count=$(grep -oE '[0-9]+ deprecated' pest.txt | head -1 | grep -oE '[0-9]+' || echo 0)
+          if [ "${count:-0}" -gt 7 ]; then
+            echo "::error::Deprecating tests grew to ${count} (budget 7). Check whether the new one is ours."
+            exit 1
+          fi
+          echo "Deprecation budget holds: ${count:-0} of 7, all from pest-plugin-arch."
+
+  # The suite against databases that actually lock.
+  #
+  # SQLite is the default job because it is fast, but it cannot prove several things this
+  # package claims. `SQLiteGrammar::compileLock()` returns an empty string, so every
+  # concurrency guarantee — the impersonation cap, the single-use token claim, the approval
+  # quorum recount, the extension allowance — is untested there and the `locking` group skips
+  # itself rather than passing. And SQLite emits unqualified table names, which is why a
+  # parsing bug that broke `read_only` outright on PostgreSQL and MySQL survived a green suite.
+  #
+  # So this job is where those claims get evidence. Without it the `locking` group is a group
+  # that never runs anywhere, which is worse than not having it.
+  databases:
+    name: PHP ${{ matrix.php }} · ${{ matrix.db }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4']
+        db: [pgsql, mysql]
+
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: impersonator_test
+          POSTGRES_USER: impersonator
+          POSTGRES_PASSWORD: impersonator
+        ports: ['5432:5432']
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_DATABASE: impersonator_test
+          MYSQL_ROOT_PASSWORD: impersonator
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, pgsql, pdo_pgsql, mysql, pdo_mysql, bcmath, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      # The whole suite, not only the locking group. A driver difference can surface anywhere —
+      # the qualified-name defect was in mode enforcement, not in a concurrency test.
+      - name: Run the suite
+        env:
+          IMPERSONATOR_TEST_DB: ${{ matrix.db }}
+          IMPERSONATOR_TEST_DB_HOST: 127.0.0.1
+          IMPERSONATOR_TEST_DB_NAME: impersonator_test
+          IMPERSONATOR_TEST_DB_USER: ${{ matrix.db == 'pgsql' && 'impersonator' || 'root' }}
+          IMPERSONATOR_TEST_DB_PASSWORD: impersonator
+        run: vendor/bin/pest --ci
+
+      # The assertion that makes this job worth having: on a real driver the locking group must
+      # *run*, not skip. Without this the job could silently degrade to the SQLite behaviour it
+      # exists to escape.
+      - name: Assert the locking group actually ran
+        env:
+          IMPERSONATOR_TEST_DB: ${{ matrix.db }}
+          IMPERSONATOR_TEST_DB_HOST: 127.0.0.1
+          IMPERSONATOR_TEST_DB_NAME: impersonator_test
+          IMPERSONATOR_TEST_DB_USER: ${{ matrix.db == 'pgsql' && 'impersonator' || 'root' }}
+          IMPERSONATOR_TEST_DB_PASSWORD: impersonator
+        run: |
+          vendor/bin/pest --ci --group=locking | tee locking.txt
+          if grep -qi 'skipped' locking.txt; then
+            echo '::error::The locking group skipped on a driver that emits row locks.'
+            exit 1
+          fi
+
+  # Coverage, reported rather than gated.
+  #
+  # No threshold: a percentage gate invites gaming — a test that executes a line without
+  # asserting anything about it raises the number and proves nothing. The point is that an
+  # uncovered branch is visible in review.
+  coverage:
+    name: Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Report coverage
+        run: vendor/bin/pest --ci --coverage --coverage-text
+
+  # The same suite with every optional integration *removed*.
+  #
+  # This is the job that matters for the dependency contract: the package must work with
+  # illuminate/* alone. Installing the optional packages in every job would hide a hard
+  # dependency that had crept into a driver, an adapter or the service provider — and the
+  # first person to find it would be a user who does not have Passport installed.
+  test-without-optional:
+    name: No optional integrations · PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['8.4', '8.5']
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl
+          coverage: none
+
+      - name: Remove the optional integrations
+        run: |
+          composer remove --dev --no-update --no-interaction \
+            laravel/sanctum laravel/passport tymon/jwt-auth stancl/tenancy
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Run the suite without the integration groups
+        run: vendor/bin/pest --ci --exclude-group=sanctum,passport,jwt,tenancy
+
+      # Proves absence rather than assuming it. `composer show` exiting non-zero is the
+      # assertion: if any optional package resolved back in as a transitive requirement,
+      # this job would otherwise pass while testing the wrong thing.
+      - name: Assert the optional packages really are absent
+        run: |
+          for package in laravel/sanctum laravel/passport tymon/jwt-auth stancl/tenancy; do
+            if composer show "$package" >/dev/null 2>&1; then
+              echo "::error::$package is still installed; this job is not testing what it claims to."
+              exit 1
+            fi
+          done
+
+  # A boot-health gate, per the failure-handling standard: every degradable registration must
+  # have completed after a normal boot. A degradable operation that silently failed leaves an
+  # application that starts cleanly and quietly lacks a feature, which no functional test
+  # catches — so it is asserted directly.
+  boot-health:
+    name: Boot health
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+        with:
+          php-version: '8.4'
+          extensions: dom, curl, libxml, mbstring, zip, pdo, sqlite, pdo_sqlite, bcmath, intl
+          coverage: none
+
+      - name: Install dependencies
+        run: composer update --prefer-dist --no-interaction --no-progress
+
+      - name: Assert nothing degraded at boot
+        run: vendor/bin/pest --ci tests/Feature/BootHealthTest.php
