@@ -7,6 +7,21 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
+### Changed
+
+- **The config key is `laranail.impersonator`,** published to `config/laranail/impersonator.php`.
+  Every read moves with it — `config('impersonator.driver')` is now
+  `config('laranail.impersonator.driver')`. Laravel's config repository is a flat map and
+  `impersonator` is a name an application could plausibly use for its own file.
+
+Three things that share the word are deliberately unchanged, because none of them is a config key:
+the route names (`impersonator.enter`, `.leave`, …), which come from the configurable
+`routes.name_prefix`; the RBAC permission strings (`impersonator.approve`, `impersonator.audit.view`);
+and the telemetry operation labels (`impersonator.notify.target`). The middleware aliases, view and
+translation namespaces and Blade prefix were already vendor-scoped.
+
+## [Unreleased]
+
 ### Added
 
 - **Timed impersonation with in-session extension.** Every impersonation already carried a deadline;

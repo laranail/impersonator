@@ -237,7 +237,7 @@ final readonly class IdentityResolver
 
         $declared = $this->targets->forModel($user)?->displayName;
 
-        $attribute = $declared ?? $this->config->get('impersonator.banner.display_name', 'name');
+        $attribute = $declared ?? $this->config->get('laranail.impersonator.banner.display_name', 'name');
 
         if (! is_string($attribute) || $attribute === '') {
             return null;

@@ -143,20 +143,20 @@ it('refuses a registered but unavailable driver instead of degrading to another'
 });
 
 it('resolves the configured driver by default', function (): void {
-    config()->set('impersonator.driver', 'session');
+    config()->set('laranail.impersonator.driver', 'session');
     manager()->extend('session', static fn (): ImpersonationDriver => fakeDriver('session'));
 
     expect(manager()->driver()->name())->toBe('session');
 });
 
 it('resolves auto to session when no tenant is initialized', function (): void {
-    config()->set('impersonator.driver', 'auto');
+    config()->set('laranail.impersonator.driver', 'auto');
 
     expect(manager()->defaultDriver())->toBe('session');
 });
 
 it('never second-guesses an explicit driver', function (): void {
-    config()->set('impersonator.driver', 'token');
+    config()->set('laranail.impersonator.driver', 'token');
 
     expect(manager()->defaultDriver())->toBe('token');
 });
@@ -164,8 +164,8 @@ it('never second-guesses an explicit driver', function (): void {
 it('composes the two axes independently', function (): void {
     // Drivers and adapters know nothing about each other, which is what makes
     // `token` + `sanctum` work without anyone having written that pairing.
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.adapter', 'sanctum');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.adapter', 'sanctum');
 
     manager()->extend('token', static fn (): ImpersonationDriver => fakeDriver('token'));
     manager()->extendAdapter('sanctum', static fn (): AuthAdapter => fakeAdapter('sanctum'));
@@ -204,8 +204,8 @@ it('lets a later registration replace a built-in of the same name', function ():
 });
 
 it('reads the guard pair from config, allowing distinct guards per side', function (): void {
-    config()->set('impersonator.guards.impersonator', 'admin');
-    config()->set('impersonator.guards.target', 'web');
+    config()->set('laranail.impersonator.guards.impersonator', 'admin');
+    config()->set('laranail.impersonator.guards.target', 'web');
 
     $guards = manager()->guards();
 
@@ -216,7 +216,7 @@ it('reads the guard pair from config, allowing distinct guards per side', functi
 
 it('reports no active impersonation when the driver cannot even be built', function (): void {
     // A misconfigured driver must not break a Blade directive on every page.
-    config()->set('impersonator.driver', 'missing');
+    config()->set('laranail.impersonator.driver', 'missing');
 
     expect(manager()->current())->toBeNull()
         ->and(manager()->isImpersonating())->toBeFalse();

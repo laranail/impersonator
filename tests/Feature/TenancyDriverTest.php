@@ -43,12 +43,12 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.driver', 'tenancy');
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
-    config()->set('impersonator.urls.strategy', 'subdomain');
-    config()->set('impersonator.urls.base_domain', 'example.com');
+    config()->set('laranail.impersonator.driver', 'tenancy');
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.urls.strategy', 'subdomain');
+    config()->set('laranail.impersonator.urls.base_domain', 'example.com');
 
     $this->tenant = Tenant::create(['id' => 'acme']);
     $this->other = Tenant::create(['id' => 'globex']);
@@ -179,8 +179,8 @@ it('gives a tenant mismatch the same message as an unknown token', function (): 
 it('refuses a token that carries no tenant at all', function (): void {
     // A token minted outside a tenant did not come from this driver, so it is not redeemable
     // through it — even on a tenant that would otherwise be willing.
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.strategy', 'domain');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.strategy', 'domain');
 
     $token = tenantToken(Impersonator::enter($this->target)->acceptUrl());
 
@@ -223,7 +223,7 @@ it('refuses a replayed token', function (): void {
 });
 
 it('refuses an expired token', function (): void {
-    config()->set('impersonator.tokens.ttl', 60);
+    config()->set('laranail.impersonator.tokens.ttl', 60);
     tenancy()->initialize($this->tenant);
     $token = tenantToken(Impersonator::enter($this->target)->acceptUrl());
 
@@ -256,7 +256,7 @@ it('leaves cleanly', function (): void {
 // ── auto driver resolution ──────────────────────────────────────────────────
 
 it('resolves auto to tenancy when a tenant is initialized', function (): void {
-    config()->set('impersonator.driver', 'auto');
+    config()->set('laranail.impersonator.driver', 'auto');
 
     tenancy()->initialize($this->tenant);
 
@@ -264,13 +264,13 @@ it('resolves auto to tenancy when a tenant is initialized', function (): void {
 });
 
 it('resolves auto to session when no tenant is initialized', function (): void {
-    config()->set('impersonator.driver', 'auto');
+    config()->set('laranail.impersonator.driver', 'auto');
 
     expect(Impersonator::defaultDriver())->toBe('session');
 });
 
 it('never second-guesses an explicit driver even inside a tenant', function (): void {
-    config()->set('impersonator.driver', 'session');
+    config()->set('laranail.impersonator.driver', 'session');
 
     tenancy()->initialize($this->tenant);
 

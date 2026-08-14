@@ -39,7 +39,7 @@ function selectedPolicy(): string
 }
 
 it('falls back to the base policy when no permission package is present', function (): void {
-    config()->set('impersonator.authorization.rbac.detect', ['Some\\Package\\ThatIsNotInstalled']);
+    config()->set('laranail.impersonator.authorization.rbac.detect', ['Some\\Package\\ThatIsNotInstalled']);
 
     expect(selectedPolicy())->toBe(BasePolicy::class);
 });
@@ -47,13 +47,13 @@ it('falls back to the base policy when no permission package is present', functi
 it('selects the RBAC policy from a configured class list', function (): void {
     // The point of the change: a different permission package is now a config edit rather than a
     // pull request.
-    config()->set('impersonator.authorization.rbac.detect', [FakePermissionProvider::class]);
+    config()->set('laranail.impersonator.authorization.rbac.detect', [FakePermissionProvider::class]);
 
     expect(selectedPolicy())->toBe(RbacPolicy::class);
 });
 
 it('probes every name in the list, not only the first', function (): void {
-    config()->set('impersonator.authorization.rbac.detect', [
+    config()->set('laranail.impersonator.authorization.rbac.detect', [
         'Some\\Package\\ThatIsNotInstalled',
         FakePermissionProvider::class,
     ]);
@@ -64,14 +64,14 @@ it('probes every name in the list, not only the first', function (): void {
 it('defaults to probing spatie when the list is empty or malformed', function (): void {
     // Empty must mean "use the default", not "detect nothing" — otherwise an application that
     // cleared the key would silently lose its permission enforcement.
-    config()->set('impersonator.authorization.rbac.detect', []);
+    config()->set('laranail.impersonator.authorization.rbac.detect', []);
 
     expect(app(ImpersonationManager::class)->detectsRbac())
         ->toBe(class_exists('Spatie\\Permission\\PermissionServiceProvider'));
 });
 
 it('lets a runtime closure decide', function (): void {
-    config()->set('impersonator.authorization.rbac.detect', ['Some\\Package\\ThatIsNotInstalled']);
+    config()->set('laranail.impersonator.authorization.rbac.detect', ['Some\\Package\\ThatIsNotInstalled']);
 
     Impersonator::detectRbacUsing(fn (): bool => true);
 
@@ -79,7 +79,7 @@ it('lets a runtime closure decide', function (): void {
 });
 
 it('lets a closure veto a class list that would otherwise match', function (): void {
-    config()->set('impersonator.authorization.rbac.detect', [FakePermissionProvider::class]);
+    config()->set('laranail.impersonator.authorization.rbac.detect', [FakePermissionProvider::class]);
 
     Impersonator::detectRbacUsing(fn (): bool => false);
 
@@ -109,9 +109,9 @@ it('fails closed when a closure throws', function (): void {
 it('lets an explicit policy override detection entirely', function (): void {
     // Both layers say yes; the explicit setting still wins. This is the escape hatch for an
     // application that has a permission package but does not want it governing impersonation.
-    config()->set('impersonator.authorization.rbac.detect', [FakePermissionProvider::class]);
+    config()->set('laranail.impersonator.authorization.rbac.detect', [FakePermissionProvider::class]);
     Impersonator::detectRbacUsing(fn (): bool => true);
-    config()->set('impersonator.authorization.policy', BasePolicy::class);
+    config()->set('laranail.impersonator.authorization.policy', BasePolicy::class);
 
     expect(selectedPolicy())->toBe(BasePolicy::class);
 });

@@ -36,12 +36,12 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
-    config()->set('impersonator.approval.require', true);
-    config()->set('impersonator.approval.except_modes', []);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.approval.require', true);
+    config()->set('laranail.impersonator.approval.except_modes', []);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     // Two reviewers, one of each role, plus a requester who holds everything.
     $this->requester = RbacUser::create([
@@ -90,7 +90,7 @@ function chainIdentityOf(RbacUser $user): Identity
 it('leaves a chain short of quorum partially approved, and refuses to spend it', function (): void {
     // The central property. One approval on a two-reviewer policy is not a permit — if `consume()`
     // accepted it, the second reviewer would be decoration.
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 2]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 2]]);
 
     $id = openChainRequest($this->target);
     $store = app(ApprovalStore::class);
@@ -112,7 +112,7 @@ it('leaves a chain short of quorum partially approved, and refuses to spend it',
 });
 
 it('treats one denial as terminal even after approvals are recorded', function (): void {
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 3]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 3]]);
 
     $id = openChainRequest($this->target);
 
@@ -132,7 +132,7 @@ it('records every reviewer rather than overwriting the previous one', function (
     // What the child table exists for. Three columns on the parent row could hold one answer, so the
     // second reviewer would have erased the first — losing the only fact an audit of a four-eyes
     // control is actually about.
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 2]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 2]]);
 
     $id = openChainRequest($this->target);
 
@@ -151,7 +151,7 @@ it('records every reviewer rather than overwriting the previous one', function (
 });
 
 it('refuses a second decision from the same reviewer', function (): void {
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 3]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 3]]);
 
     $id = openChainRequest($this->target);
 
@@ -168,7 +168,7 @@ it('lets the database, not a guard, arbitrate a duplicate reviewer', function ()
     // Asserted at the store, below the action's guard. A check in PHP cannot close this: two requests
     // from one approver both read no prior decision and both write, so one reviewer counts twice
     // toward quorum. The unique index is what makes it impossible rather than unlikely.
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 3]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 3]]);
 
     $id = openChainRequest($this->target);
     $store = app(ApprovalStore::class);
@@ -183,7 +183,7 @@ it('lets the database, not a guard, arbitrate a duplicate reviewer', function ()
 it('lets one reviewer fill only one role slot', function (): void {
     // The rule that makes role slots mean anything. The requester holds both roles — so does nobody
     // else here — so this uses a reviewer who holds both and checks they cannot satisfy both.
-    config()->set('impersonator.approval.policies', [
+    config()->set('laranail.impersonator.approval.policies', [
         'default' => ['quorum' => 2, 'roles' => ['manager' => 1, 'auditor' => 1]],
     ]);
 
@@ -211,7 +211,7 @@ it('lets one reviewer fill only one role slot', function (): void {
 });
 
 it('refuses a reviewer who holds no role the chain is waiting on', function (): void {
-    config()->set('impersonator.approval.policies', [
+    config()->set('laranail.impersonator.approval.policies', [
         'default' => ['quorum' => 1, 'roles' => ['auditor' => 1]],
     ]);
 
@@ -232,7 +232,7 @@ it('still refuses the requester however many roles they hold', function (): void
     // The requester holds both required roles and the approve permission. Self-approval is checked
     // before anything about roles, because a four-eyes flow where one pair of eyes can be both pairs
     // is a delay rather than a control.
-    config()->set('impersonator.approval.policies', [
+    config()->set('laranail.impersonator.approval.policies', [
         'default' => ['quorum' => 2, 'roles' => ['manager' => 1, 'auditor' => 1]],
     ]);
 
@@ -245,7 +245,7 @@ it('still refuses the requester however many roles they hold', function (): void
 });
 
 it('lets an application refuse a reviewer with its own rule', function (): void {
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 1]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 1]]);
 
     // "Must not be the auditor", standing in for a relationship this package cannot model.
     Impersonator::approvalEligibilityUsing(
@@ -267,7 +267,7 @@ it('lets an application refuse a reviewer with its own rule', function (): void 
 });
 
 it('fails closed when an eligibility rule returns something other than true', function (): void {
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 1]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 1]]);
 
     // A truthy string is not a yes: the point of registering a rule is that the package cannot judge
     // the relationship, so anything ambiguous has to refuse.
@@ -284,7 +284,7 @@ it('fails closed when an eligibility rule returns something other than true', fu
 });
 
 it('fails closed when an eligibility rule throws', function (): void {
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 1]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 1]]);
 
     Impersonator::approvalEligibilityUsing(function (): bool {
         throw new RuntimeException('the directory is down');
@@ -299,7 +299,7 @@ it('fails closed when an eligibility rule throws', function (): void {
 it('applies a per-mode policy, falling back to default', function (): void {
     // A `full`-access request warranting two reviewers while read-only work needs one is the ordinary
     // shape of this control.
-    config()->set('impersonator.approval.policies', [
+    config()->set('laranail.impersonator.approval.policies', [
         'default' => ['quorum' => 1],
         'full' => ['quorum' => 2],
     ]);
@@ -313,7 +313,7 @@ it('applies a per-mode policy, falling back to default', function (): void {
 it('reports the closing decision as the rollup, and not before', function (): void {
     // `decided_by` is published API shape. It names the reviewer who closed the chain — and stays null
     // while the request is still waiting, where naming one reviewer would read as "decided by them".
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 2]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 2]]);
 
     $id = openChainRequest($this->target);
 
@@ -330,7 +330,7 @@ it('reports the closing decision as the rollup, and not before', function (): vo
 });
 
 it('names the denier as the rollup even when approvals came first', function (): void {
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 3]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 3]]);
 
     $id = openChainRequest($this->target);
 
@@ -346,7 +346,7 @@ it('names the denier as the rollup even when approvals came first', function ():
 it('reports chain progress and every decision through the service', function (): void {
     // "Two of three, still needs an auditor" is the sentence a reviewer can act on. "Pending" is not,
     // which is why a count alone was never enough.
-    config()->set('impersonator.approval.policies', [
+    config()->set('laranail.impersonator.approval.policies', [
         'default' => ['quorum' => 3, 'roles' => ['manager' => 1, 'auditor' => 1]],
     ]);
 
@@ -369,7 +369,7 @@ it('reports chain progress and every decision through the service', function ():
 it('never puts the fingerprint in a decision projection', function (): void {
     // An approval queue is a screen operators holding `approve` but not `enter` can see. The
     // fingerprint is what a permit is matched on, so it is the one field that must not travel.
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 1]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 1]]);
 
     $id = openChainRequest($this->target);
     app(ApprovalService::class)->grant($id, chainIdentityOf($this->manager), 'fine');

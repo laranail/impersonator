@@ -18,9 +18,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer & Co']);
@@ -43,7 +43,7 @@ it('renders the banner component only while impersonating', function (): void {
 });
 
 it('lets a banner attribute override config per placement', function (): void {
-    config()->set('impersonator.banner.position', 'bottom');
+    config()->set('laranail.impersonator.banner.position', 'bottom');
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
@@ -89,7 +89,7 @@ it('renders nothing without a user', function (): void {
 
 it('prompts for a reason when one is required', function (): void {
     // Otherwise the operator discovers the requirement through a rejection.
-    config()->set('impersonator.reason.require', true);
+    config()->set('laranail.impersonator.reason.require', true);
     Auth::guard('web')->setUser($this->admin);
 
     expect(Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->target]))

@@ -27,11 +27,11 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
-    config()->set('impersonator.urls.base_domain', 'tenant.example.com');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.urls.base_domain', 'tenant.example.com');
     config()->set('app.url', 'https://admin.example.com');
 
     $this->admin = User::create(['name' => 'Admin']);
@@ -102,7 +102,7 @@ it('never stores the plaintext token', function (): void {
 });
 
 it('generates a token of at least 32 bytes of entropy', function (): void {
-    config()->set('impersonator.tokens.bytes', 8);
+    config()->set('laranail.impersonator.tokens.bytes', 8);
     [, $token] = issueToken($this->target);
 
     // The configured length has a floor: a token short enough to guess makes every other
@@ -163,7 +163,7 @@ it('refuses a replayed token', function (): void {
 });
 
 it('refuses an expired token', function (): void {
-    config()->set('impersonator.tokens.ttl', 60);
+    config()->set('laranail.impersonator.tokens.ttl', 60);
     [, $token] = issueToken($this->target);
 
     $this->travel(61)->seconds();
@@ -173,7 +173,7 @@ it('refuses an expired token', function (): void {
 
 it('does not mark an expired token as consumed', function (): void {
     // Otherwise the trail would read as a successful redemption.
-    config()->set('impersonator.tokens.ttl', 60);
+    config()->set('laranail.impersonator.tokens.ttl', 60);
     [, $token] = issueToken($this->target);
     $this->travel(61)->seconds();
 
@@ -200,7 +200,7 @@ it('refuses a tampered token', function (): void {
 
 it('gives every rejection the same message', function (): void {
     // Telling a caller a token merely expired tells them it was real.
-    config()->set('impersonator.tokens.ttl', 60);
+    config()->set('laranail.impersonator.tokens.ttl', 60);
     [, $expiring] = issueToken($this->target);
     $this->travel(61)->seconds();
 
@@ -239,7 +239,7 @@ it('re-runs the authorization stack at redemption', function (): void {
     // and following it, and a token that carried its own approval would still be honoured.
     [, $token] = issueToken($this->target);
 
-    config()->set('impersonator.enabled', false);
+    config()->set('laranail.impersonator.enabled', false);
 
     expect(fn () => Impersonator::complete($token, 'token'))->toThrow(ImpersonationDenied::class);
 });
@@ -256,7 +256,7 @@ it('burns the token even when authorization then refuses', function (): void {
     // A token surviving a failed attempt could be retried until the window happened to
     // open. A fresh one is cheap.
     [, $token] = issueToken($this->target);
-    config()->set('impersonator.enabled', false);
+    config()->set('laranail.impersonator.enabled', false);
 
     try {
         Impersonator::complete($token, 'token');
@@ -264,7 +264,7 @@ it('burns the token even when authorization then refuses', function (): void {
         // expected
     }
 
-    config()->set('impersonator.enabled', true);
+    config()->set('laranail.impersonator.enabled', true);
 
     expect(fn () => Impersonator::complete($token, 'token'))->toThrow(TokenRejected::class);
 });
@@ -279,7 +279,7 @@ it('kills an in-flight token when the impersonation is revoked', function (): vo
 });
 
 it('throttles the accept route', function (): void {
-    config()->set('impersonator.rate_limiting.accept.attempts', 3);
+    config()->set('laranail.impersonator.rate_limiting.accept.attempts', 3);
 
     for ($i = 0; $i < 3; $i++) {
         $this->get(route('impersonator.accept', ['token' => str_repeat('a', 40)]));
@@ -297,7 +297,7 @@ it('rejects a route token that is too short to be one', function (): void {
 // ── pruning ─────────────────────────────────────────────────────────────────
 
 it('prunes expired, spent and revoked tokens but keeps live ones', function (): void {
-    config()->set('impersonator.tokens.ttl', 60);
+    config()->set('laranail.impersonator.tokens.ttl', 60);
 
     [, $spent] = issueToken($this->target);
     Impersonator::complete($spent, 'token');

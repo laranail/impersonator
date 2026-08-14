@@ -20,32 +20,32 @@ use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\RevokeImpersonationCo
 | crawler, a prefetcher or a pasted URL can trigger.
 */
 
-Route::middleware(config('impersonator.routes.middleware', ['web']))
-    ->prefix(config('impersonator.routes.prefix', 'impersonator'))
-    ->name(config('impersonator.routes.name_prefix', 'impersonator.'))
+Route::middleware(config('laranail.impersonator.routes.middleware', ['web']))
+    ->prefix(config('laranail.impersonator.routes.prefix', 'impersonator'))
+    ->name(config('laranail.impersonator.routes.name_prefix', 'impersonator.'))
     ->group(function (): void {
-        Route::post(config('impersonator.routes.enter_path', 'enter'), EnterImpersonationController::class)
+        Route::post(config('laranail.impersonator.routes.enter_path', 'enter'), EnterImpersonationController::class)
             ->middleware('throttle:impersonator-enter')
             ->name('enter');
 
-        Route::get(config('impersonator.routes.leave_path', 'leave'), LeaveImpersonationController::class)
+        Route::get(config('laranail.impersonator.routes.leave_path', 'leave'), LeaveImpersonationController::class)
             ->name('leave');
 
         // Registered alongside `leave` and for a related reason: both have to be reachable
         // from inside an impersonated session. Throttled on the enter limiter — which is
         // keyed per operator — because extending is the same kind of privileged act as
         // entering, and an unbounded extend endpoint is a way to hammer the audit table.
-        Route::post(config('impersonator.routes.extend_path', 'extend'), ExtendImpersonationController::class)
+        Route::post(config('laranail.impersonator.routes.extend_path', 'extend'), ExtendImpersonationController::class)
             ->middleware('throttle:impersonator-enter')
             ->name('extend');
 
-        Route::post(config('impersonator.routes.revoke_path', 'revoke/{audit}'), RevokeImpersonationController::class)
+        Route::post(config('laranail.impersonator.routes.revoke_path', 'revoke/{audit}'), RevokeImpersonationController::class)
             ->name('revoke');
 
         // The one endpoint reachable without an authenticated session — by design, since a
         // handoff exists precisely because the caller's session does not reach this host.
         // The token is the credential, so this is throttled by IP.
-        Route::get(config('impersonator.routes.accept_path', 'accept/{token}'), AcceptImpersonationController::class)
+        Route::get(config('laranail.impersonator.routes.accept_path', 'accept/{token}'), AcceptImpersonationController::class)
             ->middleware('throttle:impersonator-accept')
             ->name('accept');
     });

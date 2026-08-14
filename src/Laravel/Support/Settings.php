@@ -25,7 +25,7 @@ final readonly class Settings
 
     public function raw(string $key, mixed $default = null): mixed
     {
-        return $this->config->get('impersonator.' . $key, $default);
+        return $this->config->get('laranail.impersonator.' . $key, $default);
     }
 
     public function string(string $key, string $default): string

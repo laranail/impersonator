@@ -71,7 +71,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
     {
         $target = $this->identities->toUser(
             $request->target,
-            withTrashed: (bool) $this->config->get('impersonator.targets.allow_soft_deleted', false),
+            withTrashed: (bool) $this->config->get('laranail.impersonator.targets.allow_soft_deleted', false),
         );
 
         if ($target === null) {
@@ -204,7 +204,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
      */
     private function loginWithoutEvents(StatefulGuard $guard, Authenticatable $user): void
     {
-        $silent = (bool) $this->config->get('impersonator.session.silent_login', true);
+        $silent = (bool) $this->config->get('laranail.impersonator.session.silent_login', true);
 
         if (! $silent || ! $guard instanceof SessionGuard) {
             // `remember: false` is not a default being restated — it is the
@@ -293,11 +293,11 @@ final readonly class SessionGuardAdapter implements AuthAdapter
      */
     private function resetSession(?string $preserveGuard = null): void
     {
-        if (! (bool) $this->config->get('impersonator.session.regenerate', true)) {
+        if (! (bool) $this->config->get('laranail.impersonator.session.regenerate', true)) {
             return;
         }
 
-        if ((bool) $this->config->get('impersonator.session.flush_on_switch', true)) {
+        if ((bool) $this->config->get('laranail.impersonator.session.flush_on_switch', true)) {
             // One exception to the flush, and it is not optional. When the operator sits on a
             // *different* guard than the target, they were never displaced and must stay logged in
             // — so their own auth key has to survive. Flushing it would log the operator out of
@@ -351,7 +351,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
 
     private function targetGuardName(): string
     {
-        $name = $this->config->get('impersonator.guards.target', 'web');
+        $name = $this->config->get('laranail.impersonator.guards.target', 'web');
 
         return is_string($name) && $name !== '' ? $name : 'web';
     }

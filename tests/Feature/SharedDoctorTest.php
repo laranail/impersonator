@@ -74,17 +74,17 @@ it('no check throws, whatever the configuration', function (): void {
     // the install is broken. Driven against deliberately hostile config: a missing hash key is the
     // state that makes the audit store throw on construction, which is exactly what used to take
     // the doctor down with it.
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', null);
-    config()->set('impersonator.targets.allowlist', ['ghost' => 'App\\Models\\NotInstalled']);
-    config()->set('impersonator.guards.impersonator', 'nonexistent-guard');
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api']);
-    config()->set('impersonator.approval.require', true);
-    config()->set('impersonator.limits.max_duration', null);
-    config()->set('impersonator.limits.extension.max', null);
-    config()->set('impersonator.limits.extension.max_total_duration', null);
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', null);
+    config()->set('laranail.impersonator.targets.allowlist', ['ghost' => 'App\\Models\\NotInstalled']);
+    config()->set('laranail.impersonator.guards.impersonator', 'nonexistent-guard');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api']);
+    config()->set('laranail.impersonator.approval.require', true);
+    config()->set('laranail.impersonator.limits.max_duration', null);
+    config()->set('laranail.impersonator.limits.extension.max', null);
+    config()->set('laranail.impersonator.limits.extension.max_total_duration', null);
 
     foreach (Checks::all() as $class) {
         $result = app($class)->run();
@@ -99,8 +99,8 @@ it('never leaks the audit hash key into a check result', function (): void {
     // whatever terminal, CI log or pasted issue the operator was working in.
     $secret = 'sk-' . str_repeat('z', 60);
 
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', $secret);
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', $secret);
 
     foreach (Checks::all() as $class) {
         $result = app($class)->run();
@@ -112,8 +112,8 @@ it('never leaks the audit hash key into a check result', function (): void {
 
 it('reports the same findings through both commands', function (): void {
     // The property that makes one shared list worth having.
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api']);
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api']);
 
     $own = $this->artisan('laranail::impersonator.doctor');
     $own->expectsOutputToContain('unauthenticated remote-control surface');

@@ -34,11 +34,11 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
     // The concurrency cap ships at 1; these tests are about the lifecycle, and
     // the cap has its own coverage below.
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -107,7 +107,7 @@ it('regenerates the session id on leave as well', function (): void {
 });
 
 it('does not regenerate when regeneration is switched off', function (): void {
-    config()->set('impersonator.session.regenerate', false);
+    config()->set('laranail.impersonator.session.regenerate', false);
     Auth::guard('web')->setUser($this->admin);
     $before = session()->getId();
 
@@ -127,7 +127,7 @@ it('does not fire the application login listeners for a silent login', function 
 });
 
 it('fires the login event when silent login is switched off', function (): void {
-    config()->set('impersonator.session.silent_login', false);
+    config()->set('laranail.impersonator.session.silent_login', false);
     Event::fake([Login::class]);
 
     enterAs($this->admin, $this->target);
@@ -195,7 +195,7 @@ it('closes the audit row on leave with the end reason', function (): void {
 });
 
 it('sets an expiry from max_duration', function (): void {
-    config()->set('impersonator.limits.max_duration', 30);
+    config()->set('laranail.impersonator.limits.max_duration', 30);
 
     $outcome = enterAs($this->admin, $this->target);
 
@@ -205,7 +205,7 @@ it('sets an expiry from max_duration', function (): void {
 });
 
 it('leaves the expiry unset when max_duration is null', function (): void {
-    config()->set('impersonator.limits.max_duration', null);
+    config()->set('laranail.impersonator.limits.max_duration', null);
 
     expect(enterAs($this->admin, $this->target)->session->expiresAt)->toBeNull();
 });
@@ -251,7 +251,7 @@ it('refuses nested impersonation', function (): void {
 });
 
 it('allows nesting only when explicitly configured', function (): void {
-    config()->set('impersonator.authorization.allow_nested', true);
+    config()->set('laranail.impersonator.authorization.allow_nested', true);
     $third = User::create(['name' => 'Third']);
     enterAs($this->admin, $this->target);
 
@@ -267,7 +267,7 @@ it('refuses a soft-deleted target', function (): void {
 });
 
 it('refuses a target class that is not allowlisted', function (): void {
-    config()->set('impersonator.targets.allowlist', []);
+    config()->set('laranail.impersonator.targets.allowlist', []);
     Auth::guard('web')->setUser($this->admin);
 
     expect(fn () => Impersonator::enter($this->target))
@@ -275,7 +275,7 @@ it('refuses a target class that is not allowlisted', function (): void {
 });
 
 it('refuses a missing reason when one is required', function (): void {
-    config()->set('impersonator.reason.require', true);
+    config()->set('laranail.impersonator.reason.require', true);
     Auth::guard('web')->setUser($this->admin);
 
     expect(fn () => Impersonator::enter($this->target))
@@ -285,8 +285,8 @@ it('refuses a missing reason when one is required', function (): void {
 });
 
 it('refuses a reason that exceeds the configured bound', function (): void {
-    config()->set('impersonator.reason.require', true);
-    config()->set('impersonator.reason.max_length', 10);
+    config()->set('laranail.impersonator.reason.require', true);
+    config()->set('laranail.impersonator.reason.max_length', 10);
     Auth::guard('web')->setUser($this->admin);
 
     expect(fn () => Impersonator::enter($this->target, reason: str_repeat('x', 11)))
@@ -294,7 +294,7 @@ it('refuses a reason that exceeds the configured bound', function (): void {
 });
 
 it('refuses when impersonation is disabled entirely', function (): void {
-    config()->set('impersonator.enabled', false);
+    config()->set('laranail.impersonator.enabled', false);
     Auth::guard('web')->setUser($this->admin);
 
     expect(fn () => Impersonator::enter($this->target))
@@ -316,9 +316,9 @@ it('accepts each built-in mode', function (string $mode): void {
 })->with(['read_only', 'limited', 'full']);
 
 it('enforces the concurrency cap', function (): void {
-    config()->set('impersonator.limits.max_active_per_impersonator', 1);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 1);
     $third = User::create(['name' => 'Third']);
-    config()->set('impersonator.authorization.allow_nested', true);
+    config()->set('laranail.impersonator.authorization.allow_nested', true);
 
     enterAs($this->admin, $this->target);
 
@@ -327,8 +327,8 @@ it('enforces the concurrency cap', function (): void {
 });
 
 it('refuses a target somebody else is already impersonating', function (): void {
-    config()->set('impersonator.limits.deny_when_target_busy', true);
-    config()->set('impersonator.authorization.allow_nested', true);
+    config()->set('laranail.impersonator.limits.deny_when_target_busy', true);
+    config()->set('laranail.impersonator.authorization.allow_nested', true);
     $other = User::create(['name' => 'Other admin']);
 
     enterAs($this->admin, $this->target);
@@ -338,7 +338,7 @@ it('refuses a target somebody else is already impersonating', function (): void 
 });
 
 it('honours the canBeImpersonated model opt-out', function (): void {
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => User::class,
         'protected' => ProtectedUser::class,
     ]);
@@ -349,7 +349,7 @@ it('honours the canBeImpersonated model opt-out', function (): void {
 });
 
 it('honours the canImpersonate model hook on the impersonator', function (): void {
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => User::class,
         'protected' => ProtectedUser::class,
     ]);
@@ -425,7 +425,7 @@ it('does not carry the target session payload back out on leave', function (): v
 });
 
 it('can be told to keep the session payload across a switch', function (): void {
-    config()->set('impersonator.session.flush_on_switch', false);
+    config()->set('laranail.impersonator.session.flush_on_switch', false);
 
     Auth::guard('web')->setUser($this->admin);
     session()->put('cart', ['operator-item']);
@@ -455,8 +455,8 @@ it('never rotates the target remember token when leaving', function (): void {
     // `SessionGuard::logout()` calls cycleRememberToken(), which would write a new remember_token
     // to the *target's* row — logging the real customer out of every device they own, because an
     // operator finished a support session. Distinct guards take that path.
-    config()->set('impersonator.guards.impersonator', 'web');
-    config()->set('impersonator.guards.target', 'secondary');
+    config()->set('laranail.impersonator.guards.impersonator', 'web');
+    config()->set('laranail.impersonator.guards.target', 'secondary');
     config()->set('auth.guards.secondary', ['driver' => 'session', 'provider' => 'users']);
 
     $this->target->forceFill(['remember_token' => 'customer-token-set-weeks-ago'])->save();

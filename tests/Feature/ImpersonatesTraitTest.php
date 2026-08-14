@@ -17,7 +17,7 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => StaffUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => StaffUser::class]);
     config()->set('auth.providers.users.model', StaffUser::class);
 
     $this->admin = StaffUser::create(['name' => 'Admin']);

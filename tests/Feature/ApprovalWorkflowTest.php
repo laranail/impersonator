@@ -36,15 +36,15 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
-    config()->set('impersonator.authorization.roles.levels', []);
-    config()->set('impersonator.authorization.roles.protected', []);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.authorization.roles.levels', []);
+    config()->set('laranail.impersonator.authorization.roles.protected', []);
 
-    config()->set('impersonator.approval.require', true);
+    config()->set('laranail.impersonator.approval.require', true);
 
     RbacUser::$registered = [];
 
@@ -117,7 +117,7 @@ it('refuses to enter and opens a pending request instead', function (): void {
 });
 
 it('does nothing when approval is not required', function (): void {
-    config()->set('impersonator.approval.require', false);
+    config()->set('laranail.impersonator.approval.require', false);
 
     Impersonator::enter($this->target);
 
@@ -135,7 +135,7 @@ it('exempts read_only by default', function (): void {
 });
 
 it('requires approval for an exempted mode once the exemption is removed', function (): void {
-    config()->set('impersonator.approval.except_modes', []);
+    config()->set('laranail.impersonator.approval.except_modes', []);
 
     expect(fn () => Impersonator::enter($this->target, mode: 'read_only'))
         ->toThrow(ApprovalRequired::class);
@@ -280,7 +280,7 @@ it('requires the approve permission, which entering does not confer', function (
 it('cannot be spent on a higher mode than was approved', function (): void {
     // Mode escalation through the approval flow. An approval for read-only support work
     // must not become full write access by changing one form field on the way back.
-    config()->set('impersonator.approval.except_modes', []);
+    config()->set('laranail.impersonator.approval.except_modes', []);
 
     $approvalId = null;
 
@@ -384,7 +384,7 @@ it('cannot re-decide a decided request', function (): void {
 });
 
 it('will not decide or spend a request past its ttl', function (): void {
-    config()->set('impersonator.approval.ttl', 15);
+    config()->set('laranail.impersonator.approval.ttl', 15);
 
     $approvalId = null;
 
@@ -410,7 +410,7 @@ it('will not decide or spend a request past its ttl', function (): void {
 it('will not spend a permit that expired after it was granted', function (): void {
     // Expiry is enforced on read, so the TTL binds the whole flow rather than only the
     // window before a decision.
-    config()->set('impersonator.approval.ttl', 15);
+    config()->set('laranail.impersonator.approval.ttl', 15);
 
     $approvalId = null;
 
@@ -428,7 +428,7 @@ it('will not spend a permit that expired after it was granted', function (): voi
 });
 
 it('sweeps stale requests and announces each one', function (): void {
-    config()->set('impersonator.approval.ttl', 5);
+    config()->set('laranail.impersonator.approval.ttl', 5);
 
     try {
         Impersonator::enter($this->target);
@@ -492,7 +492,7 @@ it('lists pending requests for an approver and the requester their own', functio
 });
 
 it('drops expired requests from the approver queue', function (): void {
-    config()->set('impersonator.approval.ttl', 5);
+    config()->set('laranail.impersonator.approval.ttl', 5);
 
     try {
         Impersonator::enter($this->target);
@@ -547,7 +547,7 @@ it('never exposes a credential or session id in the approval projection', functi
 });
 
 it('keeps the approved parameters rather than trusting the resubmission', function (): void {
-    config()->set('impersonator.reason.require', true);
+    config()->set('laranail.impersonator.reason.require', true);
 
     $approvalId = null;
 
@@ -573,8 +573,8 @@ it('keeps the approved parameters rather than trusting the resubmission', functi
 it('notifies the configured approver addresses', function (): void {
     Notification::fake();
 
-    config()->set('impersonator.notifications.approvals.enabled', true);
-    config()->set('impersonator.notifications.approvals.mail', ['security@example.com']);
+    config()->set('laranail.impersonator.notifications.approvals.enabled', true);
+    config()->set('laranail.impersonator.notifications.approvals.mail', ['security@example.com']);
 
     try {
         Impersonator::enter($this->target);
@@ -588,7 +588,7 @@ it('notifies the configured approver addresses', function (): void {
 it('sends nothing to approvers until the channel is enabled', function (): void {
     Notification::fake();
 
-    config()->set('impersonator.notifications.approvals.mail', ['security@example.com']);
+    config()->set('laranail.impersonator.notifications.approvals.mail', ['security@example.com']);
 
     try {
         Impersonator::enter($this->target);
@@ -602,7 +602,7 @@ it('sends nothing to approvers until the channel is enabled', function (): void 
 it('notifies resolved approvers but never the requester', function (): void {
     Notification::fake();
 
-    config()->set('impersonator.notifications.approvals.enabled', true);
+    config()->set('laranail.impersonator.notifications.approvals.enabled', true);
 
     $operator = $this->operator;
     $approver = $this->approver;
@@ -610,7 +610,7 @@ it('notifies resolved approvers but never the requester', function (): void {
     // A resolver returning both, to prove the requester is filtered out. Mailing somebody an
     // approval prompt they cannot act on is noise that turns into a support ticket.
     config()->set(
-        'impersonator.notifications.approvals.resolver',
+        'laranail.impersonator.notifications.approvals.resolver',
         fn (): array => [$approver, $operator],
     );
 
@@ -627,8 +627,8 @@ it('notifies resolved approvers but never the requester', function (): void {
 it('survives a resolver that throws', function (): void {
     Notification::fake();
 
-    config()->set('impersonator.notifications.approvals.enabled', true);
-    config()->set('impersonator.notifications.approvals.resolver', function (): array {
+    config()->set('laranail.impersonator.notifications.approvals.enabled', true);
+    config()->set('laranail.impersonator.notifications.approvals.resolver', function (): array {
         throw new RuntimeException('directory unavailable');
     });
 
@@ -668,7 +668,7 @@ it('tells the requester the outcome of a decision', function (): void {
 });
 
 it('tells the requester when nobody answered', function (): void {
-    config()->set('impersonator.approval.ttl', 5);
+    config()->set('laranail.impersonator.approval.ttl', 5);
 
     try {
         Impersonator::enter($this->target);
@@ -691,7 +691,7 @@ it('tells the requester when nobody answered', function (): void {
 it('can be told not to notify the requester', function (): void {
     Notification::fake();
 
-    config()->set('impersonator.notifications.approvals.notify_requester', false);
+    config()->set('laranail.impersonator.notifications.approvals.notify_requester', false);
 
     $approvalId = null;
 
@@ -709,7 +709,7 @@ it('can be told not to notify the requester', function (): void {
 // ── the prune command ───────────────────────────────────────────────────────
 
 it('expires stale requests through the console command', function (): void {
-    config()->set('impersonator.approval.ttl', 5);
+    config()->set('laranail.impersonator.approval.ttl', 5);
 
     $approvalId = null;
 
@@ -742,7 +742,7 @@ it('tolerates a requester who cannot be notified', function (): void {
     // for the decision to fail — the approver already said yes, and the permit already exists.
     Notification::fake();
 
-    config()->set('impersonator.targets.allowlist', ['user' => PlainUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => PlainUser::class]);
     config()->set('auth.providers.users.model', PlainUser::class);
 
     $operator = PlainUser::create(['name' => 'Plain Operator']);

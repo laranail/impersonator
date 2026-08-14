@@ -19,9 +19,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -116,7 +116,7 @@ it('honours a safe relative redirect', function (): void {
 });
 
 it('requires a reason when configured to', function (): void {
-    config()->set('impersonator.reason.require', true);
+    config()->set('laranail.impersonator.reason.require', true);
     Auth::guard('web')->setUser($this->admin);
 
     postEnter(['target_type' => 'user', 'target_id' => (string) $this->target->getKey()])
@@ -124,8 +124,8 @@ it('requires a reason when configured to', function (): void {
 });
 
 it('bounds the reason length', function (): void {
-    config()->set('impersonator.reason.require', true);
-    config()->set('impersonator.reason.max_length', 20);
+    config()->set('laranail.impersonator.reason.require', true);
+    config()->set('laranail.impersonator.reason.max_length', 20);
     Auth::guard('web')->setUser($this->admin);
 
     postEnter([
@@ -189,7 +189,7 @@ it('rate limits enter attempts per operator, not per address', function (): void
     // Probed with refused attempts, which is both the realistic scenario and the only way to
     // count repeatedly: a *successful* enter makes the operator the target, so the next
     // attempt would be refused as self-impersonation rather than throttled.
-    config()->set('impersonator.rate_limiting.enter.attempts', 2);
+    config()->set('laranail.impersonator.rate_limiting.enter.attempts', 2);
     Auth::guard('web')->setUser($this->admin);
 
     $probe = ['target_type' => 'user', 'target_id' => '99999'];
@@ -201,7 +201,7 @@ it('rate limits enter attempts per operator, not per address', function (): void
 });
 
 it('limits each operator separately', function (): void {
-    config()->set('impersonator.rate_limiting.enter.attempts', 1);
+    config()->set('laranail.impersonator.rate_limiting.enter.attempts', 1);
     $other = User::create(['name' => 'Other admin']);
     $probe = ['target_type' => 'user', 'target_id' => '99999'];
 

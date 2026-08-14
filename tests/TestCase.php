@@ -53,7 +53,7 @@ abstract class TestCase extends Orchestra
         // exercise it explicitly on purpose: appending it globally here would make
         // every unrelated test depend on middleware ordering, and hide which test is
         // actually covering the enforcement.
-        $config->set('impersonator.routes.auto_append_to_groups', []);
+        $config->set('laranail.impersonator.routes.auto_append_to_groups', []);
     }
 
     /**

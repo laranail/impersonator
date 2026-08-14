@@ -25,11 +25,11 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.audit.tamper_evidence', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.audit.tamper_evidence', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Alice Admin']);
     $this->target = User::create(['name' => 'Bob Customer']);

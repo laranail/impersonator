@@ -38,7 +38,7 @@ beforeEach(function (): void {
     config()->set('auth.providers.vendors', ['driver' => 'eloquent', 'model' => Vendor::class]);
     config()->set('auth.guards.vendor', ['driver' => 'session', 'provider' => 'vendors']);
 
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => User::class,
         'vendor' => [
             'model' => Vendor::class,
@@ -47,7 +47,7 @@ beforeEach(function (): void {
             'label' => 'Vendor account',
         ],
     ]);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
 
     app(TargetRegistry::class)->flush();
 
@@ -91,7 +91,7 @@ it('exposes human labels for a type picker', function (): void {
 });
 
 it('drops an entry that is not an installed Eloquent model', function (): void {
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => User::class,
         'ghost' => 'App\\Models\\Removed',
         'broken' => ['guard' => 'vendor'],
@@ -183,7 +183,7 @@ it('shows the vendor label in the banner', function (): void {
 it('accepts a type registered at runtime by another package', function (): void {
     // So a vendor module can register its own type from its own provider, without asking
     // the host application to edit config it does not own.
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     app(TargetRegistry::class)->flush();
 
     expect(app(TargetRegistry::class)->has('vendor'))->toBeFalse();
@@ -215,7 +215,7 @@ it('ignores a runtime registration for a class that is not a model', function ()
 // ── the security boundary still holds ───────────────────────────────────────
 
 it('still refuses a model that is registered nowhere', function (): void {
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     app(TargetRegistry::class)->flush();
     Auth::guard('web')->setUser($this->admin);
 
@@ -224,7 +224,7 @@ it('still refuses a model that is registered nowhere', function (): void {
 });
 
 it('denies every target when nothing is registered', function (): void {
-    config()->set('impersonator.targets.allowlist', []);
+    config()->set('laranail.impersonator.targets.allowlist', []);
     app(TargetRegistry::class)->flush();
     Auth::guard('web')->setUser($this->admin);
 

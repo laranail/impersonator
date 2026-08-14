@@ -46,13 +46,13 @@ beforeEach(function (): void {
         '--no-interaction' => true,
     ])->run();
 
-    config()->set('impersonator.targets.allowlist', ['user' => PassportUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => PassportUser::class]);
     config()->set('auth.providers.users', ['driver' => 'eloquent', 'model' => PassportUser::class]);
     // Passport resolves a model's provider by looking for a guard whose driver is `passport`,
     // so an application without one cannot issue tokens at all.
     config()->set('auth.guards.api', ['driver' => 'passport', 'provider' => 'users']);
-    config()->set('impersonator.adapter', 'passport');
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.adapter', 'passport');
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
 
     $this->admin = PassportUser::create(['name' => 'Admin']);
     $this->target = PassportUser::create(['name' => 'Customer']);
@@ -94,7 +94,7 @@ it('names the token after the audit row', function (): void {
 });
 
 it('shortens the expiry without shortening every other token the app issues', function (): void {
-    config()->set('impersonator.adapters.passport.expires_after', 5);
+    config()->set('laranail.impersonator.adapters.passport.expires_after', 5);
 
     $outcome = Impersonator::enter($this->target);
 

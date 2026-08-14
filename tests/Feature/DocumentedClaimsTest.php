@@ -75,12 +75,12 @@ it('consults the config key for every package table', function (): void {
     foreach ($map as $key => $real) {
         expect($created)->toContain($real);
 
-        config()->set('impersonator.' . $key, 'a_table_that_is_not_there');
+        config()->set('laranail.impersonator.' . $key, 'a_table_that_is_not_there');
 
         expect(str_contains(app(TablesCheck::class)->run()->message, 'a_table_that_is_not_there'))
             ->toBeTrue("the doctor does not consult [{$key}]");
 
-        config()->set('impersonator.' . $key, $real);
+        config()->set('laranail.impersonator.' . $key, $real);
     }
 
     // The row-level-security check reads the same list, but reacts by querying `pg_class` rather than by

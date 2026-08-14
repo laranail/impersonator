@@ -39,9 +39,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -56,7 +56,7 @@ it('requests a row lock when counting active impersonations', function (): void 
     // emitted SQL, the cap is a read-then-write and two requests can both pass it.
     requiresRowLocks();
 
-    config()->set('impersonator.limits.max_active_per_impersonator', 2);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 2);
 
     $locked = [];
     DB::listen(function ($query) use (&$locked): void {
@@ -86,7 +86,7 @@ it('enforces the cap inside the locked transaction', function (): void {
         impersonator: $this->admin,
     );
 
-    config()->set('impersonator.limits.max_active_per_impersonator', 1);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 1);
 
     $store->open($request);
 
@@ -102,9 +102,9 @@ it('locks the chain head while computing a digest', function (): void {
     // no longer verifies.
     requiresRowLocks();
 
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     // One row first, so there is a chain head to lock.
     Impersonator::enter($this->target);
@@ -147,8 +147,8 @@ it('requests a row lock before deciding whether more time may be granted', funct
 it('spends one allowance when two extensions race', function (): void {
     requiresRowLocks();
 
-    config()->set('impersonator.limits.extension.max', 1);
-    config()->set('impersonator.limits.extension.max_total_duration', null);
+    config()->set('laranail.impersonator.limits.extension.max', 1);
+    config()->set('laranail.impersonator.limits.extension.max_total_duration', null);
 
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
@@ -172,7 +172,7 @@ it('spends one allowance when two extensions race', function (): void {
 it('locks the approval row before recounting a chain', function (): void {
     requiresRowLocks();
 
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 2]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 2]]);
 
     $request = new ImpersonationRequest(
         impersonator: new Identity('user', 1),
@@ -205,7 +205,7 @@ it('locks the approval row before recounting a chain', function (): void {
 it('lands exactly one state transition when two reviewers grant', function (): void {
     requiresRowLocks();
 
-    config()->set('impersonator.approval.policies', ['default' => ['quorum' => 2]]);
+    config()->set('laranail.impersonator.approval.policies', ['default' => ['quorum' => 2]]);
 
     $request = new ImpersonationRequest(
         impersonator: new Identity('user', 1),

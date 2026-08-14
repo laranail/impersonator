@@ -138,7 +138,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom($this->configPath(), 'impersonator');
+        $this->mergeConfigFrom($this->configPath(), 'laranail.impersonator');
 
         $this->registerSupport();
         $this->registerContracts();
@@ -1120,7 +1120,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
     protected function registerPublishing(): void
     {
         $this->publishes([
-            $this->configPath() => $this->app->configPath('impersonator.php'),
+            $this->configPath() => $this->app->configPath('laranail/impersonator.php'),
         ], 'impersonator-config');
 
         $this->publishes([

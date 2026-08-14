@@ -132,7 +132,7 @@ final readonly class SessionState
 
     public function key(): string
     {
-        $key = $this->config->get('impersonator.session.key', 'impersonator');
+        $key = $this->config->get('laranail.impersonator.session.key', 'impersonator');
 
         return is_string($key) && $key !== '' ? $key : 'impersonator';
     }

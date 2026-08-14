@@ -26,9 +26,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -123,14 +123,14 @@ it('ships with the persistence guard enabled', function (): void {
     // Pins the default itself, not just the behaviour. Shipping this off would silently
     // reduce read_only to an HTTP-method check, which is a much weaker promise than the
     // name and the documentation make.
-    expect(config('impersonator.modes.read_only.prevent_writes'))->toBeTrue()
+    expect(config('laranail.impersonator.modes.read_only.prevent_writes'))->toBeTrue()
         ->and(app(ModeRegistry::class)->enforcer(Mode::of('read_only'))->guardsPersistence())->toBeTrue();
 });
 
 it('permits the hidden write only when the guard is explicitly disabled', function (): void {
     // The escape hatch, for an application with a specific incompatibility. Turning it off
     // means read_only bounds HTTP methods alone.
-    config()->set('impersonator.modes.read_only.prevent_writes', false);
+    config()->set('laranail.impersonator.modes.read_only.prevent_writes', false);
     impersonateAs($this->admin, $this->target, 'read_only');
 
     $this->get('/app/sneaky-write')->assertOk();
@@ -296,9 +296,9 @@ it('enforces the model deny-list against the table a write targets', function ()
     // `deny_models` holds class names, but the persistence guard — the only layer that can see
     // which model a write touches — reports the *table*. Comparing a table name against class
     // names never matched, so this deny-list read as protection while enforcing nothing.
-    config()->set('impersonator.modes.limited.deny_models', [User::class]);
-    config()->set('impersonator.modes.limited.deny_routes', []);
-    config()->set('impersonator.modes.limited.deny_paths', []);
+    config()->set('laranail.impersonator.modes.limited.deny_models', [User::class]);
+    config()->set('laranail.impersonator.modes.limited.deny_routes', []);
+    config()->set('laranail.impersonator.modes.limited.deny_paths', []);
 
     impersonateAs($this->admin, $this->target, 'limited');
 
@@ -309,9 +309,9 @@ it('enforces the model deny-list against the table a write targets', function ()
 });
 
 it('leaves an undenied model alone in limited mode', function (): void {
-    config()->set('impersonator.modes.limited.deny_models', ['App\\Models\\PaymentMethod']);
-    config()->set('impersonator.modes.limited.deny_routes', []);
-    config()->set('impersonator.modes.limited.deny_paths', []);
+    config()->set('laranail.impersonator.modes.limited.deny_models', ['App\\Models\\PaymentMethod']);
+    config()->set('laranail.impersonator.modes.limited.deny_routes', []);
+    config()->set('laranail.impersonator.modes.limited.deny_paths', []);
 
     impersonateAs($this->admin, $this->target, 'limited');
 

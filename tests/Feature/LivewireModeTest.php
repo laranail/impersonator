@@ -33,10 +33,10 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
-    config()->set('impersonator.modes.limited.deny_models', []);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.modes.limited.deny_models', []);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -65,7 +65,7 @@ function livewireV3(string $component, string $method): array
 }
 
 it('denies a Livewire action by component and method', function (): void {
-    config()->set('impersonator.modes.limited.deny_livewire', ['ProfileForm::updatePassword']);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', ['ProfileForm::updatePassword']);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -76,7 +76,7 @@ it('denies a Livewire action by component and method', function (): void {
 });
 
 it('matches a whole component with a wildcard', function (): void {
-    config()->set('impersonator.modes.limited.deny_livewire', ['BillingPanel::*']);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', ['BillingPanel::*']);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -85,7 +85,7 @@ it('matches a whole component with a wildcard', function (): void {
 });
 
 it('matches a method wherever it appears', function (): void {
-    config()->set('impersonator.modes.limited.deny_livewire', ['*::destroy']);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', ['*::destroy']);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -97,7 +97,7 @@ it('matches a method wherever it appears', function (): void {
 it('reads a Livewire 2 payload as well', function (): void {
     // Both shapes are in the wild, and a package that only handled the newer one would silently enforce
     // nothing on the older — which is the failure mode this whole axis exists to remove.
-    config()->set('impersonator.modes.limited.deny_livewire', ['profile-form::updatePassword']);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', ['profile-form::updatePassword']);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -113,7 +113,7 @@ it('reads a Livewire 2 payload as well', function (): void {
 it('denies every call in a batched payload, not just the first', function (): void {
     // Livewire batches: one request can call several methods across several components. Checking only
     // the first would let a denied action ride along behind an allowed one.
-    config()->set('impersonator.modes.limited.deny_livewire', ['*::destroy']);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', ['*::destroy']);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -130,7 +130,7 @@ it('denies every call in a batched payload, not just the first', function (): vo
 it('costs nothing when no Livewire rule is configured', function (): void {
     // The payload is not parsed at all unless the mode has rules for it: decoding a JSON body to
     // discover it was not Livewire is a cost every application would otherwise pay.
-    config()->set('impersonator.modes.limited.deny_livewire', []);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', []);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -141,7 +141,7 @@ it('allows an unparseable payload rather than guessing', function (): void {
     // An empty identifier list means the axis does not match — never that the request is allowed by
     // fiat. The other axes still apply, and read_only is unaffected because its guard is at the
     // persistence layer.
-    config()->set('impersonator.modes.limited.deny_livewire', ['*::destroy']);
+    config()->set('laranail.impersonator.modes.limited.deny_livewire', ['*::destroy']);
 
     Impersonator::enter($this->target, mode: 'limited');
 
@@ -168,7 +168,7 @@ it('reads identifiers without a booted mode, for a host to inspect', function ()
 it('leaves read_only unaffected, since its guard is below the http layer', function (): void {
     // Stated in the docs and worth pinning: read_only refuses the write itself, so it never depended on
     // recognising the route in the first place.
-    config()->set('impersonator.modes.read_only.prevent_writes', true);
+    config()->set('laranail.impersonator.modes.read_only.prevent_writes', true);
 
     Impersonator::enter($this->target, mode: 'read_only');
 

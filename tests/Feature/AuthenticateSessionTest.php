@@ -33,10 +33,10 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin', 'password' => bcrypt('operator-secret')]);
     $this->target = User::create(['name' => 'Customer', 'password' => bcrypt('customer-secret')]);
@@ -96,7 +96,7 @@ it('survives a guarded request with the session flush disabled', function (): vo
     // ever mismatches — a test written that way passes with or without the fix.
     //
     // Flushing the session masks it too, for the same reason, so the opt-out is off here.
-    config()->set('impersonator.session.flush_on_switch', false);
+    config()->set('laranail.impersonator.session.flush_on_switch', false);
 
     Auth::guard('web')->setUser($this->admin);
 
@@ -119,7 +119,7 @@ it('survives a guarded request with the session flush disabled', function (): vo
 it('survives leaving after a guarded request, with the flush disabled', function (): void {
     // The return leg of the same problem: on leave the sentinel holds the target's hash while the
     // operator is authenticated again.
-    config()->set('impersonator.session.flush_on_switch', false);
+    config()->set('laranail.impersonator.session.flush_on_switch', false);
 
     Auth::guard('web')->setUser($this->admin);
     $this->get('/app/guarded')->assertOk();

@@ -43,7 +43,7 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
 
     $this->admin = User::create(['name' => 'Admin']);
@@ -148,7 +148,7 @@ it('never writes a credential hash or session id into a log', function (): void 
 });
 
 it('writes nothing when logging is disabled', function (): void {
-    config()->set('impersonator.logging.enabled', false);
+    config()->set('laranail.impersonator.logging.enabled', false);
 
     $captured = [];
     Log::listen(function ($message) use (&$captured): void {
@@ -161,7 +161,7 @@ it('writes nothing when logging is disabled', function (): void {
 });
 
 it('degrades an unrecognised log level to the default rather than throwing', function (): void {
-    config()->set('impersonator.logging.level', 'shout');
+    config()->set('laranail.impersonator.logging.level', 'shout');
 
     $captured = [];
     Log::listen(function ($message) use (&$captured): void {
@@ -174,7 +174,7 @@ it('degrades an unrecognised log level to the default rather than throwing', fun
 });
 
 it('honours a configured log level', function (): void {
-    config()->set('impersonator.logging.level', 'notice');
+    config()->set('laranail.impersonator.logging.level', 'notice');
 
     $captured = [];
     Log::listen(function ($message) use (&$captured): void {
@@ -275,7 +275,7 @@ it('writes the tamper-relevant subset to a separate audit channel as well', func
     // ASVS 16.4.2/16.4.3: an audit table writable by the application's own database user is not
     // tamper-resistant. The HMAC chain gives evidence, not resistance — only an off-box sink closes it.
     config()->set('logging.channels.impersonator_audit', ['driver' => 'single', 'path' => storage_path('logs/audit.log')]);
-    config()->set('impersonator.logging.audit_channel', 'impersonator_audit');
+    config()->set('laranail.impersonator.logging.audit_channel', 'impersonator_audit');
 
     $channels = [];
     Log::listen(function ($message) use (&$channels): void {
@@ -290,7 +290,7 @@ it('writes the tamper-relevant subset to a separate audit channel as well', func
 });
 
 it('ignores an audit channel that does not resolve rather than failing an impersonation', function (): void {
-    config()->set('impersonator.logging.audit_channel', 'a-channel-nobody-defined');
+    config()->set('laranail.impersonator.logging.audit_channel', 'a-channel-nobody-defined');
 
     // The ordinary line is written before this is attempted, so a typo costs a copy and not a record.
     expect(fn () => Impersonator::enter($this->target))->not->toThrow(Throwable::class);
@@ -302,9 +302,9 @@ it('never writes a token, a hash, a session id or a fingerprint', function (): v
     // The rule this package holds itself to is stricter than ASVS 16.2.5, which asks only that session
     // tokens be masked: here they are never written at all. A hash is still a verifier that lets a
     // holder confirm a guess, and a fingerprint is the value a permit is matched on.
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     $captured = [];
     Log::listen(function ($message) use (&$captured): void {
@@ -318,7 +318,7 @@ it('never writes a token, a hash, a session id or a fingerprint', function (): v
     $token = $outcome->credential?->secret;
     $accept = $outcome->acceptUrl;
 
-    config()->set('impersonator.driver', 'session');
+    config()->set('laranail.impersonator.driver', 'session');
 
     $serialised = (string) json_encode(array_map(
         static fn ($m): array => ['message' => $m->message, 'context' => $m->context],

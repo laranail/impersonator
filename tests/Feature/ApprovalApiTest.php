@@ -23,17 +23,17 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
-    config()->set('impersonator.authorization.roles.levels', []);
-    config()->set('impersonator.authorization.roles.protected', []);
-    config()->set('impersonator.approval.require', true);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.authorization.roles.levels', []);
+    config()->set('laranail.impersonator.authorization.roles.protected', []);
+    config()->set('laranail.impersonator.approval.require', true);
 
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api']);
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api']);
 
     RbacUser::$registered = [];
 
@@ -269,7 +269,7 @@ it('bounds the decision note', function (): void {
 });
 
 it('refuses an expired request with a 409', function (): void {
-    config()->set('impersonator.approval.ttl', 5);
+    config()->set('laranail.impersonator.approval.ttl', 5);
 
     $id = openRequest($this->target);
 
@@ -314,7 +314,7 @@ it('links the approval to the impersonation it produced', function (): void {
 it('is absent when the approval feature is off but the api is on', function (): void {
     // Turning approval off must not remove the queue endpoints: an install that disables the
     // requirement still has historical requests an auditor may need to read.
-    config()->set('impersonator.approval.require', false);
+    config()->set('laranail.impersonator.approval.require', false);
 
     Auth::guard('web')->setUser($this->approver);
 
@@ -322,7 +322,7 @@ it('is absent when the approval feature is off but the api is on', function (): 
 });
 
 it('still enters directly when approval is not required', function (): void {
-    config()->set('impersonator.approval.require', false);
+    config()->set('laranail.impersonator.approval.require', false);
 
     $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',

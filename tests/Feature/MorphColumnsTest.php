@@ -29,9 +29,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -147,8 +147,8 @@ it('still filters by the public target field after the column rename', function 
 it('leaves the audit hash chain verifiable across the rename', function (): void {
     // The chained fact is keyed `target` and valued `type:id`. Only the columns it is read *from*
     // moved, so the digest of an existing row is unchanged — a rename must not read as tampering.
-    config()->set('impersonator.audit.tamper_evidence', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evidence', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     Impersonator::enter($this->target);
 
@@ -164,6 +164,6 @@ it('leaves the audit hash chain verifiable across the rename', function (): void
 it('does not require a morph map by default', function (): void {
     // Off by default because `requireMorphMap()` is application-global: turning it on from a package
     // would make a host application's unrelated unmapped morphs start throwing on upgrade.
-    expect(config('impersonator.morphs.require_map'))->toBeFalse()
+    expect(config('laranail.impersonator.morphs.require_map'))->toBeFalse()
         ->and(Relation::requiresMorphMap())->toBeFalse();
 });

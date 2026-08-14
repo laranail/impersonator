@@ -36,10 +36,10 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -211,7 +211,7 @@ it('reports the cookie driver as unable to terminate out of band', function (): 
 
 it('honours the destroy_on_revoke switch', function (): void {
     useFileSessions();
-    config()->set('impersonator.session.destroy_on_revoke', false);
+    config()->set('laranail.impersonator.session.destroy_on_revoke', false);
 
     $terminator = app(SessionTerminator::class);
 

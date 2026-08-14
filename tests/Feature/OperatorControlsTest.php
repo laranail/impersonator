@@ -32,9 +32,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = RbacUser::create([
         'name' => 'Admin',
@@ -50,16 +50,16 @@ beforeEach(function (): void {
 it('leaves every control off by default', function (): void {
     // A control that turned itself on during an upgrade would refuse impersonations an installation
     // expects to work — at the moment somebody is trying to help a customer.
-    expect(config('impersonator.authorization.step_up.require'))->toBeFalse()
-        ->and(config('impersonator.authorization.recheck_each_request'))->toBeFalse()
-        ->and(config('impersonator.limits.max_idle'))->toBeNull()
-        ->and(config('impersonator.targets.eligibility'))->toBeNull();
+    expect(config('laranail.impersonator.authorization.step_up.require'))->toBeFalse()
+        ->and(config('laranail.impersonator.authorization.recheck_each_request'))->toBeFalse()
+        ->and(config('laranail.impersonator.limits.max_idle'))->toBeNull()
+        ->and(config('laranail.impersonator.targets.eligibility'))->toBeNull();
 
     expect(Impersonator::enter($this->target)->isStarted())->toBeTrue();
 });
 
 it('refuses to enter without a recent password confirmation', function (): void {
-    config()->set('impersonator.authorization.step_up.require', true);
+    config()->set('laranail.impersonator.authorization.step_up.require', true);
 
     try {
         Impersonator::enter($this->target);
@@ -72,8 +72,8 @@ it('refuses to enter without a recent password confirmation', function (): void 
 it('refuses on a stale confirmation as well as an absent one', function (): void {
     // Absent is the more important half: an install that forgot the host-side flow produces exactly
     // that, and treating it as passing would make the control decorative.
-    config()->set('impersonator.authorization.step_up.require', true);
-    config()->set('impersonator.authorization.step_up.within', 60);
+    config()->set('laranail.impersonator.authorization.step_up.require', true);
+    config()->set('laranail.impersonator.authorization.step_up.within', 60);
 
     session()->put('auth.password_confirmed_at', time() - 3600);
 
@@ -85,7 +85,7 @@ it('refuses on a stale confirmation as well as an absent one', function (): void
 });
 
 it('ends an impersonation that sat idle', function (): void {
-    config()->set('impersonator.limits.max_idle', 5);
+    config()->set('laranail.impersonator.limits.max_idle', 5);
 
     Route::middleware(['web', GuardImpersonationLifetime::class])->get('/app/inside', fn (): string => 'ok');
 
@@ -111,8 +111,8 @@ it('ends an impersonation that sat idle', function (): void {
 it('ends a live impersonation when the operator loses their permission', function (): void {
     // The policy runs at enter, so without this a revoked role leaves live sessions running until the
     // duration cap — the withdrawal that mattered most taking effect last.
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
-    config()->set('impersonator.authorization.recheck_each_request', true);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.authorization.recheck_each_request', true);
 
     Route::middleware(['web', GuardImpersonationLifetime::class])->get('/app/inside', fn (): string => 'ok');
 
@@ -127,8 +127,8 @@ it('ends a live impersonation when the operator loses their permission', functio
 });
 
 it('leaves a live impersonation alone when the recheck is off', function (): void {
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
-    config()->set('impersonator.authorization.recheck_each_request', false);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.authorization.recheck_each_request', false);
 
     Route::middleware(['web', GuardImpersonationLifetime::class])->get('/app/inside', fn (): string => 'ok');
 
@@ -145,7 +145,7 @@ it('refuses a target an application rules ineligible', function (): void {
     // `(bool)`, not `!== true`: the column is uncast on this fixture, so SQLite hands back `1` and a
     // strict comparison would let every blocked account through. Worth spelling out — a rule written
     // that way in an application would fail open silently, which is the one direction that matters.
-    config()->set('impersonator.targets.eligibility', fn (object $target): bool => ! (bool) $target->blocked);
+    config()->set('laranail.impersonator.targets.eligibility', fn (object $target): bool => ! (bool) $target->blocked);
 
     $this->target->forceFill(['blocked' => true])->save();
 
@@ -159,12 +159,12 @@ it('refuses a target an application rules ineligible', function (): void {
 
 it('fails closed when an eligibility rule returns something other than true or throws', function (): void {
     foreach (['yes', 1, null, []] as $value) {
-        config()->set('impersonator.targets.eligibility', fn (): mixed => $value);
+        config()->set('laranail.impersonator.targets.eligibility', fn (): mixed => $value);
 
         expect(fn () => Impersonator::enter($this->target))->toThrow(ImpersonationDenied::class);
     }
 
-    config()->set('impersonator.targets.eligibility', function (): bool {
+    config()->set('laranail.impersonator.targets.eligibility', function (): bool {
         throw new RuntimeException('the directory is down');
     });
 

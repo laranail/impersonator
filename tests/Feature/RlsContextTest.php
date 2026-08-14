@@ -32,9 +32,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -82,7 +82,7 @@ it('names both parties and the mode in the gucs', function (): void {
 });
 
 it('honours a configured guc prefix', function (): void {
-    config()->set('impersonator.rls.prefix', 'tenant');
+    config()->set('laranail.impersonator.rls.prefix', 'tenant');
 
     Impersonator::enter($this->target);
 
@@ -136,7 +136,7 @@ it('sets the gucs transaction-scoped, not session-scoped', function (): void {
 it('survives a name a caller could have crafted', function (): void {
     // The prefix comes from config, so it is not attacker-controlled — but the values are identity, and
     // the point of bindings is that neither can alter the statement.
-    config()->set('impersonator.rls.prefix', 'app');
+    config()->set('laranail.impersonator.rls.prefix', 'app');
 
     $crafted = User::create(['name' => "'; drop table impersonator_audits; --"]);
 

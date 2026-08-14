@@ -36,10 +36,10 @@ beforeEach(function (): void {
         $table->timestamps();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => ApiUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => ApiUser::class]);
     config()->set('auth.providers.users.model', ApiUser::class);
-    config()->set('impersonator.adapter', 'sanctum');
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.adapter', 'sanctum');
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
 
     $this->admin = ApiUser::create(['name' => 'Admin']);
     $this->target = ApiUser::create(['name' => 'Customer']);
@@ -77,7 +77,7 @@ it('scopes the token to a single impersonated ability, not everything', function
 it('gives the token a short expiry independent of the app setting', function (): void {
     // A support credential and a user's own long-lived API token have nothing in common.
     config()->set('sanctum.expiration', 60 * 24 * 30);
-    config()->set('impersonator.adapters.sanctum.expires_after', 5);
+    config()->set('laranail.impersonator.adapters.sanctum.expires_after', 5);
 
     $outcome = Impersonator::enter($this->target);
 
@@ -153,7 +153,7 @@ it('impersonates a target that does not use the HasApiTokens trait', function ()
     // Sanctum's trait carries no `@phpstan-require-implements`, and Laravel's default User uses
     // it *without* the contract — so requiring either would refuse the most common setup there
     // is. Writing through Sanctum's own model instead means any Eloquent target works.
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => ApiUser::class,
         'plain' => PlainUser::class,
     ]);

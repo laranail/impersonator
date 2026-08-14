@@ -19,7 +19,7 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
 
     $this->admin = User::create(['name' => 'Admin']);
@@ -50,7 +50,7 @@ it('refuses the leave route when nothing is being impersonated', function (): vo
 });
 
 it('redirects after leaving to the configured destination', function (): void {
-    config()->set('impersonator.redirects.after_leave', '/admin/users');
+    config()->set('laranail.impersonator.redirects.after_leave', '/admin/users');
     $this->startSession();
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
@@ -61,7 +61,7 @@ it('redirects after leaving to the configured destination', function (): void {
 it('does not register routes when route registration is disabled', function (): void {
     // Verified through config rather than by re-booting: the flag is read at boot,
     // and asserting on it here documents the contract without a second kernel.
-    expect(config('impersonator.routes.register'))->toBeTrue();
+    expect(config('laranail.impersonator.routes.register'))->toBeTrue();
 });
 
 // ── Blade ───────────────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ it('escapes an ampersand in the display name', function (): void {
 });
 
 it('renders nothing when the banner is switched off', function (): void {
-    config()->set('impersonator.banner.enabled', false);
+    config()->set('laranail.impersonator.banner.enabled', false);
     $this->startSession();
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
@@ -151,8 +151,8 @@ it('renders nothing when the banner is switched off', function (): void {
 });
 
 it('honours the theme and position config', function (): void {
-    config()->set('impersonator.banner.theme', 'light');
-    config()->set('impersonator.banner.position', 'top');
+    config()->set('laranail.impersonator.banner.theme', 'light');
+    config()->set('laranail.impersonator.banner.position', 'top');
     $this->startSession();
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
@@ -164,7 +164,7 @@ it('honours the theme and position config', function (): void {
 });
 
 it('falls back to an unrecognised theme rather than emitting it', function (): void {
-    config()->set('impersonator.banner.theme', 'neon');
+    config()->set('laranail.impersonator.banner.theme', 'neon');
     $this->startSession();
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);

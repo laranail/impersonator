@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::connection($this->connection())->create(
-            config('impersonator.audit.table', 'impersonator_audits'),
+            config('laranail.impersonator.audit.table', 'impersonator_audits'),
             function (Blueprint $table): void {
                 // ULID rather than an auto-increment: the id is handed out in URLs
                 // and API responses, and a sequential one leaks how much
@@ -108,7 +108,7 @@ return new class extends Migration
         );
 
         Schema::connection($this->connection())->create(
-            config('impersonator.trail.table', 'impersonator_audit_events'),
+            config('laranail.impersonator.trail.table', 'impersonator_audit_events'),
             function (Blueprint $table): void {
                 $table->ulid('id')->primary();
                 $table->ulid('audit_id');
@@ -130,7 +130,7 @@ return new class extends Migration
                 // nobody can interpret.
                 $table->foreign('audit_id')
                     ->references('id')
-                    ->on(config('impersonator.audit.table', 'impersonator_audits'))
+                    ->on(config('laranail.impersonator.audit.table', 'impersonator_audits'))
                     ->cascadeOnDelete();
 
                 $table->index(['audit_id', 'occurred_at'], 'impersonator_events_audit_idx');
@@ -139,7 +139,7 @@ return new class extends Migration
         );
 
         Schema::connection($this->connection())->create(
-            config('impersonator.tokens.table', 'impersonator_tokens'),
+            config('laranail.impersonator.tokens.table', 'impersonator_tokens'),
             function (Blueprint $table): void {
                 $table->ulid('id')->primary();
 
@@ -162,7 +162,7 @@ return new class extends Migration
         );
 
         Schema::connection($this->connection())->create(
-            config('impersonator.approval.table', 'impersonator_approval_requests'),
+            config('laranail.impersonator.approval.table', 'impersonator_approval_requests'),
             function (Blueprint $table): void {
                 $table->ulid('id')->primary();
 
@@ -206,7 +206,7 @@ return new class extends Migration
             },
         );
         Schema::connection($this->connection())->create(
-            config('impersonator.approval.decisions_table', 'impersonator_approval_decisions'),
+            config('laranail.impersonator.approval.decisions_table', 'impersonator_approval_decisions'),
             function (Blueprint $table): void {
                 $table->ulid('id')->primary();
                 $table->ulid('approval_id');
@@ -246,7 +246,7 @@ return new class extends Migration
 
                 $table->foreign('approval_id', 'impersonator_decisions_approval_fk')
                     ->references('id')
-                    ->on(config('impersonator.approval.table', 'impersonator_approval_requests'))
+                    ->on(config('laranail.impersonator.approval.table', 'impersonator_approval_requests'))
                     ->cascadeOnDelete();
             },
         );
@@ -258,11 +258,11 @@ return new class extends Migration
 
         // Children first: the trail holds a foreign key onto the audit table, and the decisions
         // table holds one onto the approvals table.
-        $schema->dropIfExists(config('impersonator.approval.decisions_table', 'impersonator_approval_decisions'));
-        $schema->dropIfExists(config('impersonator.approval.table', 'impersonator_approval_requests'));
-        $schema->dropIfExists(config('impersonator.tokens.table', 'impersonator_tokens'));
-        $schema->dropIfExists(config('impersonator.trail.table', 'impersonator_audit_events'));
-        $schema->dropIfExists(config('impersonator.audit.table', 'impersonator_audits'));
+        $schema->dropIfExists(config('laranail.impersonator.approval.decisions_table', 'impersonator_approval_decisions'));
+        $schema->dropIfExists(config('laranail.impersonator.approval.table', 'impersonator_approval_requests'));
+        $schema->dropIfExists(config('laranail.impersonator.tokens.table', 'impersonator_tokens'));
+        $schema->dropIfExists(config('laranail.impersonator.trail.table', 'impersonator_audit_events'));
+        $schema->dropIfExists(config('laranail.impersonator.audit.table', 'impersonator_audits'));
     }
 
     /**
@@ -287,7 +287,7 @@ return new class extends Migration
      */
     private function morphs(Blueprint $table, string $name, bool $nullable = false): void
     {
-        $keyType = config('impersonator.morphs.key_type', 'string');
+        $keyType = config('laranail.impersonator.morphs.key_type', 'string');
 
         $type = $table->string($name . '_type');
 
@@ -310,7 +310,7 @@ return new class extends Migration
      */
     private function connection(): ?string
     {
-        $connection = config('impersonator.audit.connection');
+        $connection = config('laranail.impersonator.audit.connection');
 
         return is_string($connection) && $connection !== '' ? $connection : null;
     }

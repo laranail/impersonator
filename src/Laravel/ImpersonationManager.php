@@ -267,7 +267,7 @@ class ImpersonationManager
                 . 'installation. Either its underlying package is not installed, or the '
                 . 'configured guard [%s] is not of a driver it can authenticate.',
                 $name,
-                $this->configString('impersonator.guards.target', 'web'),
+                $this->configString('laranail.impersonator.guards.target', 'web'),
             ));
         }
 
@@ -284,7 +284,7 @@ class ImpersonationManager
      */
     public function defaultDriver(): string
     {
-        $configured = $this->configString('impersonator.driver', 'session');
+        $configured = $this->configString('laranail.impersonator.driver', 'session');
 
         if ($configured !== 'auto') {
             return $configured;
@@ -295,7 +295,7 @@ class ImpersonationManager
 
     public function defaultAdapter(): string
     {
-        return $this->configString('impersonator.adapter', 'session');
+        return $this->configString('laranail.impersonator.adapter', 'session');
     }
 
     public function modes(): ModeRegistry
@@ -595,7 +595,7 @@ class ImpersonationManager
         $attribute = ($user instanceof Model
             ? $this->identities->targets()->forModel($user)?->displayName
             : null)
-            ?? $this->config->get('impersonator.banner.display_name', 'name');
+            ?? $this->config->get('laranail.impersonator.banner.display_name', 'name');
 
         if (is_string($attribute) && $user instanceof Model) {
             $value = $user->getAttribute($attribute);
@@ -661,7 +661,7 @@ class ImpersonationManager
         }
 
         return $this->modeRegistry->resolve(
-            $mode ?? $this->configString('impersonator.default_mode', Mode::FULL),
+            $mode ?? $this->configString('laranail.impersonator.default_mode', Mode::FULL),
         );
     }
 
@@ -669,7 +669,7 @@ class ImpersonationManager
     {
         return new Guards(
             impersonator: $this->impersonatorGuardName(),
-            target: $this->configString('impersonator.guards.target', 'web'),
+            target: $this->configString('laranail.impersonator.guards.target', 'web'),
         );
     }
 
@@ -685,7 +685,7 @@ class ImpersonationManager
      */
     public function guardsFor(string $targetType): Guards
     {
-        $fallback = $this->configString('impersonator.guards.target', 'web');
+        $fallback = $this->configString('laranail.impersonator.guards.target', 'web');
 
         return new Guards(
             impersonator: $this->impersonatorGuardName(),
@@ -812,7 +812,7 @@ class ImpersonationManager
 
     protected function impersonatorGuardName(): string
     {
-        return $this->configString('impersonator.guards.impersonator', 'web');
+        return $this->configString('laranail.impersonator.guards.impersonator', 'web');
     }
 
     /**

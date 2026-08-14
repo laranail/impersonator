@@ -27,10 +27,10 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin', 'email' => 'admin@example.com']);
     $this->target = User::create(['name' => 'Customer', 'email' => 'customer@example.com']);
@@ -57,7 +57,7 @@ it('sends nothing by default', function (): void {
 });
 
 it('tells the target their account was accessed when enabled', function (): void {
-    config()->set('impersonator.notifications.notify_target', true);
+    config()->set('laranail.impersonator.notifications.notify_target', true);
     Notification::fake();
 
     enterNow($this->admin, $this->target);
@@ -68,7 +68,7 @@ it('tells the target their account was accessed when enabled', function (): void
 it('does not name the operator to the target', function (): void {
     // Naming them would hand every customer the identity of individual staff; the audit
     // trail already records it for anyone with a legitimate reason to ask.
-    config()->set('impersonator.notifications.notify_target', true);
+    config()->set('laranail.impersonator.notifications.notify_target', true);
     $auditId = enterNow($this->admin, $this->target);
 
     $session = app(AuditStore::class)->find($auditId);
@@ -98,7 +98,7 @@ it('explains each mode in plain language rather than by name', function (string 
 it('emits an event once the target has been told', function (): void {
     // So a compliance report can evidence that disclosure happened, not only that it was
     // configured.
-    config()->set('impersonator.notifications.notify_target', true);
+    config()->set('laranail.impersonator.notifications.notify_target', true);
     Notification::fake();
     Event::fake([TargetNotified::class]);
 
@@ -110,8 +110,8 @@ it('emits an event once the target has been told', function (): void {
 // ── security alerts ─────────────────────────────────────────────────────────
 
 it('alerts the security channel on a full-mode entry', function (): void {
-    config()->set('impersonator.notifications.security_channel.enabled', true);
-    config()->set('impersonator.notifications.security_channel.mail', ['security@example.com']);
+    config()->set('laranail.impersonator.notifications.security_channel.enabled', true);
+    config()->set('laranail.impersonator.notifications.security_channel.mail', ['security@example.com']);
     Notification::fake();
 
     enterNow($this->admin, $this->target, 'full');
@@ -121,8 +121,8 @@ it('alerts the security channel on a full-mode entry', function (): void {
 
 it('does not alert on routine read-only support work', function (): void {
     // An alert channel that fires on everything is one nobody reads.
-    config()->set('impersonator.notifications.security_channel.enabled', true);
-    config()->set('impersonator.notifications.security_channel.mail', ['security@example.com']);
+    config()->set('laranail.impersonator.notifications.security_channel.enabled', true);
+    config()->set('laranail.impersonator.notifications.security_channel.mail', ['security@example.com']);
     Notification::fake();
 
     enterNow($this->admin, $this->target, 'read_only');
@@ -131,8 +131,8 @@ it('does not alert on routine read-only support work', function (): void {
 });
 
 it('alerts on every revocation regardless of mode', function (): void {
-    config()->set('impersonator.notifications.security_channel.enabled', true);
-    config()->set('impersonator.notifications.security_channel.mail', ['security@example.com']);
+    config()->set('laranail.impersonator.notifications.security_channel.enabled', true);
+    config()->set('laranail.impersonator.notifications.security_channel.mail', ['security@example.com']);
     $auditId = enterNow($this->admin, $this->target, 'read_only');
 
     Notification::fake();
@@ -142,9 +142,9 @@ it('alerts on every revocation regardless of mode', function (): void {
 });
 
 it('honours the configured trigger list', function (): void {
-    config()->set('impersonator.notifications.security_channel.enabled', true);
-    config()->set('impersonator.notifications.security_channel.mail', ['security@example.com']);
-    config()->set('impersonator.notifications.security_channel.on', ['revoked']);
+    config()->set('laranail.impersonator.notifications.security_channel.enabled', true);
+    config()->set('laranail.impersonator.notifications.security_channel.mail', ['security@example.com']);
+    config()->set('laranail.impersonator.notifications.security_channel.on', ['revoked']);
     Notification::fake();
 
     enterNow($this->admin, $this->target, 'full');
@@ -182,7 +182,7 @@ it('keeps the credential hash and session id out of an alert payload', function 
 
 it('does not let a failing notification break the impersonation', function (): void {
     // A mail server being down must not stop a support engineer helping a customer.
-    config()->set('impersonator.notifications.notify_target', true);
+    config()->set('laranail.impersonator.notifications.notify_target', true);
     config()->set('mail.default', 'nonexistent-transport');
 
     expect(enterNow($this->admin, $this->target))->toBeString()
@@ -200,14 +200,14 @@ it('names the impersonator as the causer by default', function (): void {
 });
 
 it('names the target under the target strategy', function (): void {
-    config()->set('impersonator.causer.strategy', 'target');
+    config()->set('laranail.impersonator.causer.strategy', 'target');
     enterNow($this->admin, $this->target);
 
     expect(app(CauserResolver::class)->causer()?->getKey())->toBe($this->target->getKey());
 });
 
 it('records both under the both strategy', function (): void {
-    config()->set('impersonator.causer.strategy', 'both');
+    config()->set('laranail.impersonator.causer.strategy', 'both');
     enterNow($this->admin, $this->target);
 
     $resolver = app(CauserResolver::class);
@@ -238,7 +238,7 @@ it('falls back to the authenticated user outside an impersonation', function ():
 it('falls back to the default strategy for an unrecognised config value', function (): void {
     // This runs inside somebody else's logging pipeline; a typo must not take down every
     // write in the application.
-    config()->set('impersonator.causer.strategy', 'nonsense');
+    config()->set('laranail.impersonator.causer.strategy', 'nonsense');
     enterNow($this->admin, $this->target);
 
     expect(app(CauserResolver::class)->strategy())->toBe('impersonator')
@@ -248,8 +248,8 @@ it('falls back to the default strategy for an unrecognised config value', functi
 it('warns rather than failing when the target cannot be notified', function (): void {
     // A user model without Notifiable is a configuration gap worth surfacing, not a
     // reason to fail the impersonation.
-    config()->set('impersonator.notifications.notify_target', true);
-    config()->set('impersonator.targets.allowlist', ['plain' => PlainUser::class]);
+    config()->set('laranail.impersonator.notifications.notify_target', true);
+    config()->set('laranail.impersonator.targets.allowlist', ['plain' => PlainUser::class]);
 
     $warnings = [];
     app()->instance(FailureReporter::class,

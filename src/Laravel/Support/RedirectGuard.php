@@ -88,7 +88,7 @@ final readonly class RedirectGuard
 
     private function isAllowedAbsoluteUrl(string $url): bool
     {
-        if (! $this->config->get('impersonator.redirects.allow_absolute', false)) {
+        if (! $this->config->get('laranail.impersonator.redirects.allow_absolute', false)) {
             return false;
         }
 
@@ -114,7 +114,7 @@ final readonly class RedirectGuard
     /** @return list<string> lowercased, for case-insensitive exact matching */
     private function allowedHosts(): array
     {
-        $hosts = $this->config->get('impersonator.redirects.allowed_hosts', []);
+        $hosts = $this->config->get('laranail.impersonator.redirects.allowed_hosts', []);
 
         if (! is_array($hosts)) {
             return [];
@@ -133,7 +133,7 @@ final readonly class RedirectGuard
 
     private function configured(string $key): string
     {
-        $value = $this->config->get('impersonator.redirects.' . $key, '/');
+        $value = $this->config->get('laranail.impersonator.redirects.' . $key, '/');
 
         // The fallback itself is config, so it is validated too — otherwise a
         // misconfigured default would be the one target that bypassed the check.

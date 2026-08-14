@@ -11,9 +11,9 @@ use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 
 it('merges the package config', function (): void {
-    expect(config('impersonator.driver'))->toBe('session')
-        ->and(config('impersonator.adapter'))->toBe('session')
-        ->and(config('impersonator.tokens.bytes'))->toBe(40);
+    expect(config('laranail.impersonator.driver'))->toBe('session')
+        ->and(config('laranail.impersonator.adapter'))->toBe('session')
+        ->and(config('laranail.impersonator.tokens.bytes'))->toBe(40);
 });
 
 it('binds the manager as a singleton', function (): void {
@@ -49,7 +49,7 @@ it('does not register the api routes by default', function (): void {
     // An impersonation API is a remote-control surface for every account in the system, so it is
     // something an operator switches on deliberately rather than something they acquire by
     // upgrading a package.
-    expect(config('impersonator.api.enabled'))->toBeFalse()
+    expect(config('laranail.impersonator.api.enabled'))->toBeFalse()
         ->and(Route::has('impersonator.api.impersonations.store'))->toBeFalse()
         ->and(Route::has('impersonator.api.audits.index'))->toBeFalse();
 });

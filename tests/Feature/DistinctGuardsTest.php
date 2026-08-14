@@ -25,9 +25,9 @@ beforeEach(function (): void {
 
     config()->set('auth.providers.users.model', User::class);
     config()->set('auth.guards.admin', ['driver' => 'session', 'provider' => 'users']);
-    config()->set('impersonator.guards.impersonator', 'admin');
-    config()->set('impersonator.guards.target', 'web');
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.guards.impersonator', 'admin');
+    config()->set('laranail.impersonator.guards.target', 'web');
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -87,7 +87,7 @@ it('refuses to use the session adapter against a token guard', function (): void
     // message has to name the guard, or the operator goes looking for a missing
     // composer package that was never the problem.
     config()->set('auth.guards.api', ['driver' => 'token', 'provider' => 'users']);
-    config()->set('impersonator.guards.target', 'api');
+    config()->set('laranail.impersonator.guards.target', 'api');
 
     expect(fn () => Impersonator::adapter('session'))
         ->toThrow(ImpersonationException::class, 'configured guard [api]');

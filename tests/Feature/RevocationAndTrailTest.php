@@ -26,11 +26,11 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
     // The state cache would otherwise mask a revocation recorded mid-test.
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -135,7 +135,7 @@ it('is idempotent', function (): void {
 // ── max_duration ────────────────────────────────────────────────────────────
 
 it('force-ends an impersonation that outlived max_duration', function (): void {
-    config()->set('impersonator.limits.max_duration', 30);
+    config()->set('laranail.impersonator.limits.max_duration', 30);
     $auditId = startImpersonation($this->admin, $this->target);
 
     $this->travel(31)->minutes();
@@ -147,7 +147,7 @@ it('force-ends an impersonation that outlived max_duration', function (): void {
 });
 
 it('leaves an impersonation inside its window alone', function (): void {
-    config()->set('impersonator.limits.max_duration', 30);
+    config()->set('laranail.impersonator.limits.max_duration', 30);
     startImpersonation($this->admin, $this->target);
 
     $this->travel(29)->minutes();
@@ -193,7 +193,7 @@ it('omits payloads by default', function (): void {
 });
 
 it('redacts a recorded payload', function (): void {
-    config()->set('impersonator.trail.record_payloads', true);
+    config()->set('laranail.impersonator.trail.record_payloads', true);
     $auditId = startImpersonation($this->admin, $this->target);
 
     $this->post('/app/save', [
@@ -211,7 +211,7 @@ it('redacts a recorded payload', function (): void {
 });
 
 it('skips ignored paths at any sample rate', function (): void {
-    config()->set('impersonator.trail.ignore_paths', ['app/dash']);
+    config()->set('laranail.impersonator.trail.ignore_paths', ['app/dash']);
     $auditId = startImpersonation($this->admin, $this->target);
 
     $this->get('/app/dash');
@@ -220,7 +220,7 @@ it('skips ignored paths at any sample rate', function (): void {
 });
 
 it('records nothing when the trail is disabled', function (): void {
-    config()->set('impersonator.trail.enabled', false);
+    config()->set('laranail.impersonator.trail.enabled', false);
     $auditId = startImpersonation($this->admin, $this->target);
 
     $this->get('/app/dash');
@@ -229,7 +229,7 @@ it('records nothing when the trail is disabled', function (): void {
 });
 
 it('drops every event at a zero sample rate', function (): void {
-    config()->set('impersonator.trail.sample_rate', 0.0);
+    config()->set('laranail.impersonator.trail.sample_rate', 0.0);
     $auditId = startImpersonation($this->admin, $this->target);
 
     $this->get('/app/dash');
@@ -253,7 +253,7 @@ it('purges the trail with its parent', function (): void {
 it('enforces the concurrency cap inside the store, not just the policy', function (): void {
     // The authoritative check: a count read in the policy and an insert performed
     // afterwards is a race two simultaneous requests can both win.
-    config()->set('impersonator.limits.max_active_per_impersonator', 1);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 1);
     $third = User::create(['name' => 'Third']);
 
     $request = Impersonator::buildRequest(target: $third, impersonator: $this->admin);

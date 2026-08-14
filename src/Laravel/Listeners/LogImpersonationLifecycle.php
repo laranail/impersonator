@@ -287,7 +287,7 @@ final readonly class LogImpersonationLifecycle
      */
     private function write(string $level, string $message, array $context, bool $audit = false): void
     {
-        if ($this->config->get('impersonator.logging.enabled', true) !== true) {
+        if ($this->config->get('laranail.impersonator.logging.enabled', true) !== true) {
             return;
         }
 
@@ -306,7 +306,7 @@ final readonly class LogImpersonationLifecycle
 
     private function channel(): LoggerInterface
     {
-        $channel = $this->config->get('impersonator.logging.channel');
+        $channel = $this->config->get('laranail.impersonator.logging.channel');
 
         return is_string($channel) && $channel !== ''
             ? $this->logs->channel($channel)
@@ -326,7 +326,7 @@ final readonly class LogImpersonationLifecycle
      */
     private function auditChannel(): ?LoggerInterface
     {
-        $channel = $this->config->get('impersonator.logging.audit_channel');
+        $channel = $this->config->get('laranail.impersonator.logging.audit_channel');
 
         if (! is_string($channel) || $channel === '') {
             return null;
@@ -352,7 +352,7 @@ final readonly class LogImpersonationLifecycle
      */
     private function scrub(array $context): array
     {
-        $keys = $this->config->get('impersonator.trail.redact');
+        $keys = $this->config->get('laranail.impersonator.trail.redact');
 
         return Redactor::for(is_array($keys) ? array_values(array_filter($keys, is_string(...))) : [])
             ->scrub($context);
@@ -360,12 +360,12 @@ final readonly class LogImpersonationLifecycle
 
     private function level(): string
     {
-        return $this->normalise($this->config->get('impersonator.logging.level'), 'info');
+        return $this->normalise($this->config->get('laranail.impersonator.logging.level'), 'info');
     }
 
     private function rejectionLevel(): string
     {
-        return $this->normalise($this->config->get('impersonator.logging.rejection_level'), 'warning');
+        return $this->normalise($this->config->get('laranail.impersonator.logging.rejection_level'), 'warning');
     }
 
     /**

@@ -21,14 +21,14 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
     // Select the RBAC layer explicitly: the package is duck-typed, so it does not need
     // spatie installed, and auto-detection keys on that provider being present.
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
-    config()->set('impersonator.authorization.roles.levels', []);
-    config()->set('impersonator.authorization.roles.protected', []);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.authorization.roles.levels', []);
+    config()->set('laranail.impersonator.authorization.roles.protected', []);
 
     RbacUser::$registered = [];
 
@@ -55,7 +55,7 @@ it('selects the RBAC policy when configured', function (): void {
 });
 
 it('rejects a configured policy that is not a policy', function (): void {
-    config()->set('impersonator.authorization.policy', User::class);
+    config()->set('laranail.impersonator.authorization.policy', User::class);
 
     expect(fn () => app(AuthorizationPolicy::class))->toThrow(InvalidArgumentException::class);
 });
@@ -73,7 +73,7 @@ it('refuses an operator without the enter permission', function (): void {
 });
 
 it('honours a renamed enter permission', function (): void {
-    config()->set('impersonator.authorization.permissions.enter', 'acme.support.impersonate');
+    config()->set('laranail.impersonator.authorization.permissions.enter', 'acme.support.impersonate');
     $operator = RbacUser::create([
         'name' => 'Op',
         'permissions' => ['acme.support.impersonate', 'impersonator.mode.full'],
@@ -122,7 +122,7 @@ it('allows a senior operator every mode they hold', function (): void {
 });
 
 it('honours a custom mode permission template', function (): void {
-    config()->set('impersonator.authorization.permissions.mode', 'acme.imp.%s');
+    config()->set('laranail.impersonator.authorization.permissions.mode', 'acme.imp.%s');
     $operator = RbacUser::create([
         'name' => 'Op',
         'permissions' => ['impersonator.enter', 'acme.imp.full'],
@@ -146,7 +146,7 @@ it('reports mode availability without impersonating, for a UI', function (): voi
 // ── protected roles ─────────────────────────────────────────────────────────
 
 it('never allows a protected role to be impersonated', function (): void {
-    config()->set('impersonator.authorization.roles.protected', ['super-admin']);
+    config()->set('laranail.impersonator.authorization.roles.protected', ['super-admin']);
     $founder = RbacUser::create(['name' => 'Founder', 'roles' => ['super-admin']]);
 
     expect(decide($this->admin, $founder)->code)->toBe(Decision::PROTECTED_ROLE);
@@ -154,7 +154,7 @@ it('never allows a protected role to be impersonated', function (): void {
 
 it('protects a role regardless of how privileged the impersonator is', function (): void {
     // A property of the target, not a comparison — no amount of privilege gets past it.
-    config()->set('impersonator.authorization.roles.protected', ['super-admin']);
+    config()->set('laranail.impersonator.authorization.roles.protected', ['super-admin']);
     $god = RbacUser::create([
         'name' => 'God',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
@@ -166,7 +166,7 @@ it('protects a role regardless of how privileged the impersonator is', function 
 });
 
 it('leaves unprotected targets alone', function (): void {
-    config()->set('impersonator.authorization.roles.protected', ['super-admin']);
+    config()->set('laranail.impersonator.authorization.roles.protected', ['super-admin']);
     $staff = RbacUser::create(['name' => 'Staff', 'roles' => ['support']]);
 
     expect(decide($this->admin, $staff)->allowed)->toBeTrue();
@@ -175,7 +175,7 @@ it('leaves unprotected targets alone', function (): void {
 // ── hierarchy ───────────────────────────────────────────────────────────────
 
 it('requires the impersonator to outrank the target', function (): void {
-    config()->set('impersonator.authorization.roles.levels', ['admin' => 80, 'support' => 40]);
+    config()->set('laranail.impersonator.authorization.roles.levels', ['admin' => 80, 'support' => 40]);
 
     $admin = RbacUser::create([
         'name' => 'Admin',
@@ -193,7 +193,7 @@ it('requires the impersonator to outrank the target', function (): void {
 });
 
 it('refuses a sideways impersonation between peers', function (): void {
-    config()->set('impersonator.authorization.roles.levels', ['support' => 40]);
+    config()->set('laranail.impersonator.authorization.roles.levels', ['support' => 40]);
 
     $perms = ['impersonator.enter', 'impersonator.mode.full'];
     $a = RbacUser::create(['name' => 'A', 'permissions' => $perms, 'roles' => ['support']]);
@@ -205,14 +205,14 @@ it('refuses a sideways impersonation between peers', function (): void {
 it('skips the hierarchy check when neither side is ranked', function (): void {
     // A comparison between two unranked users has no meaningful answer, and denying
     // would break every install that never configured levels.
-    config()->set('impersonator.authorization.roles.levels', ['admin' => 80]);
+    config()->set('laranail.impersonator.authorization.roles.levels', ['admin' => 80]);
 
     expect(decide($this->admin, $this->target)->allowed)->toBeTrue();
 });
 
 it('uses a configured closure in preference to the built-in comparison', function (): void {
-    config()->set('impersonator.authorization.roles.levels', ['support' => 40]);
-    config()->set('impersonator.authorization.roles.hierarchy', fn (): bool => true);
+    config()->set('laranail.impersonator.authorization.roles.levels', ['support' => 40]);
+    config()->set('laranail.impersonator.authorization.roles.hierarchy', fn (): bool => true);
 
     $a = RbacUser::create([
         'name' => 'A',
@@ -227,13 +227,13 @@ it('uses a configured closure in preference to the built-in comparison', functio
 it('fails closed when a custom hierarchy rule returns something other than true', function (): void {
     // This is the one place an application can widen access, so anything ambiguous
     // denies.
-    config()->set('impersonator.authorization.roles.hierarchy', fn (): ?bool => null);
+    config()->set('laranail.impersonator.authorization.roles.hierarchy', fn (): ?bool => null);
 
     expect(decide($this->admin, $this->target)->code)->toBe(Decision::HIERARCHY_VIOLATION);
 });
 
 it('fails closed when a custom hierarchy rule throws', function (): void {
-    config()->set('impersonator.authorization.roles.hierarchy', function (): bool {
+    config()->set('laranail.impersonator.authorization.roles.hierarchy', function (): bool {
         throw new RuntimeException('boom');
     });
 
@@ -241,7 +241,7 @@ it('fails closed when a custom hierarchy rule throws', function (): void {
 });
 
 it('fails closed when a custom hierarchy rule is not callable', function (): void {
-    config()->set('impersonator.authorization.roles.hierarchy', 'not-a-class');
+    config()->set('laranail.impersonator.authorization.roles.hierarchy', 'not-a-class');
 
     expect(decide($this->admin, $this->target)->code)->toBe(Decision::HIERARCHY_VIOLATION);
 });
@@ -284,7 +284,7 @@ it('still refuses self-impersonation with every permission held', function (): v
 it('ignores the RBAC rules for a model with no permission API', function (): void {
     // Requiring every user model to implement one would make an RBAC package a hard
     // dependency of this one.
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
 
     $plainAdmin = User::create(['name' => 'Plain admin']);

@@ -36,10 +36,10 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => JwtUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => JwtUser::class]);
     config()->set('auth.providers.users.model', JwtUser::class);
-    config()->set('impersonator.adapter', 'jwt');
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.adapter', 'jwt');
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
 
     $this->admin = JwtUser::create(['name' => 'Admin']);
     $this->target = JwtUser::create(['name' => 'Customer']);
@@ -97,7 +97,7 @@ it('carries the mode so a foreign resource server can enforce it', function (): 
 
 it('gives the token a short TTL independent of the app setting', function (): void {
     config()->set('jwt.ttl', 60 * 24);
-    config()->set('impersonator.adapters.jwt.ttl', 5);
+    config()->set('laranail.impersonator.adapters.jwt.ttl', 5);
 
     $outcome = Impersonator::enter($this->target);
     $claims = decodeClaims((string) $outcome->credential?->secret());
@@ -109,7 +109,7 @@ it('restores the application TTL after minting', function (): void {
     // `setTTL` is global state on the factory; leaving it changed would shorten every token
     // the application issues for the rest of the request.
     config()->set('jwt.ttl', 120);
-    config()->set('impersonator.adapters.jwt.ttl', 5);
+    config()->set('laranail.impersonator.adapters.jwt.ttl', 5);
 
     Impersonator::enter($this->target);
 

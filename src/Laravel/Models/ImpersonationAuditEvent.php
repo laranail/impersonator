@@ -41,14 +41,14 @@ class ImpersonationAuditEvent extends Model
 
     public function getTable(): string
     {
-        $table = config('impersonator.trail.table', 'impersonator_audit_events');
+        $table = config('laranail.impersonator.trail.table', 'impersonator_audit_events');
 
         return is_string($table) && $table !== '' ? $table : 'impersonator_audit_events';
     }
 
     public function getConnectionName(): ?string
     {
-        $connection = config('impersonator.audit.connection');
+        $connection = config('laranail.impersonator.audit.connection');
 
         return is_string($connection) && $connection !== '' ? $connection : parent::getConnectionName();
     }

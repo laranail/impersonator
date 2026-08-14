@@ -27,9 +27,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -82,11 +82,11 @@ it('runs the doctor without crashing on a deliberately broken install', function
     // The one case it has to handle well: somebody runs this *because* the install is broken. Tamper
     // evidence on with no key makes the audit store throw on construction, which used to take the
     // doctor down with it.
-    config()->set('impersonator.audit.tamper_evidence', true);
-    config()->set('impersonator.audit.hash_key', null);
-    config()->set('impersonator.targets.allowlist', ['ghost' => 'App\\Models\\NotInstalled']);
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api']);
+    config()->set('laranail.impersonator.audit.tamper_evidence', true);
+    config()->set('laranail.impersonator.audit.hash_key', null);
+    config()->set('laranail.impersonator.targets.allowlist', ['ghost' => 'App\\Models\\NotInstalled']);
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api']);
 
     // Non-zero is correct here — it found real failures. What matters is that it *reported* them.
     $this->artisan('laranail::impersonator.doctor')->assertFailed();
@@ -95,15 +95,15 @@ it('runs the doctor without crashing on a deliberately broken install', function
 it('never prints the audit hash key in the about panel', function (): void {
     $secret = 'sk-' . str_repeat('z', 60);
 
-    config()->set('impersonator.audit.tamper_evidence', true);
-    config()->set('impersonator.audit.hash_key', $secret);
+    config()->set('laranail.impersonator.audit.tamper_evidence', true);
+    config()->set('laranail.impersonator.audit.hash_key', $secret);
 
     $this->artisan('about')->assertSuccessful()->doesntExpectOutputToContain($secret);
 });
 
 it('verifies its own audit chain end to end', function (): void {
-    config()->set('impersonator.audit.tamper_evidence', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evidence', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     Impersonator::enter($this->target);
     Impersonator::leave();

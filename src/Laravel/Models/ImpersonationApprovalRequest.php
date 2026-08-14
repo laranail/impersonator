@@ -45,7 +45,7 @@ class ImpersonationApprovalRequest extends Model
 
     public function getTable(): string
     {
-        $table = config('impersonator.approval.table', 'impersonator_approval_requests');
+        $table = config('laranail.impersonator.approval.table', 'impersonator_approval_requests');
 
         return is_string($table) && $table !== '' ? $table : 'impersonator_approval_requests';
     }
@@ -55,7 +55,7 @@ class ImpersonationApprovalRequest extends Model
         // Shares the audit connection: an approval and the impersonation it authorised are read
         // together by anyone reconstructing what happened, and splitting them across connections
         // would make that join impossible.
-        $connection = config('impersonator.audit.connection');
+        $connection = config('laranail.impersonator.audit.connection');
 
         return is_string($connection) && $connection !== '' ? $connection : parent::getConnectionName();
     }
@@ -83,7 +83,7 @@ class ImpersonationApprovalRequest extends Model
      */
     public function prunable(): Builder
     {
-        $days = config('impersonator.approval.retention_days');
+        $days = config('laranail.impersonator.approval.retention_days');
 
         if (! is_numeric($days) || (int) $days <= 0) {
             return static::query()->whereRaw('1 = 0');

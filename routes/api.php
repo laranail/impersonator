@@ -21,9 +21,9 @@ use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api\ImpersonationCont
 | cannot drift.
 */
 
-Route::middleware(config('impersonator.api.middleware', ['api', 'auth:sanctum']))
-    ->prefix(config('impersonator.api.prefix', 'impersonator/api/v1'))
-    ->name(config('impersonator.api.name_prefix', 'impersonator.api.'))
+Route::middleware(config('laranail.impersonator.api.middleware', ['api', 'auth:sanctum']))
+    ->prefix(config('laranail.impersonator.api.prefix', 'impersonator/api/v1'))
+    ->name(config('laranail.impersonator.api.name_prefix', 'impersonator.api.'))
     ->group(function (): void {
         Route::post('impersonations', [ImpersonationController::class, 'store'])
             ->middleware('throttle:impersonator-api')

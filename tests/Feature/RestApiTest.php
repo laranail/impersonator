@@ -20,14 +20,14 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     // The API is off by default, so a suite testing it has to switch it on — which is the point.
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api']);
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api']);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -67,8 +67,8 @@ it('starts an impersonation and returns 201', function (): void {
 it('returns a pending handoff with an accept url for the token driver', function (): void {
     // A pending handoff has not impersonated anybody; a client treating it as live would show "now
     // impersonating" for a session that was never created.
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.base_domain', 'app.example.com');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $response = $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
@@ -219,7 +219,7 @@ it('rejects an unknown filter value rather than returning an empty page', functi
 });
 
 it('caps the page size rather than honouring an unbounded request', function (): void {
-    config()->set('impersonator.api.max_per_page', 5);
+    config()->set('laranail.impersonator.api.max_per_page', 5);
 
     $this->getJson(apiUrl('audits?per_page=1000'))->assertStatus(422);
     $this->getJson(apiUrl('audits?per_page=5'))->assertOk();
@@ -281,7 +281,7 @@ it('requires the audit permission to read the trail', function (): void {
 });
 
 it('throttles the api', function (): void {
-    config()->set('impersonator.rate_limiting.api.attempts', 2);
+    config()->set('laranail.impersonator.rate_limiting.api.attempts', 2);
 
     $payload = ['target_type' => 'user', 'target_id' => '99999'];
 

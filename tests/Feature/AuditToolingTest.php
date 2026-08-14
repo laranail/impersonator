@@ -28,9 +28,9 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 10);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 10);
 
     Route::middleware(['web', RecordImpersonationTrail::class])->group(function (): void {
         Route::get('/app/page', fn (): string => 'page')->name('page');
@@ -97,7 +97,7 @@ it('writes csv a standards-compliant reader can parse', function (): void {
     //
     // The `payload` column is JSON, so it is full of quotes and backslashes. This is the column
     // where it actually went wrong.
-    config()->set('impersonator.trail.record_payloads', true);
+    config()->set('laranail.impersonator.trail.record_payloads', true);
 
     $auditId = Impersonator::enter($this->target)->auditId();
     $this->post('/app/save', ['note' => 'C:\\Users\\admin', 'said' => 'say "hi"']);
@@ -179,8 +179,8 @@ it('writes no chain when tamper evidence is off', function (): void {
 });
 
 it('chains rows when tamper evidence is on', function (): void {
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     $first = Impersonator::enter($this->target)->auditId();
     Impersonator::leave();
@@ -197,15 +197,15 @@ it('chains rows when tamper evidence is on', function (): void {
 it('refuses to boot the chain without a key', function (): void {
     // A chain written with a key nobody recorded cannot be verified later, so silently deriving
     // one would produce an audit trail that only looks tamper-evident.
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', null);
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', null);
 
     expect(fn () => Impersonator::enter($this->target))->toThrow(InvalidArgumentException::class);
 });
 
 it('verifies an intact chain', function (): void {
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     Impersonator::enter($this->target);
     Impersonator::leave();
@@ -215,8 +215,8 @@ it('verifies an intact chain', function (): void {
 });
 
 it('detects an altered row', function (): void {
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     $auditId = Impersonator::enter($this->target, reason: 'Ticket #1')->auditId();
 
@@ -227,8 +227,8 @@ it('detects an altered row', function (): void {
 });
 
 it('detects a deleted row by the break it leaves in the chain', function (): void {
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     $first = Impersonator::enter($this->target)->auditId();
     Impersonator::leave();
@@ -240,12 +240,12 @@ it('detects a deleted row by the break it leaves in the chain', function (): voi
 });
 
 it('cannot be verified with a different key', function (): void {
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     Impersonator::enter($this->target);
 
-    config()->set('impersonator.audit.hash_key', str_repeat('z', 64));
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('z', 64));
 
     $this->artisan('laranail::impersonator.verify-audit')->assertFailed();
 });
@@ -262,8 +262,8 @@ it('skips rows written before tamper evidence was switched on', function (): voi
     Impersonator::enter($this->target)->auditId();
     Impersonator::leave();
 
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     Impersonator::enter($this->target);
 
@@ -273,8 +273,8 @@ it('skips rows written before tamper evidence was switched on', function (): voi
 // ── CLI enter ───────────────────────────────────────────────────────────────
 
 it('enters from the console and prints an accept URL', function (): void {
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.base_domain', 'app.example.com');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $this->artisan('laranail::impersonator.enter', [
         'user' => (string) $this->target->getKey(),
@@ -288,8 +288,8 @@ it('enters from the console and prints an accept URL', function (): void {
 
 it('records that the impersonation came from the console', function (): void {
     // Console-initiated impersonation warrants different scrutiny from one started through a UI.
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.base_domain', 'app.example.com');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $this->artisan('laranail::impersonator.enter', [
         'user' => (string) $this->target->getKey(),
@@ -301,8 +301,8 @@ it('records that the impersonation came from the console', function (): void {
 });
 
 it('warns that the printed URL is a live credential', function (): void {
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.base_domain', 'app.example.com');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $this->artisan('laranail::impersonator.enter', [
         'user' => (string) $this->target->getKey(),
@@ -311,7 +311,7 @@ it('warns that the printed URL is a live credential', function (): void {
 });
 
 it('says there is no URL for an in-process driver', function (): void {
-    config()->set('impersonator.driver', 'session');
+    config()->set('laranail.impersonator.driver', 'session');
 
     $this->artisan('laranail::impersonator.enter', [
         'user' => (string) $this->target->getKey(),
@@ -326,7 +326,7 @@ it('requires an operator so the audit row names a real person', function (): voi
 
 it('refuses an ambiguous bare id when several target types are registered', function (): void {
     // Guessing which type was meant could enter the wrong account entirely.
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => User::class,
         'staff' => RbacUser::class,
     ]);
@@ -339,8 +339,8 @@ it('refuses an ambiguous bare id when several target types are registered', func
 });
 
 it('accepts a qualified type:id', function (): void {
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.base_domain', 'app.example.com');
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $this->artisan('laranail::impersonator.enter', [
         'user' => 'user:' . $this->target->getKey(),
@@ -358,9 +358,9 @@ it('reports a refusal with its decision code', function (): void {
 // ── audit policy ────────────────────────────────────────────────────────────
 
 it('gates audit reads through the same policy the API uses', function (): void {
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.authorization.policy',
+    config()->set('laranail.impersonator.authorization.policy',
         RbacPolicy::class);
 
     $viewer = RbacUser::create(['name' => 'Viewer', 'permissions' => ['impersonator.audit.view']]);
@@ -380,9 +380,9 @@ it('gates audit reads through the same policy the API uses', function (): void {
 
 it('gates revocation separately from reading', function (): void {
     // An auditor who may read every impersonation has no business ending one.
-    config()->set('impersonator.targets.allowlist', ['user' => RbacUser::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => RbacUser::class]);
     config()->set('auth.providers.users.model', RbacUser::class);
-    config()->set('impersonator.authorization.policy',
+    config()->set('laranail.impersonator.authorization.policy',
         RbacPolicy::class);
 
     $reader = RbacUser::create(['name' => 'Reader', 'permissions' => ['impersonator.audit.view']]);

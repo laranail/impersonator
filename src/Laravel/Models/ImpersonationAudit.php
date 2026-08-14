@@ -56,14 +56,14 @@ class ImpersonationAudit extends Model
 
     public function getTable(): string
     {
-        $table = config('impersonator.audit.table', 'impersonator_audits');
+        $table = config('laranail.impersonator.audit.table', 'impersonator_audits');
 
         return is_string($table) && $table !== '' ? $table : 'impersonator_audits';
     }
 
     public function getConnectionName(): ?string
     {
-        $connection = config('impersonator.audit.connection');
+        $connection = config('laranail.impersonator.audit.connection');
 
         return is_string($connection) && $connection !== '' ? $connection : parent::getConnectionName();
     }
@@ -111,7 +111,7 @@ class ImpersonationAudit extends Model
     /** @return Builder<static> */
     public function prunable(): Builder
     {
-        $days = config('impersonator.audit.retention_days');
+        $days = config('laranail.impersonator.audit.retention_days');
 
         if (! is_numeric($days) || (int) $days <= 0) {
             return static::query()->whereRaw('1 = 0');

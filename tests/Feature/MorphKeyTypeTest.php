@@ -29,7 +29,7 @@ it('stores morph ids as strings by default', function (): void {
 });
 
 it('migrates every documented key type', function (string $keyType, array $expected): void {
-    config()->set('impersonator.morphs.key_type', $keyType);
+    config()->set('laranail.impersonator.morphs.key_type', $keyType);
 
     // Everything, via the harness helper rather than a list maintained here — a hand-written list is
     // what silently fell behind when a fifth table arrived. Forced, because this re-runs the migration

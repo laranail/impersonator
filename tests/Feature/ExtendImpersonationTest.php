@@ -31,10 +31,10 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
-    config()->set('impersonator.limits.max_active_per_impersonator', 5);
-    config()->set('impersonator.limits.state_cache.ttl', 0);
+    config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
+    config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = User::create(['name' => 'Admin']);
     $this->target = User::create(['name' => 'Customer']);
@@ -46,7 +46,7 @@ beforeEach(function (): void {
 it('defaults to a ten minute window', function (): void {
     // The published default. Asserted because it is a security posture, not a preference — a
     // silent bump back to an hour is exactly the regression worth catching.
-    expect(config('impersonator.limits.max_duration'))->toBe(10);
+    expect(config('laranail.impersonator.limits.max_duration'))->toBe(10);
 
     Impersonator::enter($this->target);
 
@@ -99,8 +99,8 @@ it('survives past the original deadline once extended', function (): void {
 });
 
 it('stops at the ceiling however many extensions are allowed', function (): void {
-    config()->set('impersonator.limits.extension.max', null);
-    config()->set('impersonator.limits.extension.max_total_duration', 25);
+    config()->set('laranail.impersonator.limits.extension.max', null);
+    config()->set('laranail.impersonator.limits.extension.max_total_duration', 25);
 
     Impersonator::enter($this->target);
 
@@ -121,8 +121,8 @@ it('stops at the ceiling however many extensions are allowed', function (): void
 });
 
 it('spends the allowance exactly once per extension', function (): void {
-    config()->set('impersonator.limits.extension.max', 2);
-    config()->set('impersonator.limits.extension.max_total_duration', null);
+    config()->set('laranail.impersonator.limits.extension.max', 2);
+    config()->set('laranail.impersonator.limits.extension.max_total_duration', null);
 
     Impersonator::enter($this->target);
 
@@ -158,7 +158,7 @@ it('refuses to outrun a revocation', function (): void {
 });
 
 it('refuses when extension is switched off', function (): void {
-    config()->set('impersonator.limits.extension.enabled', false);
+    config()->set('laranail.impersonator.limits.extension.enabled', false);
 
     Impersonator::enter($this->target);
 
@@ -181,7 +181,7 @@ it('dispatches an event carrying the new deadline and the count', function (): v
 });
 
 it('extends over HTTP and refuses with the decision code', function (): void {
-    config()->set('impersonator.limits.extension.max', 1);
+    config()->set('laranail.impersonator.limits.extension.max', 1);
 
     Impersonator::enter($this->target);
 
@@ -214,7 +214,7 @@ it('reports whether the button should render without spending anything', functio
 });
 
 it('holds the window shut until the final minutes when configured', function (): void {
-    config()->set('impersonator.limits.extension.within', 3);
+    config()->set('laranail.impersonator.limits.extension.within', 3);
 
     Impersonator::enter($this->target);
 
@@ -228,8 +228,8 @@ it('holds the window shut until the final minutes when configured', function ():
 it('leaves the audit hash chain verifiable after an extension', function (): void {
     // The property that makes an extendable window acceptable in an audited system: the expiry
     // is not among the chained facts, so moving it cannot forge or break tamper evidence.
-    config()->set('impersonator.audit.tamper_evidence', true);
-    config()->set('impersonator.audit.hash_key', str_repeat('k', 64));
+    config()->set('laranail.impersonator.audit.tamper_evidence', true);
+    config()->set('laranail.impersonator.audit.hash_key', str_repeat('k', 64));
 
     Impersonator::enter($this->target);
 

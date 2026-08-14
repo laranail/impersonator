@@ -20,7 +20,7 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
     config()->set('auth.providers.users.model', User::class);
 });
 
@@ -65,7 +65,7 @@ it('reports the resolved driver and adapter', function (): void {
 it('fails when the target allowlist is empty', function (): void {
     // Not a permissive default: an empty allowlist refuses every enter, with a message about the
     // target type that reads like a bug in the caller.
-    config()->set('impersonator.targets.allowlist', []);
+    config()->set('laranail.impersonator.targets.allowlist', []);
 
     doctor()
         ->expectsOutputToContain('allowlist is empty')
@@ -76,7 +76,7 @@ it('fails when an allowlisted class is not an installed model', function (): voi
     // The registry drops such an entry silently, so the doctor has to compare the raw config
     // against what resolved — iterating the registry would never see the broken entry, because
     // the broken entry is exactly the one that is missing.
-    config()->set('impersonator.targets.allowlist', ['ghost' => 'App\\Models\\Ghost']);
+    config()->set('laranail.impersonator.targets.allowlist', ['ghost' => 'App\\Models\\Ghost']);
 
     $run = doctorRun();
 
@@ -86,7 +86,7 @@ it('fails when an allowlisted class is not an installed model', function (): voi
 });
 
 it('fails when a configured guard is not defined', function (): void {
-    config()->set('impersonator.guards.target', 'nonexistent');
+    config()->set('laranail.impersonator.guards.target', 'nonexistent');
 
     doctor()
         ->expectsOutputToContain('not defined in config/auth.php')
@@ -94,7 +94,7 @@ it('fails when a configured guard is not defined', function (): void {
 });
 
 it('fails when the tables are missing', function (): void {
-    config()->set('impersonator.audit.table', 'impersonator_audits_gone');
+    config()->set('laranail.impersonator.audit.table', 'impersonator_audits_gone');
 
     $run = doctorRun();
 
@@ -130,8 +130,8 @@ it('fails when a boot operation degraded', function (): void {
 });
 
 it('fails when the api is exposed without an auth guard', function (): void {
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api']);
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api']);
 
     doctor()
         ->expectsOutputToContain('unauthenticated remote-control surface')
@@ -139,8 +139,8 @@ it('fails when the api is exposed without an auth guard', function (): void {
 });
 
 it('passes when the api is behind an auth guard', function (): void {
-    config()->set('impersonator.api.enabled', true);
-    config()->set('impersonator.api.middleware', ['api', 'auth:sanctum']);
+    config()->set('laranail.impersonator.api.enabled', true);
+    config()->set('laranail.impersonator.api.middleware', ['api', 'auth:sanctum']);
 
     doctor()->assertSuccessful();
 });
@@ -149,8 +149,8 @@ it('fails when tamper evidence is on without a key', function (): void {
     // An application in this state boots cleanly and throws on its first impersonation, so the
     // doctor is the only thing that will say so before a user does. It reports rather than crashes
     // because the check runs before anything resolves the audit store — which is what throws.
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', null);
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', null);
 
     doctor()
         ->expectsOutputToContain('hash_key is unset')
@@ -160,7 +160,7 @@ it('fails when tamper evidence is on without a key', function (): void {
 // ── warnings that must not fail the command ─────────────────────────────────
 
 it('warns but does not fail on an unlimited duration', function (): void {
-    config()->set('impersonator.limits.max_duration', null);
+    config()->set('laranail.impersonator.limits.max_duration', null);
 
     doctor()
         ->expectsOutputToContain('unlimited')
@@ -168,8 +168,8 @@ it('warns but does not fail on an unlimited duration', function (): void {
 });
 
 it('warns about a short hash key without failing', function (): void {
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', 'too-short');
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', 'too-short');
 
     doctor()
         ->expectsOutputToContain('Use at least 32')
@@ -178,7 +178,7 @@ it('warns about a short hash key without failing', function (): void {
 
 it('warns when the master switch is off', function (): void {
     // Off is a deliberate incident posture, not a fault — and revocation still works.
-    config()->set('impersonator.enabled', false);
+    config()->set('laranail.impersonator.enabled', false);
 
     doctor()
         ->expectsOutputToContain('every enter is refused')
@@ -186,8 +186,8 @@ it('warns when the master switch is off', function (): void {
 });
 
 it('warns when the token driver has no base domain', function (): void {
-    config()->set('impersonator.driver', 'token');
-    config()->set('impersonator.urls.base_domain', null);
+    config()->set('laranail.impersonator.driver', 'token');
+    config()->set('laranail.impersonator.urls.base_domain', null);
 
     doctor()
         ->expectsOutputToContain('base_domain is unset')
@@ -195,7 +195,7 @@ it('warns when the token driver has no base domain', function (): void {
 });
 
 it('warns when a configured gate ability is not defined', function (): void {
-    config()->set('impersonator.authorization.gate_ability', 'impersonate-somehow');
+    config()->set('laranail.impersonator.authorization.gate_ability', 'impersonate-somehow');
 
     doctor()
         ->expectsOutputToContain('no such ability is defined')
@@ -221,7 +221,7 @@ it('warns that a cookie session cannot be killed out of band', function (): void
 it('names the enter-plus-mode permission trap when the rbac policy is active', function (): void {
     // The single most common way an install is quietly broken: an operator holding only the enter
     // permission can impersonate nothing, and the error they get names the mode.
-    config()->set('impersonator.authorization.policy', RbacPolicy::class);
+    config()->set('laranail.impersonator.authorization.policy', RbacPolicy::class);
 
     $run = doctorRun();
 
@@ -240,8 +240,8 @@ it('reports the base policy as allowing any registered mode', function (): void 
 });
 
 it('warns about approval without approver notifications', function (): void {
-    config()->set('impersonator.approval.require', true);
-    config()->set('impersonator.notifications.approvals.enabled', false);
+    config()->set('laranail.impersonator.approval.require', true);
+    config()->set('laranail.impersonator.notifications.approvals.enabled', false);
 
     doctor()
         ->expectsOutputToContain('approver notifications are off')
@@ -257,7 +257,7 @@ it('reports no conflicting impersonation package', function (): void {
 it('warns about a conflicting package an application declared itself', function (): void {
     // The list is config-driven so an application can add whatever it knows conflicts — a Filament
     // plugin, an internal package — without waiting on a release here.
-    config()->set('impersonator.doctor.conflicting_packages', [
+    config()->set('laranail.impersonator.doctor.conflicting_packages', [
         User::class => 'acme/legacy-impersonate',
     ]);
 
@@ -279,8 +279,8 @@ it('adds an about panel', function (): void {
 
 it('never puts the audit hash key in the about output', function (): void {
     // `about` output is what people paste into bug reports.
-    config()->set('impersonator.audit.tamper_evident', true);
-    config()->set('impersonator.audit.hash_key', 'super-secret-key-that-must-not-leak');
+    config()->set('laranail.impersonator.audit.tamper_evident', true);
+    config()->set('laranail.impersonator.audit.hash_key', 'super-secret-key-that-must-not-leak');
 
     $this->artisan('about --only=impersonator')->assertSuccessful();
 

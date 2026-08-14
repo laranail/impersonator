@@ -20,7 +20,7 @@ beforeEach(function (): void {
         $table->softDeletes();
     });
 
-    config()->set('impersonator.targets.allowlist', ['user' => User::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['user' => User::class]);
 });
 
 function resolver(): IdentityResolver
@@ -70,14 +70,14 @@ it('accepts either the alias or the class when checking the allowlist', function
 });
 
 it('denies every target when the allowlist is empty', function (): void {
-    config()->set('impersonator.targets.allowlist', []);
+    config()->set('laranail.impersonator.targets.allowlist', []);
 
     expect(resolver()->allowlist())->toBe([])
         ->and(resolver()->isAllowlisted(User::class))->toBeFalse();
 });
 
 it('drops allowlist entries that are not installed Eloquent models', function (): void {
-    config()->set('impersonator.targets.allowlist', [
+    config()->set('laranail.impersonator.targets.allowlist', [
         'user' => User::class,
         'ghost' => 'App\\Models\\Removed',
         'plain' => NotAModel::class,
@@ -87,21 +87,21 @@ it('drops allowlist entries that are not installed Eloquent models', function ()
 });
 
 it('survives an allowlist that is not an array', function (): void {
-    config()->set('impersonator.targets.allowlist', 'nonsense');
+    config()->set('laranail.impersonator.targets.allowlist', 'nonsense');
 
     expect(resolver()->allowlist())->toBe([]);
 });
 
 it('prefers a globally enforced morph alias over the class name', function (): void {
     // Otherwise one type ends up with two spellings across the audit rows.
-    config()->set('impersonator.targets.allowlist', [Secret::class]);
+    config()->set('laranail.impersonator.targets.allowlist', [Secret::class]);
     Relation::morphMap(['vault' => Secret::class]);
 
     expect(resolver()->aliasFor(Secret::class))->toBe('vault');
 });
 
 it('falls back to the class name when no alias is registered', function (): void {
-    config()->set('impersonator.targets.allowlist', []);
+    config()->set('laranail.impersonator.targets.allowlist', []);
     Relation::morphMap([], merge: false);
 
     expect(resolver()->aliasFor(Secret::class))->toBe(Secret::class);
@@ -133,7 +133,7 @@ it('resolves an operator whose type is not in the target allowlist', function ()
     // because the target arrives as request input. An operator's identity comes from the
     // authenticated session, so an Admin model that enters as User must not have to be
     // listed among the accounts that can be impersonated — that would be backwards.
-    config()->set('impersonator.targets.allowlist', ['other' => Secret::class]);
+    config()->set('laranail.impersonator.targets.allowlist', ['other' => Secret::class]);
 
     $operator = User::create(['name' => 'Operator']);
     $identity = resolver()->fromUser($operator);
