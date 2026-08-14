@@ -78,11 +78,11 @@ alias:
 
 | Alias | Namespaced |
 |---|---|
-| `<x-impersonation-banner />` | `<x-impersonator::impersonation-banner />` |
-| `<x-impersonate-button />` | `<x-impersonator::impersonate-button />` |
-| `<x-impersonation-leave-button />` | `<x-impersonator::leave-impersonation-button />` |
-| `<x-impersonation-badge />` | `<x-impersonator::impersonation-badge />` |
-| `<x-when-impersonating>` | `<x-impersonator::when-impersonating>` |
+| `<x-impersonation-banner />` | `<x-laranail-impersonator::impersonation-banner />` |
+| `<x-impersonate-button />` | `<x-laranail-impersonator::impersonate-button />` |
+| `<x-impersonation-leave-button />` | `<x-laranail-impersonator::leave-impersonation-button />` |
+| `<x-impersonation-badge />` | `<x-laranail-impersonator::impersonation-badge />` |
+| `<x-when-impersonating>` | `<x-laranail-impersonator::when-impersonating>` |
 
 Note the leave button: its class is `LeaveImpersonationButton`, so the namespaced tag reads
 `leave-impersonation-button` while the alias reads `impersonation-leave-button`. The alias is the

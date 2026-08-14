@@ -39,17 +39,17 @@ class ApprovalRequestedNotification extends Notification implements ShouldQueue
         $appName = is_string($name = config('app.name')) ? $name : 'Application';
 
         return (new MailMessage)
-            ->subject(__('impersonator::notifications.approval.requested.subject', ['app' => $appName]))
-            ->line(__('impersonator::notifications.approval.requested.line'))
-            ->line(__('impersonator::notifications.fields.operator', ['value' => $this->request->requester->label ?? $this->request->requester->key()]))
-            ->line(__('impersonator::notifications.fields.target', ['value' => $this->request->target->label ?? $this->request->target->key()]))
-            ->line(__('impersonator::notifications.fields.mode', ['value' => $this->request->mode->name]))
-            ->line(__('impersonator::notifications.fields.reason', ['value' => $this->request->reason ?? __('impersonator::notifications.fields.none_given')]))
-            ->line(__('impersonator::notifications.fields.request_id', ['value' => $this->request->id]))
+            ->subject(__('laranail-impersonator::notifications.approval.requested.subject', ['app' => $appName]))
+            ->line(__('laranail-impersonator::notifications.approval.requested.line'))
+            ->line(__('laranail-impersonator::notifications.fields.operator', ['value' => $this->request->requester->label ?? $this->request->requester->key()]))
+            ->line(__('laranail-impersonator::notifications.fields.target', ['value' => $this->request->target->label ?? $this->request->target->key()]))
+            ->line(__('laranail-impersonator::notifications.fields.mode', ['value' => $this->request->mode->name]))
+            ->line(__('laranail-impersonator::notifications.fields.reason', ['value' => $this->request->reason ?? __('laranail-impersonator::notifications.fields.none_given')]))
+            ->line(__('laranail-impersonator::notifications.fields.request_id', ['value' => $this->request->id]))
             // An absolute timestamp, deliberately not localised into prose: an approver acting on a
             // deadline needs it unambiguous, and the timezone abbreviation is the part that matters.
-            ->line(__('impersonator::notifications.fields.expires', ['value' => $this->request->expiresAt->format('Y-m-d H:i:s T')]))
-            ->line(__('impersonator::notifications.approval.requested.action'));
+            ->line(__('laranail-impersonator::notifications.fields.expires', ['value' => $this->request->expiresAt->format('Y-m-d H:i:s T')]))
+            ->line(__('laranail-impersonator::notifications.approval.requested.action'));
     }
 
     /** @return array<string, mixed> */

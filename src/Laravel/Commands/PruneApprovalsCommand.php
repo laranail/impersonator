@@ -58,7 +58,7 @@ class PruneApprovalsCommand extends Command
         // `trans_choice`, not a `request%s` splice. Appending an `s` is only right in a language that
         // pluralises like English, and the shape of a counted sentence is exactly what a locale changes.
         $this->components->info(trans_choice(
-            'impersonator::console.prune_approvals.expired',
+            'laranail-impersonator::console.prune_approvals.expired',
             count($expired),
             ['count' => count($expired)],
         ));

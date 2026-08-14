@@ -571,8 +571,8 @@ class ImpersonatorServiceProvider extends ServiceProvider
     /**
      * Load the package's own lines, and let an application publish over them.
      *
-     * Both namespaces, which is what `loadTranslationsFrom` gives: `impersonator::decisions.x` for
-     * PHP arrays and `impersonator::` JSON lines if a host adds any. Published lines in
+     * Both namespaces, which is what `loadTranslationsFrom` gives: `laranail-impersonator::decisions.x` for
+     * PHP arrays and `laranail-impersonator::` JSON lines if a host adds any. Published lines in
      * `lang/vendor/impersonator` win over these automatically — Laravel checks the application path
      * first — so overriding one sentence does not mean forking the file.
      *
@@ -582,12 +582,12 @@ class ImpersonatorServiceProvider extends ServiceProvider
      */
     protected function registerTranslations(): void
     {
-        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'impersonator');
+        $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'laranail-impersonator');
     }
 
     protected function registerViews(): void
     {
-        $this->loadViewsFrom($this->packagePath('resources/views'), 'impersonator');
+        $this->loadViewsFrom($this->packagePath('resources/views'), 'laranail-impersonator');
     }
 
     /**
@@ -715,9 +715,9 @@ class ImpersonatorServiceProvider extends ServiceProvider
         Blade::component('impersonation-badge', ImpersonationBadge::class);
         Blade::component('when-impersonating', WhenImpersonating::class);
 
-        // Also exposed under a namespace, so `<x-impersonator::banner />` works for
+        // Also exposed under a namespace, so `<x-laranail-impersonator::banner />` works for
         // teams that prefer namespaced components or already own these short names.
-        Blade::componentNamespace('Simtabi\\Laranail\\Impersonator\\Laravel\\View\\Components', 'impersonator');
+        Blade::componentNamespace('Simtabi\\Laranail\\Impersonator\\Laravel\\View\\Components', 'laranail-impersonator');
     }
 
     /**

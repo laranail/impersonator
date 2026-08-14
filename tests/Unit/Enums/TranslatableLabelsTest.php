@@ -60,14 +60,14 @@ it('pins the translation slug rather than deriving it', function (): void {
     expect(EndReason::translationSlug())->toBe('end_reason')
         ->and(ApprovalState::translationSlug())->toBe('approval_state')
         ->and(CredentialType::translationSlug())->toBe('credential_type')
-        ->and(EndReason::translationNamespace())->toBe('impersonator');
+        ->and(EndReason::translationNamespace())->toBe('laranail-impersonator');
 });
 
 it('builds a translation key an application can actually target', function (): void {
     // Published shape: an application localising these needs to know where to put the keys.
-    expect(EndReason::translationKey('revoked'))->toBe('impersonator::enums.end_reason.revoked')
+    expect(EndReason::translationKey('revoked'))->toBe('laranail-impersonator::enums.end_reason.revoked')
         ->and(ApprovalState::translationKey('pending', 'description'))
-        ->toBe('impersonator::enums.approval_state.pending.description');
+        ->toBe('laranail-impersonator::enums.approval_state.pending.description');
 });
 
 it('keeps isInvoluntary in its fail-safe open form', function (): void {

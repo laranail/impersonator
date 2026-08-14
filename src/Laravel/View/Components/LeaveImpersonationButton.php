@@ -43,9 +43,9 @@ class LeaveImpersonationButton extends Component
         // Assigned onto the property, not just into the view data. Blade exposes a component's public
         // properties to its template, and that exposure *shadows* same-named render data — so a null
         // property rendered an empty label while the data array held the right one.
-        $this->label ??= (string) __('impersonator::components.leave');
+        $this->label ??= (string) __('laranail-impersonator::components.leave');
 
-        return $this->renderView('impersonator::components.leave-button', [
+        return $this->renderView('laranail-impersonator::components.leave-button', [
             'url' => app(BannerPresenter::class)->leaveUrl(),
             'label' => $this->label,
         ]);

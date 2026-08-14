@@ -51,7 +51,7 @@ class DoctorCommand extends Command
 
     public function handle(Container $container): int
     {
-        $this->components->info(__('impersonator::console.doctor.heading'));
+        $this->components->info(__('laranail-impersonator::console.doctor.heading'));
 
         $failures = 0;
         $warnings = 0;
@@ -70,12 +70,12 @@ class DoctorCommand extends Command
         if ($failures > 0) {
             // Counted on failures, since that is the number the sentence turns on.
             $this->components->error(trans_choice(
-                'impersonator::console.doctor.failed',
+                'laranail-impersonator::console.doctor.failed',
                 $failures,
                 [
                     'failures' => $failures,
                     'warnings' => trans_choice(
-                        'impersonator::console.doctor.warning_count',
+                        'laranail-impersonator::console.doctor.warning_count',
                         $warnings,
                         ['count' => $warnings],
                     ),
@@ -90,11 +90,11 @@ class DoctorCommand extends Command
         // exits non-zero for a deliberate decision is one teams stop running.
         $warnings > 0
             ? $this->components->warn(trans_choice(
-                'impersonator::console.doctor.warnings',
+                'laranail-impersonator::console.doctor.warnings',
                 $warnings,
                 ['count' => $warnings],
             ))
-            : $this->components->info(__('impersonator::console.doctor.clean'));
+            : $this->components->info(__('laranail-impersonator::console.doctor.clean'));
 
         return self::SUCCESS;
     }
@@ -121,7 +121,7 @@ class DoctorCommand extends Command
             if (! $check instanceof Check) {
                 return [
                     class_basename($class),
-                    DoctorResult::fail(__('impersonator::console.doctor.wrong_type', [
+                    DoctorResult::fail(__('laranail-impersonator::console.doctor.wrong_type', [
                         'type' => get_debug_type($check),
                         'expected' => Check::class,
                     ])),
@@ -132,7 +132,7 @@ class DoctorCommand extends Command
         } catch (Throwable $e) {
             return [
                 class_basename($class),
-                DoctorResult::fail(__('impersonator::console.doctor.check_failed', ['message' => $e->getMessage()])),
+                DoctorResult::fail(__('laranail-impersonator::console.doctor.check_failed', ['message' => $e->getMessage()])),
             ];
         }
     }

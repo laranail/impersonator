@@ -37,7 +37,7 @@ class WhenImpersonating extends Component
             return '';
         }
 
-        return $this->renderView('impersonator::components.slot', ['impersonation' => $session]);
+        return $this->renderView('laranail-impersonator::components.slot', ['impersonation' => $session]);
     }
 
     /**

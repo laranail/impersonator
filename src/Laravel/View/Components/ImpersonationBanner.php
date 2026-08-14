@@ -39,7 +39,7 @@ class ImpersonationBanner extends Component
             return '';
         }
 
-        return $this->renderView('impersonator::banner', [
+        return $this->renderView('laranail-impersonator::banner', [
             ...$data,
             'theme' => $this->theme ?? $data['theme'],
             'position' => $this->position ?? $data['position'],

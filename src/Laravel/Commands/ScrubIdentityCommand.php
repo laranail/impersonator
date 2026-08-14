@@ -48,7 +48,7 @@ class ScrubIdentityCommand extends Command
         $reference = is_string($argument) ? $argument : '';
 
         if (! str_contains($reference, ':')) {
-            $this->components->error(__('impersonator::console.scrub_identity.malformed'));
+            $this->components->error(__('laranail-impersonator::console.scrub_identity.malformed'));
 
             return self::FAILURE;
         }
@@ -68,14 +68,14 @@ class ScrubIdentityCommand extends Command
         $matched = $audits->count();
 
         if ($matched === 0) {
-            $this->components->info(__('impersonator::console.scrub_identity.no_rows'));
+            $this->components->info(__('laranail-impersonator::console.scrub_identity.no_rows'));
 
             return self::SUCCESS;
         }
 
         if ($dryRun) {
             $this->components->warn(trans_choice(
-                'impersonator::console.scrub_identity.dry_run',
+                'laranail-impersonator::console.scrub_identity.dry_run',
                 $matched,
                 ['count' => $matched],
             ));
@@ -97,7 +97,7 @@ class ScrubIdentityCommand extends Command
             ->update(['target_label' => null]);
 
         $this->components->info(trans_choice(
-            'impersonator::console.scrub_identity.scrubbed',
+            'laranail-impersonator::console.scrub_identity.scrubbed',
             $matched,
             ['count' => $matched],
         ));
@@ -116,7 +116,7 @@ class ScrubIdentityCommand extends Command
             ->count();
 
         $this->components->info(trans_choice(
-            'impersonator::console.scrub_identity.approvals',
+            'laranail-impersonator::console.scrub_identity.approvals',
             $approvals,
             ['count' => $approvals],
         ));

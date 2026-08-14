@@ -28,9 +28,9 @@ use Simtabi\Laranail\Impersonator\Core\Values\Decision;
  *
  * So the lookup runs specific → general → literal:
  *
- *   1. `impersonator::decisions.{code}.{detail}` when the decision carries a `detail` context key
- *   2. `impersonator::decisions.{code}` — for a code whose line is a plain string
- *   3. `impersonator::decisions.{code}.default` — for a code whose lines are a group
+ *   1. `laranail-impersonator::decisions.{code}.{detail}` when the decision carries a `detail` context key
+ *   2. `laranail-impersonator::decisions.{code}` — for a code whose line is a plain string
+ *   3. `laranail-impersonator::decisions.{code}.default` — for a code whose lines are a group
  *   4. the English literal Core already built
  *
  * The last step is what makes this safe to adopt incrementally: a code with no key yet renders exactly
@@ -97,14 +97,14 @@ final readonly class MessageCatalog
      * Resolve specific → general → literal.
      *
      * `has()` before `get()` throughout, because Laravel's translator returns the *key* when it finds
-     * nothing. Without the guard a missing key renders as `impersonator::decisions.target_busy` in a
+     * nothing. Without the guard a missing key renders as `laranail-impersonator::decisions.target_busy` in a
      * user's browser, which is worse than the untranslated English it replaced.
      *
      * @param array<string, mixed> $replace
      */
     private function lookup(string $key, ?string $detail, string $fallback, array $replace): string
     {
-        $namespaced = 'impersonator::' . $key;
+        $namespaced = 'laranail-impersonator::' . $key;
 
         // `.default` last, so a code whose lines are a group still resolves when the refusing site set
         // no discriminator — a group lookup returns an array, which is not a usable message.

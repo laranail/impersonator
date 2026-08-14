@@ -36,7 +36,7 @@ class ImpersonationBadge extends Component
             return '';
         }
 
-        return $this->renderView('impersonator::components.badge', [
+        return $this->renderView('laranail-impersonator::components.badge', [
             'mode' => $session->mode->name,
             'modeName' => $presenter->modeName($session->mode->name, short: true),
             'description' => $manager->modes()->descriptions()[$session->mode->name] ?? null,

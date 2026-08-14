@@ -88,7 +88,7 @@ class VerifyAuditCommand extends Command
         }
 
         $this->components->info(trans_choice(
-            'impersonator::console.verify_audit.intact',
+            'laranail-impersonator::console.verify_audit.intact',
             $checked,
             ['count' => $checked],
         ));

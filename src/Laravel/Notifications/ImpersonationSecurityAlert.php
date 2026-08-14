@@ -41,16 +41,16 @@ class ImpersonationSecurityAlert extends Notification implements ShouldQueue
         $appName = is_string($name = config('app.name')) ? $name : 'Application';
 
         return (new MailMessage)
-            ->subject(__('impersonator::notifications.security.subject', [
+            ->subject(__('laranail-impersonator::notifications.security.subject', [
                 'app' => $appName,
                 'summary' => $this->headline(),
             ]))
             ->line($this->headline())
-            ->line(__('impersonator::notifications.fields.operator', ['value' => $this->session->impersonator->label ?? $this->session->impersonator->key()]))
-            ->line(__('impersonator::notifications.fields.target', ['value' => $this->session->target->label ?? $this->session->target->key()]))
-            ->line(__('impersonator::notifications.fields.mode', ['value' => $this->session->mode->name]))
-            ->line(__('impersonator::notifications.fields.reason', ['value' => $this->session->reason ?? __('impersonator::notifications.fields.none_given')]))
-            ->line(__('impersonator::notifications.fields.audit_id', ['value' => $this->session->auditId]));
+            ->line(__('laranail-impersonator::notifications.fields.operator', ['value' => $this->session->impersonator->label ?? $this->session->impersonator->key()]))
+            ->line(__('laranail-impersonator::notifications.fields.target', ['value' => $this->session->target->label ?? $this->session->target->key()]))
+            ->line(__('laranail-impersonator::notifications.fields.mode', ['value' => $this->session->mode->name]))
+            ->line(__('laranail-impersonator::notifications.fields.reason', ['value' => $this->session->reason ?? __('laranail-impersonator::notifications.fields.none_given')]))
+            ->line(__('laranail-impersonator::notifications.fields.audit_id', ['value' => $this->session->auditId]));
     }
 
     /** @return array<string, mixed> */
@@ -68,10 +68,10 @@ class ImpersonationSecurityAlert extends Notification implements ShouldQueue
     private function headline(): string
     {
         return match ($this->trigger) {
-            'revoked' => (string) __('impersonator::notifications.security.summary.revoked'),
-            'full_mode_enter' => (string) __('impersonator::notifications.security.summary.full_mode_enter'),
-            'expired' => (string) __('impersonator::notifications.security.summary.expired'),
-            default => (string) __('impersonator::notifications.security.summary.default'),
+            'revoked' => (string) __('laranail-impersonator::notifications.security.summary.revoked'),
+            'full_mode_enter' => (string) __('laranail-impersonator::notifications.security.summary.full_mode_enter'),
+            'expired' => (string) __('laranail-impersonator::notifications.security.summary.expired'),
+            default => (string) __('laranail-impersonator::notifications.security.summary.default'),
         };
     }
 }

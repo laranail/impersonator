@@ -56,7 +56,7 @@ it('is also reachable under the namespaced form', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    expect(Blade::render('<x-impersonator::impersonation-banner />'))->toContain('impersonator-banner');
+    expect(Blade::render('<x-laranail-impersonator::impersonation-banner />'))->toContain('impersonator-banner');
 });
 
 // ── impersonate button ──────────────────────────────────────────────────────
@@ -146,7 +146,7 @@ it('resolves component labels at render time and lets a tag override them', func
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    app('translator')->addLines(['components.leave' => 'Quitter'], 'en', 'impersonator');
+    app('translator')->addLines(['components.leave' => 'Quitter'], 'en', 'laranail-impersonator');
 
     expect(Blade::render('<x-impersonation-leave-button />'))->toContain('Quitter')
         ->and(Blade::render('<x-impersonation-leave-button label="Back to admin" />'))
@@ -213,9 +213,9 @@ it('renders every component under both its alias and its namespaced name', funct
     Impersonator::enter($this->target);
 
     $pairs = [
-        '<x-impersonation-banner />' => '<x-impersonator::impersonation-banner />',
-        '<x-impersonation-badge />' => '<x-impersonator::impersonation-badge />',
-        '<x-impersonation-leave-button />' => '<x-impersonator::leave-impersonation-button />',
+        '<x-impersonation-banner />' => '<x-laranail-impersonator::impersonation-banner />',
+        '<x-impersonation-badge />' => '<x-laranail-impersonator::impersonation-badge />',
+        '<x-impersonation-leave-button />' => '<x-laranail-impersonator::leave-impersonation-button />',
     ];
 
     foreach ($pairs as $alias => $namespaced) {
@@ -223,7 +223,7 @@ it('renders every component under both its alias and its namespaced name', funct
             ->and(Blade::render($namespaced))->toBe(Blade::render($alias));
     }
 
-    expect(Blade::render('<x-impersonator::when-impersonating>YES</x-impersonator::when-impersonating>'))
+    expect(Blade::render('<x-laranail-impersonator::when-impersonating>YES</x-laranail-impersonator::when-impersonating>'))
         ->toContain('YES');
 });
 
@@ -232,7 +232,7 @@ it('renders the impersonate button under both names', function (): void {
     Auth::guard('web')->setUser($this->admin);
 
     $alias = Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->target]);
-    $namespaced = Blade::render('<x-impersonator::impersonate-button :user="$user" />', ['user' => $this->target]);
+    $namespaced = Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" />', ['user' => $this->target]);
 
     expect($alias)->not->toBe('')
         ->and($namespaced)->toBe($alias);

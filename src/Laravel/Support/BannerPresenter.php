@@ -42,7 +42,7 @@ final readonly class BannerPresenter
     {
         $data = $this->data();
 
-        return $data === null ? '' : $this->views->make('impersonator::banner', $data)->render();
+        return $data === null ? '' : $this->views->make('laranail-impersonator::banner', $data)->render();
     }
 
     /**

@@ -70,9 +70,9 @@ class EnterImpersonationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'target_type.in' => __('impersonator::validation.target_type.in'),
-            'mode.in' => __('impersonator::validation.mode.in'),
-            'guard.in' => __('impersonator::validation.guard.in'),
+            'target_type.in' => __('laranail-impersonator::validation.target_type.in'),
+            'mode.in' => __('laranail-impersonator::validation.mode.in'),
+            'guard.in' => __('laranail-impersonator::validation.guard.in'),
         ];
     }
 

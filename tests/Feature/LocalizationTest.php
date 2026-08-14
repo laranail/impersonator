@@ -19,7 +19,7 @@ use Simtabi\Laranail\Impersonator\Laravel\Support\MessageCatalog;
 | the literal for a translation when one exists. Two properties this file defends above all:
 |
 |  - **the code never moves** — it is what an API consumer branches on;
-|  - **a missing key degrades to English**, never to a blank or a raw `impersonator::…` string in
+|  - **a missing key degrades to English**, never to a blank or a raw `laranail-impersonator::…` string in
 |    somebody's browser.
 */
 
@@ -29,7 +29,7 @@ function catalog(): MessageCatalog
 }
 
 it('translates a refusal while leaving its code alone', function (): void {
-    app('translator')->addLines(['decisions.target_busy' => 'Quelqu\'un d\'autre utilise ce compte.'], 'en', 'impersonator');
+    app('translator')->addLines(['decisions.target_busy' => 'Quelqu\'un d\'autre utilise ce compte.'], 'en', 'laranail-impersonator');
 
     $decision = Decision::deny(Decision::TARGET_BUSY, 'Somebody else is already impersonating that account.');
 
@@ -46,11 +46,11 @@ it('falls back to the English literal when no key exists', function (): void {
 
 it('never renders a raw translation key', function (): void {
     // Laravel's translator returns the key when it finds nothing, so a missing key without the
-    // `has()` guard shows `impersonator::decisions.x` to a user — worse than the English it replaced.
+    // `has()` guard shows `laranail-impersonator::decisions.x` to a user — worse than the English it replaced.
     foreach (['target_busy', 'nonexistent_code', 'session_terminated'] as $code) {
         $message = catalog()->forDecision(Decision::deny($code, 'Fallback sentence.'));
 
-        expect($message)->not->toContain('impersonator::')
+        expect($message)->not->toContain('laranail-impersonator::')
             ->and($message)->not->toBe($code);
     }
 });
@@ -97,7 +97,7 @@ it('selects a plural form rather than printing both', function (): void {
 });
 
 it('drops non-scalar context rather than printing Array', function (): void {
-    app('translator')->addLines(['decisions.protected_role' => 'Blocked by :roles.'], 'en', 'impersonator');
+    app('translator')->addLines(['decisions.protected_role' => 'Blocked by :roles.'], 'en', 'laranail-impersonator');
 
     $decision = Decision::deny(Decision::PROTECTED_ROLE, 'Fallback.', ['roles' => ['admin', 'owner']]);
 
@@ -154,7 +154,7 @@ it('resolves every shipped line through the loaded namespace', function (): void
     // silently fails — and per file rather than once, because a new file is exactly what gets added
     // without checking.
     foreach (['decisions', 'exceptions', 'modes', 'banner', 'console', 'notifications', 'validation', 'components'] as $file) {
-        expect(app('translator')->has('impersonator::' . $file . '.' . array_key_first(
+        expect(app('translator')->has('laranail-impersonator::' . $file . '.' . array_key_first(
             require dirname(__DIR__, 2) . '/resources/lang/en/' . $file . '.php',
         )))->toBeTrue();
     }
@@ -163,13 +163,13 @@ it('resolves every shipped line through the loaded namespace', function (): void
 it('counts console summaries with a plural form rather than a spliced s', function (): void {
     // `row%s` is only correct in a language that pluralises like English, and wrong even in English
     // for an irregular noun. Asserted at both boundaries, since off-by-one is the whole risk.
-    expect(trans_choice('impersonator::console.verify_audit.intact', 1, ['count' => 1]))
+    expect(trans_choice('laranail-impersonator::console.verify_audit.intact', 1, ['count' => 1]))
         ->toBe('1 audit row verified. The chain is intact.')
-        ->and(trans_choice('impersonator::console.verify_audit.intact', 4, ['count' => 4]))
+        ->and(trans_choice('laranail-impersonator::console.verify_audit.intact', 4, ['count' => 4]))
         ->toBe('4 audit rows verified. The chain is intact.')
-        ->and(trans_choice('impersonator::console.prune_tokens.pruned', 1, ['count' => 1]))
+        ->and(trans_choice('laranail-impersonator::console.prune_tokens.pruned', 1, ['count' => 1]))
         ->toBe('1 impersonation handoff token pruned.')
-        ->and(trans_choice('impersonator::console.prune_approvals.expired', 0, ['count' => 0]))
+        ->and(trans_choice('laranail-impersonator::console.prune_approvals.expired', 0, ['count' => 0]))
         ->toBe('0 impersonation approval requests expired.');
 });
 
@@ -179,7 +179,7 @@ it('gives each approval outcome a whole subject rather than splicing an adjectiv
     $subjects = [];
 
     foreach (['approved', 'denied', 'expired'] as $outcome) {
-        $subjects[] = (string) __('impersonator::notifications.approval.decided.subject_' . $outcome, ['app' => 'Acme']);
+        $subjects[] = (string) __('laranail-impersonator::notifications.approval.decided.subject_' . $outcome, ['app' => 'Acme']);
     }
 
     expect(array_unique($subjects))->toHaveCount(3);
@@ -228,8 +228,8 @@ it('references no translation key that does not exist', function (): void {
     // The other half of the product-demo-mode bug: a `__()` call naming a file, or a nesting, that was
     // never shipped. Laravel renders the raw key for those and nothing fails.
     //
-    // Scoped to actual translation calls rather than every `impersonator::` literal, because Laravel
-    // shares the `namespace::` syntax between lang keys and **view** names — `impersonator::components.badge`
+    // Scoped to actual translation calls rather than every `laranail-impersonator::` literal, because Laravel
+    // shares the `namespace::` syntax between lang keys and **view** names — `laranail-impersonator::components.badge`
     // is a Blade view, and a sweep that could not tell the two apart reported it as a missing line.
     $keys = [];
 
@@ -239,7 +239,7 @@ it('references no translation key that does not exist', function (): void {
         }
 
         preg_match_all(
-            "/(?:__|trans|trans_choice|Lang::has|Lang::get)\\(\\s*'impersonator::([a-z_]+\\.[a-z_.]+)'/",
+            "/(?:__|trans|trans_choice|Lang::has|Lang::get)\\(\\s*'laranail-impersonator::([a-z_]+\\.[a-z_.]+)'/",
             (string) file_get_contents($file->getPathname()),
             $m,
         );
@@ -258,7 +258,7 @@ it('references no translation key that does not exist', function (): void {
     $missing = [];
 
     foreach ($keys as $key => $file) {
-        if (! Lang::has('impersonator::' . $key)) {
+        if (! Lang::has('laranail-impersonator::' . $key)) {
             $missing[] = $key . ' (' . $file . ')';
         }
     }
@@ -281,7 +281,7 @@ it('ships every case of the dynamically built keys', function (): void {
 
     foreach ($cases as $prefix => $suffixes) {
         foreach ($suffixes as $suffix) {
-            if (! Lang::has('impersonator::' . $prefix . $suffix)) {
+            if (! Lang::has('laranail-impersonator::' . $prefix . $suffix)) {
                 $missing[] = $prefix . $suffix;
             }
         }

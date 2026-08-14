@@ -39,23 +39,23 @@ class ApprovalDecided extends Notification implements ShouldQueue
             // order is not universal — a template ending in the outcome cannot be translated
             // correctly into a language that puts it first, and the result reads as machine output.
             ->subject(__(
-                'impersonator::notifications.approval.decided.subject_' . $this->outcome(),
+                'laranail-impersonator::notifications.approval.decided.subject_' . $this->outcome(),
                 ['app' => is_string($appName = config('app.name')) ? $appName : 'Application'],
             ))
             ->line($this->headline())
-            ->line(__('impersonator::notifications.fields.target', ['value' => $this->request->target->label ?? $this->request->target->key()]))
-            ->line(__('impersonator::notifications.fields.mode', ['value' => $this->request->mode->name]))
-            ->line(__('impersonator::notifications.fields.request_id', ['value' => $this->request->id]));
+            ->line(__('laranail-impersonator::notifications.fields.target', ['value' => $this->request->target->label ?? $this->request->target->key()]))
+            ->line(__('laranail-impersonator::notifications.fields.mode', ['value' => $this->request->mode->name]))
+            ->line(__('laranail-impersonator::notifications.fields.request_id', ['value' => $this->request->id]));
 
         if ($this->request->decisionNote !== null) {
-            $message->line(__('impersonator::notifications.fields.note', ['value' => $this->request->decisionNote]));
+            $message->line(__('laranail-impersonator::notifications.fields.note', ['value' => $this->request->decisionNote]));
         }
 
         if ($this->request->approved()) {
             // The window matters, and it is the window on the *approval*, not a fresh one. An
             // operator who thinks they have fifteen minutes from reading the mail will find the
             // permit already dead.
-            $message->line(__('impersonator::notifications.approval.decided.window', [
+            $message->line(__('laranail-impersonator::notifications.approval.decided.window', [
                 'date' => $this->request->expiresAt->format('Y-m-d H:i:s T'),
             ]));
         }
@@ -87,9 +87,9 @@ class ApprovalDecided extends Notification implements ShouldQueue
     private function headline(): string
     {
         return match (true) {
-            $this->expired => (string) __('impersonator::notifications.approval.decided.expired'),
-            $this->request->approved() => (string) __('impersonator::notifications.approval.decided.approved'),
-            default => (string) __('impersonator::notifications.approval.decided.denied'),
+            $this->expired => (string) __('laranail-impersonator::notifications.approval.decided.expired'),
+            $this->request->approved() => (string) __('laranail-impersonator::notifications.approval.decided.approved'),
+            default => (string) __('laranail-impersonator::notifications.approval.decided.denied'),
         };
     }
 }

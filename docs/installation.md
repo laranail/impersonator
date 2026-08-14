@@ -176,7 +176,7 @@ changing one sentence does not mean forking a file.
 
 Three things worth knowing before you translate:
 
-- **A missing key falls back to English.** Nothing renders blank or as a raw `impersonator::…` key, so
+- **A missing key falls back to English.** Nothing renders blank or as a raw `laranail-impersonator::…` key, so
   a partial translation is a valid state. Delete a line you do not want to override.
 - **The `reason` code in an API response is never translated.** It is the stable contract; `message`
   is the display text. Branch on `reason`. See [The REST API](tools/rest-api.md#refusals).

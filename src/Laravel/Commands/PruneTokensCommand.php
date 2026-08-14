@@ -32,7 +32,7 @@ class PruneTokensCommand extends Command
         $removed = $tokens->pruneExpired();
 
         $this->components->info(trans_choice(
-            'impersonator::console.prune_tokens.pruned',
+            'laranail-impersonator::console.prune_tokens.pruned',
             $removed,
             ['count' => $removed],
         ));

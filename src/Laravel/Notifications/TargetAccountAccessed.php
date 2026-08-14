@@ -45,13 +45,13 @@ class TargetAccountAccessed extends Notification implements ShouldQueue
     {
         $appName = is_string($name = config('app.name')) && $name !== ''
             ? $name
-            : (string) __('impersonator::notifications.target.fallback_app_name');
+            : (string) __('laranail-impersonator::notifications.target.fallback_app_name');
 
         return (new MailMessage)
-            ->subject(__('impersonator::notifications.target.subject', ['app' => $appName]))
-            ->line(__('impersonator::notifications.target.accessed', ['date' => $this->startedAtForHumans()]))
+            ->subject(__('laranail-impersonator::notifications.target.subject', ['app' => $appName]))
+            ->line(__('laranail-impersonator::notifications.target.accessed', ['date' => $this->startedAtForHumans()]))
             ->line($this->modeExplanation())
-            ->line(__('impersonator::notifications.target.routine'));
+            ->line(__('laranail-impersonator::notifications.target.routine'));
     }
 
     /** @return array<string, mixed> */
@@ -73,11 +73,11 @@ class TargetAccountAccessed extends Notification implements ShouldQueue
     private function modeExplanation(): string
     {
         $mode = $this->session->mode->name;
-        $key = 'impersonator::notifications.target.mode.' . $mode;
+        $key = 'laranail-impersonator::notifications.target.mode.' . $mode;
 
         return Lang::has($key)
             ? (string) __($key)
-            : (string) __('impersonator::notifications.target.mode.default');
+            : (string) __('laranail-impersonator::notifications.target.mode.default');
     }
 
     /**

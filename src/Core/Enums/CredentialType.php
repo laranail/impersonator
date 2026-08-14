@@ -55,6 +55,6 @@ enum CredentialType: string implements Translatable
 
     public static function translationNamespace(): string
     {
-        return 'impersonator';
+        return 'laranail-impersonator';
     }
 }

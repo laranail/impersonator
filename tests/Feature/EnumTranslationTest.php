@@ -17,7 +17,7 @@ it('resolves a label from the translator when one is registered', function (): v
     app('translator')->addLines(
         ['enums.end_reason.revoked' => 'Ended by an administrator'],
         'en',
-        'impersonator',
+        'laranail-impersonator',
     );
 
     expect(EndReason::Revoked->label())->toBe('Ended by an administrator')
@@ -30,7 +30,7 @@ it('never translates the value, only the label', function (): void {
     app('translator')->addLines(
         ['enums.end_reason.revoked' => 'Beendet'],
         'en',
-        'impersonator',
+        'laranail-impersonator',
     );
 
     expect(EndReason::Revoked->value)->toBe('revoked')

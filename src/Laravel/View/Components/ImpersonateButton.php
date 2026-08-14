@@ -71,9 +71,9 @@ class ImpersonateButton extends Component
         // Assigned onto the property, not just into the view data. Blade exposes a component's public
         // properties to its template, and that exposure *shadows* same-named render data — so a null
         // property rendered an empty label while the data array held the right one.
-        $this->label ??= (string) __('impersonator::components.impersonate');
+        $this->label ??= (string) __('laranail-impersonator::components.impersonate');
 
-        return $this->renderView('impersonator::components.impersonate-button', [
+        return $this->renderView('laranail-impersonator::components.impersonate-button', [
             'user' => $this->user,
             'action' => $this->action($settings),
             'targetType' => $manager->identities()->aliasFor(

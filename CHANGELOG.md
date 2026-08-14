@@ -298,7 +298,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **Refusal and exception messages are localisable, translated at the render seam.** New
   `resources/lang/en/` (`decisions`, `exceptions`, `modes`, `banner`), loaded under the
-  `impersonator::` namespace and publishable with `--tag=impersonator-lang`. English is the only
+  `laranail-impersonator::` namespace and publishable with `--tag=impersonator-lang`. English is the only
   locale shipped.
 
   Translation happens in a new `MessageCatalog` in the bridge, **not in Core**. Core keeps building a
@@ -318,7 +318,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
   - **A missing key degrades to English.** `has()` guards every `get()`, because Laravel's translator
     returns the *key* when it finds nothing — an unguarded lookup renders
-    `impersonator::decisions.target_busy` in a user's browser, which is worse than the English it
+    `laranail-impersonator::decisions.target_busy` in a user's browser, which is worse than the English it
     replaced. This is also what makes the feature adoptable one key at a time.
   - **`TokenRejected` keeps ONE line for all four factories.** Four keys would rebuild the oracle Core's
     single `PUBLIC_MESSAGE` exists to prevent: telling somebody probing the accept route that a token
@@ -370,8 +370,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
   Two new completeness tests, both of which found real problems while being written. One sweeps every
   translation call in `src/` and resolves its key — scoped to `__`/`trans`/`trans_choice`/`Lang::has`
-  rather than every `impersonator::` literal, because Laravel shares the `namespace::` syntax between
-  lang keys and **view** names, and a looser sweep reported `impersonator::components.badge` (a Blade
+  rather than every `laranail-impersonator::` literal, because Laravel shares the `namespace::` syntax between
+  lang keys and **view** names, and a looser sweep reported `laranail-impersonator::components.badge` (a Blade
   view) as a missing line. The other enumerates the keys built by concatenating a runtime value onto a
   prefix, which no static check can reach.
 
@@ -385,7 +385,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 - **`EndReason`, `ApprovalState` and `CredentialType` labels are translatable**, via
   `laranail/enumerator`'s `#[Label]` attribute and `IsTranslatable` trait in place of hand-written
-  `match` blocks. An application can now localise them under `impersonator::enums.{slug}.{case}`
+  `match` blocks. An application can now localise them under `laranail-impersonator::enums.{slug}.{case}`
   without this package shipping a locale. `CredentialType` gains labels it never had.
 
   Every label is byte-identical to what the `match` returned, asserted case by case — this is a
@@ -704,7 +704,7 @@ First release.
 - **Blade component library**: `<x-impersonation-banner />`, `<x-impersonate-button />`,
   `<x-impersonation-leave-button />`, `<x-impersonation-badge />` and
   `<x-when-impersonating>`, each rendering nothing when inapplicable so they can be
-  dropped into a layout unconditionally. Also namespaced as `x-impersonator::*`.
+  dropped into a layout unconditionally. Also namespaced as `x-laranail-impersonator::*`.
 - **Form Requests, gates and routes**: `EnterImpersonationRequest` and
   `RevokeImpersonationRequest` validating the target against the morph allowlist, the
   mode against the registry, the guard against `config('auth.guards')` and redirects

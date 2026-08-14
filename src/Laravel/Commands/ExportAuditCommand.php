@@ -28,7 +28,7 @@ class ExportAuditCommand extends Command
         $format = strtolower($this->stringOption('format') ?? AuditExporter::JSON);
 
         if (! in_array($format, AuditExporter::formats(), true)) {
-            $this->components->error(__('impersonator::console.export_audit.unknown_format', [
+            $this->components->error(__('laranail-impersonator::console.export_audit.unknown_format', [
                 'format' => $format,
                 'formats' => implode(', ', AuditExporter::formats()),
             ]));
@@ -56,13 +56,13 @@ class ExportAuditCommand extends Command
 
         if (file_put_contents($path, $document) === false) {
             $this->components->error(
-                __('impersonator::console.export_audit.unwritable', ['path' => $path]),
+                __('laranail-impersonator::console.export_audit.unwritable', ['path' => $path]),
             );
 
             return self::FAILURE;
         }
 
-        $this->components->info(__('impersonator::console.export_audit.exported', [
+        $this->components->info(__('laranail-impersonator::console.export_audit.exported', [
             'audit' => $audit,
             'path' => $path,
         ]));

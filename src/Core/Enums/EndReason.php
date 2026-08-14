@@ -71,6 +71,6 @@ enum EndReason: string implements Translatable
 
     public static function translationNamespace(): string
     {
-        return 'impersonator';
+        return 'laranail-impersonator';
     }
 }

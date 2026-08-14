@@ -113,7 +113,7 @@ class EnterCommand extends Command
             $aliases = $targets->aliases();
 
             if (count($aliases) !== 1) {
-                $this->components->error(__('impersonator::console.enter.ambiguous', [
+                $this->components->error(__('laranail-impersonator::console.enter.ambiguous', [
                     'subject' => $label,
                     'value' => $reference,
                     'count' => count($aliases),
