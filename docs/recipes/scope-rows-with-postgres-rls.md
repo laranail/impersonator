@@ -36,7 +36,7 @@ or a console command — and you must handle that rather than being handed a fab
 ```
 
 ```php
-Route::middleware(['web', 'impersonator.rls'])->group(/* … */);
+Route::middleware(['web', 'laranail-impersonator.rls'])->group(/* … */);
 ```
 
 This publishes the context as transaction-scoped GUCs — `app.impersonated_user_id`,

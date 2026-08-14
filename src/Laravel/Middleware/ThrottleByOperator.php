@@ -26,7 +26,7 @@ use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
  * Drop-in for `throttle:…` — same arguments, same behaviour when nobody is impersonating, since
  * everything but the signature is inherited.
  *
- *   Route::middleware('impersonator.throttle:60,1')->group(…);
+ *   Route::middleware('laranail-impersonator.throttle:60,1')->group(…);
  *
  * For a named limiter defined with `RateLimiter::for()`, subclassing cannot help: the closure owns
  * the key. Use {@see ImpersonationManager::rateLimitKey()} inside it instead.

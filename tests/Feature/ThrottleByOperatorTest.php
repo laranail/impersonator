@@ -66,7 +66,7 @@ it('qualifies the key by morph type so two models sharing an id do not share a b
 it('spends the operator budget rather than the target budget', function (): void {
     // The behavioural assertion. Two impersonated requests through the drop-in middleware must
     // consume the operator's allowance; the target's must be untouched.
-    Route::middleware(['web', 'impersonator.throttle:1,1'])
+    Route::middleware(['web', 'laranail-impersonator.throttle:1,1'])
         ->get('/app/limited', fn (): string => 'ok')
         ->name('limited');
 
@@ -85,7 +85,7 @@ it('spends the operator budget rather than the target budget', function (): void
 });
 
 it('behaves exactly like throttle when nobody is impersonating', function (): void {
-    Route::middleware(['web', 'impersonator.throttle:1,1'])
+    Route::middleware(['web', 'laranail-impersonator.throttle:1,1'])
         ->get('/app/plain', fn (): string => 'ok');
 
     Auth::guard('web')->setUser($this->admin);

@@ -365,7 +365,7 @@ Two ways to fix it in your application. For a route using `throttle:…` argumen
 middleware:
 
 ```php
-Route::middleware('impersonator.throttle:60,1')->group(function (): void {
+Route::middleware('laranail-impersonator.throttle:60,1')->group(function (): void {
     // Identical to `throttle:60,1` when nobody is impersonating.
 });
 ```

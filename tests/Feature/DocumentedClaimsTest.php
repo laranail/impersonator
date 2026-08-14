@@ -143,7 +143,7 @@ it('documents every middleware alias it registers', function (): void {
         dirname(__DIR__, 2) . '/src/Laravel/Providers/ImpersonatorServiceProvider.php',
     );
 
-    preg_match_all("/aliasMiddleware\('([a-z.]+)'/", $provider, $matches);
+    preg_match_all("/aliasMiddleware\('([a-z.-]+)'/", $provider, $matches);
 
     $docs = '';
 

@@ -731,19 +731,19 @@ class ImpersonatorServiceProvider extends ServiceProvider
     {
         $router = $this->app->make(Router::class);
 
-        $router->aliasMiddleware('impersonator.lifetime', GuardImpersonationLifetime::class);
-        $router->aliasMiddleware('impersonator.mode', EnforceImpersonationMode::class);
-        $router->aliasMiddleware('impersonator.trail', RecordImpersonationTrail::class);
+        $router->aliasMiddleware('laranail-impersonator.lifetime', GuardImpersonationLifetime::class);
+        $router->aliasMiddleware('laranail-impersonator.mode', EnforceImpersonationMode::class);
+        $router->aliasMiddleware('laranail-impersonator.trail', RecordImpersonationTrail::class);
 
         // A drop-in for `throttle:…` that keys on the operator rather than the impersonated
         // account. Aliased rather than swapped in globally, because replacing the framework's
         // `throttle` for an application is not this package's decision to make.
-        $router->aliasMiddleware('impersonator.throttle', ThrottleByOperator::class);
+        $router->aliasMiddleware('laranail-impersonator.throttle', ThrottleByOperator::class);
 
         // Publishes the impersonation context as PostgreSQL GUCs. Aliased rather than appended to a
         // group: it is opt-in defence in depth, and the primary RLS fix is a change in the host's own
         // scoping layer rather than anything this middleware does.
-        $router->aliasMiddleware('impersonator.rls', ApplyRlsContext::class);
+        $router->aliasMiddleware('laranail-impersonator.rls', ApplyRlsContext::class);
 
         $settings = $this->app->make(Settings::class);
 

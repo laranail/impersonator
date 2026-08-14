@@ -732,9 +732,9 @@ return [
         // Order matters: lifetime first, because there is no point judging what a
         // terminated session may do.
         'enforcement' => [
-            'impersonator.lifetime',
-            'impersonator.mode',
-            'impersonator.trail',
+            'laranail-impersonator.lifetime',
+            'laranail-impersonator.mode',
+            'laranail-impersonator.trail',
         ],
 
         // Automatically push the enforcement middleware onto these groups. Set to an
