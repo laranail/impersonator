@@ -5,7 +5,7 @@ All notable changes to `laranail/impersonator` are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and
 this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.1.0] - 2026-08-15
 
 ### Changed
 
@@ -20,7 +20,6 @@ the route names (`impersonator.enter`, `.leave`, …), which come from the confi
 and the telemetry operation labels (`impersonator.notify.target`). The middleware aliases, view and
 translation namespaces and Blade prefix were already vendor-scoped.
 
-## [Unreleased]
 
 ### Added
 
@@ -640,8 +639,6 @@ translation namespaces and Blade prefix were already vendor-scoped.
   carrying a live single-use token does not travel onward as a referrer or rest in a shared cache.
   Documented the log-retention channel, which is the significant one — including Telescope, which
   records the full URI of a *failed* request, precisely when the token may still be unspent.
-
-## [0.1.0] - 2026-08-12
 
 First release.
 
