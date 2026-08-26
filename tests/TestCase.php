@@ -7,7 +7,7 @@ namespace Simtabi\Laranail\Impersonator\Tests;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
 use Orchestra\Testbench\TestCase as Orchestra;
-use Simtabi\Laranail\Enumerator\EnumeratorServiceProvider;
+use Simtabi\Laranail\Enumerator\Providers\EnumeratorServiceProvider;
 use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 use Simtabi\Laranail\Package\Tools\Providers\PackageToolsServiceProvider;
 
