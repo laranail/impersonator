@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns;
 
 use Illuminate\Console\Parser;
-use ReflectionProperty;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Simtabi\Laranail\Console\Tools\Commands\Concerns\SupportsNamespacedNames as CanonicalNamespacedNames;
 use Symfony\Component\Console\Input\InputDefinition;
 
 /**
@@ -23,14 +22,21 @@ use Symfony\Component\Console\Input\InputDefinition;
  * validation entirely. Nothing has to be nulled, unset or reflected away first. The real name
  * is then parsed and written directly, past the validator.
  *
- * Reimplemented here rather than pulled in from `laranail/console`, deliberately: that package
- * requires PHP ^8.4.1 and this one targets ^8.3, so depending on it for a few dozen lines
- * would raise the floor for every consumer. The org standard explicitly sanctions the copy.
+ * The reflection write itself is NOT reimplemented here. It comes from
+ * `laranail/console`'s trait of the same name, which is the canonical one -- twenty-nine packages
+ * in the family import it -- and this package already requires that dependency.
+ *
+ * It used to be a local copy, justified in this docblock by console requiring PHP ^8.4.1 while this
+ * package targeted ^8.3. Both halves of that have since stopped being true: the floor here is
+ * ^8.4.1 || ^8.5, and `laranail/console` is in `require`. What the copy left behind was a second
+ * place that knew how to write past `validateName()`, free to drift from the first.
+ *
+ * What remains here is genuinely this package's own: applying a signature from
+ * `namespacedSignature()` rather than Laravel's `$signature`, and the option/argument accessors.
  */
 trait SupportsNamespacedNames
 {
-    /** @var list<string> optional short aliases, applied after construction */
-    protected array $commandAliases = [];
+    use CanonicalNamespacedNames;
 
     public function __construct()
     {
@@ -42,9 +48,36 @@ trait SupportsNamespacedNames
             $this->applyNamespacedSignature($signature);
         }
 
-        if ($this->commandAliases !== []) {
-            $this->setAliases($this->commandAliases);
+        $aliases = $this->declaredCommandAliases();
+
+        if ($aliases !== []) {
+            $this->setAliases($aliases);
         }
+    }
+
+    /**
+     * The consuming command's own `$commandAliases`, if it declares one.
+     *
+     * Deliberately NOT a property on this trait, for the same reason `namespacedSignature()` is a
+     * method: a trait cannot declare a property that the using class also declares with a different
+     * default -- PHP rejects the composition outright. Declaring it here made "a command that wants
+     * aliases declares its own list" a compile-time fatal rather than the documented usage.
+     *
+     * @return list<string>
+     */
+    private function declaredCommandAliases(): array
+    {
+        if (! property_exists($this, 'commandAliases') || ! is_array($this->commandAliases)) {
+            return [];
+        }
+
+        // Filtered rather than cast: the property is the consuming command's, so its contents are
+        // not this trait's to assume. A stray null would reach Symfony's setAliases() as a type
+        // error at boot, which is the failure mode this whole method exists to avoid.
+        return array_values(array_filter(
+            $this->commandAliases,
+            static fn (mixed $alias): bool => is_string($alias) && $alias !== '',
+        ));
     }
 
     /**
@@ -77,8 +110,8 @@ trait SupportsNamespacedNames
     {
         [$name, $arguments, $options] = Parser::parse($signature);
 
-        $property = new ReflectionProperty(SymfonyCommand::class, 'name');
-        $property->setValue($this, $name);
+        // setName() comes from the canonical trait, which does the write past validateName().
+        $this->setName($name);
 
         $definition = new InputDefinition;
 
