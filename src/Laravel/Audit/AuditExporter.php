@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Audit;
 
+use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
 
 /**
  * Renders one impersonation and its full action trail for a compliance request.
@@ -49,7 +49,7 @@ final readonly class AuditExporter
 
         return match ($format) {
             self::CSV => $this->csv($session),
-            default => $this->json($session),
+            default   => $this->json($session),
         };
     }
 
@@ -139,9 +139,9 @@ final readonly class AuditExporter
     {
         return match (true) {
             $value === null, $value === false => '',
-            $value === true => 'true',
-            is_scalar($value) => (string) $value,
-            default => '',
+            $value === true                   => 'true',
+            is_scalar($value)                 => (string) $value,
+            default                           => '',
         };
     }
 
@@ -152,8 +152,8 @@ final readonly class AuditExporter
         // id by construction, so an export cannot leak them by forgetting to.
         return [
             'impersonation' => $session->toArray(),
-            'trail_events' => $this->trail->countForAudit($session->auditId),
-            'trail' => array_map(
+            'trail_events'  => $this->trail->countForAudit($session->auditId),
+            'trail'         => array_map(
                 static fn (TrailEvent $event): array => $event->toArray(),
                 $this->allTrailEvents($session->auditId),
             ),
@@ -178,6 +178,7 @@ final readonly class AuditExporter
 
     /**
      * @param array<array-key, mixed> $data
+     *
      * @return array<string, string>
      */
     private function flatten(array $data, string $prefix = ''): array

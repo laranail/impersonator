@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Contracts\Config\Repository as Config;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
 
 /**
  * Translates between application users and the Core layer's Identity value.
@@ -130,20 +130,6 @@ final readonly class IdentityResolver
         return $query->find($identity->id);
     }
 
-    /** @return class-string<Model>|null */
-    private function morphMapClass(string $type): ?string
-    {
-        $class = Relation::morphMap()[$type] ?? null;
-
-        return is_string($class) && is_subclass_of($class, Model::class) ? $class : null;
-    }
-
-    /** @return class-string<Model>|null */
-    private function modelClass(string $type): ?string
-    {
-        return is_subclass_of($type, Model::class) ? $type : null;
-    }
-
     /** Whether a class or morph alias may be impersonated at all. */
     public function isAllowlisted(string $typeOrClass): bool
     {
@@ -220,6 +206,20 @@ final readonly class IdentityResolver
     public function isTrashed(Model $model): bool
     {
         return method_exists($model, 'trashed') && $model->trashed() === true;
+    }
+
+    /** @return class-string<Model>|null */
+    private function morphMapClass(string $type): ?string
+    {
+        $class = Relation::morphMap()[$type] ?? null;
+
+        return is_string($class) && is_subclass_of($class, Model::class) ? $class : null;
+    }
+
+    /** @return class-string<Model>|null */
+    private function modelClass(string $type): ?string
+    {
+        return is_subclass_of($type, Model::class) ? $type : null;
     }
 
     /**

@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Models;
 
+use DateTimeImmutable;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\MassPrunable;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * One row per impersonation — the session-level audit record.
@@ -38,21 +40,6 @@ class ImpersonationAudit extends Model
     use MassPrunable;
 
     protected $guarded = [];
-
-    /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return [
-            'metadata' => 'array',
-            'started_at' => 'datetime',
-            'expires_at' => 'datetime',
-            'ended_at' => 'datetime',
-            'revoked_at' => 'datetime',
-            'decided_at' => 'datetime',
-            'extended_at' => 'datetime',
-            'extensions' => 'integer',
-        ];
-    }
 
     public function getTable(): string
     {
@@ -122,6 +109,7 @@ class ImpersonationAudit extends Model
 
     /**
      * @param Builder<self> $query
+     *
      * @return Builder<self>
      */
     public function scopeActive(Builder $query): Builder
@@ -151,7 +139,7 @@ class ImpersonationAudit extends Model
             ),
             driver: $this->str('driver', 'session'),
             adapter: $this->str('adapter', 'session'),
-            startedAt: $this->immutable('started_at') ?? new \DateTimeImmutable,
+            startedAt: $this->immutable('started_at') ?? new DateTimeImmutable,
             endedAt: $this->immutable('ended_at'),
             endedBy: $this->stringOrNull('ended_by') === null
                 ? null
@@ -165,6 +153,21 @@ class ImpersonationAudit extends Model
             revokedAt: $this->immutable('revoked_at'),
             extensions: $this->extensionCount(),
         );
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'metadata'    => 'array',
+            'started_at'  => 'datetime',
+            'expires_at'  => 'datetime',
+            'ended_at'    => 'datetime',
+            'revoked_at'  => 'datetime',
+            'decided_at'  => 'datetime',
+            'extended_at' => 'datetime',
+            'extensions'  => 'integer',
+        ];
     }
 
     /**
@@ -212,12 +215,12 @@ class ImpersonationAudit extends Model
         return $narrowed;
     }
 
-    private function immutable(string $attribute): ?\DateTimeImmutable
+    private function immutable(string $attribute): ?DateTimeImmutable
     {
         $value = $this->getAttribute($attribute);
 
-        return $value instanceof \DateTimeInterface
-            ? \DateTimeImmutable::createFromInterface($value)
+        return $value instanceof DateTimeInterface
+            ? DateTimeImmutable::createFromInterface($value)
             : null;
     }
 

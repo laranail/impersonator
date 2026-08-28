@@ -3,23 +3,23 @@
 declare(strict_types=1);
 
 use Illuminate\Auth\Events\Login;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\ProtectedUser;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -339,7 +339,7 @@ it('refuses a target somebody else is already impersonating', function (): void 
 
 it('honours the canBeImpersonated model opt-out', function (): void {
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user' => User::class,
+        'user'      => User::class,
         'protected' => ProtectedUser::class,
     ]);
     $protected = ProtectedUser::create(['name' => 'Founder']);
@@ -350,7 +350,7 @@ it('honours the canBeImpersonated model opt-out', function (): void {
 
 it('honours the canImpersonate model hook on the impersonator', function (): void {
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user' => User::class,
+        'user'      => User::class,
         'protected' => ProtectedUser::class,
     ]);
     $restricted = ProtectedUser::create(['name' => 'Restricted']);

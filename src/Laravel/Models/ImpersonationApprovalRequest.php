@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Models;
 
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\MassPrunable;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * One row per break-glass approval — the four-eyes control.
@@ -31,17 +33,6 @@ class ImpersonationApprovalRequest extends Model
     use MassPrunable;
 
     protected $guarded = [];
-
-    /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return [
-            'request' => 'array',
-            'decided_at' => 'datetime',
-            'consumed_at' => 'datetime',
-            'expires_at' => 'datetime',
-        ];
-    }
 
     public function getTable(): string
     {
@@ -96,6 +87,7 @@ class ImpersonationApprovalRequest extends Model
 
     /**
      * @param Builder<self> $query
+     *
      * @return Builder<self>
      */
     public function scopeAwaitingDecision(Builder $query): Builder
@@ -116,7 +108,7 @@ class ImpersonationApprovalRequest extends Model
             mode: Mode::of($this->str('mode', Mode::FULL)),
             request: $request,
             state: ApprovalState::tryFrom($this->str('state')) ?? ApprovalState::Pending,
-            expiresAt: $this->immutable('expires_at') ?? new \DateTimeImmutable,
+            expiresAt: $this->immutable('expires_at') ?? new DateTimeImmutable,
             reason: $this->stringOrNull('reason'),
             // `decidedBy` and `decisionNote` are not columns on this table any more — each reviewer's
             // answer lives in impersonator_approval_decisions. The store fills them in as a rollup
@@ -126,6 +118,17 @@ class ImpersonationApprovalRequest extends Model
             auditId: $this->stringOrNull('audit_id'),
             createdAt: $this->immutable('created_at'),
         );
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'request'     => 'array',
+            'decided_at'  => 'datetime',
+            'consumed_at' => 'datetime',
+            'expires_at'  => 'datetime',
+        ];
     }
 
     private function str(string $attribute, string $default = ''): string
@@ -142,17 +145,18 @@ class ImpersonationApprovalRequest extends Model
         return is_string($value) && $value !== '' ? $value : null;
     }
 
-    private function immutable(string $attribute): ?\DateTimeImmutable
+    private function immutable(string $attribute): ?DateTimeImmutable
     {
         $value = $this->getAttribute($attribute);
 
-        return $value instanceof \DateTimeInterface
-            ? \DateTimeImmutable::createFromInterface($value)
+        return $value instanceof DateTimeInterface
+            ? DateTimeImmutable::createFromInterface($value)
             : null;
     }
 
     /**
      * @param array<array-key, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function stringKeyed(array $data): array

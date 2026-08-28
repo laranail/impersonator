@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 
 /**
  * Validation for the approver's queue.
@@ -42,7 +42,7 @@ class ListApprovalsRequest extends FormRequest
 
         return [
             'per_page' => ['sometimes', 'integer', 'min:1', 'max:' . $max],
-            'offset' => ['sometimes', 'integer', 'min:0'],
+            'offset'   => ['sometimes', 'integer', 'min:0'],
         ];
     }
 

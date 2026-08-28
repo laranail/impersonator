@@ -5,10 +5,10 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade;
+use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 
 it('merges the package config', function (): void {
     expect(config('laranail.impersonator.driver'))->toBe('session')

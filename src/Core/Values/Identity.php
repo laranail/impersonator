@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Values;
 
-use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
 use Stringable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
 
 /**
  * A framework-agnostic reference to a user.
@@ -32,9 +32,20 @@ final readonly class Identity implements Stringable
         }
     }
 
+    public function __toString(): string
+    {
+        return $this->key();
+    }
+
     public static function of(string $type, int|string $id, ?string $label = null): self
     {
         return new self($type, $id, $label);
+    }
+
+    /** @param array{type: string, id: int|string, label?: string|null} $data */
+    public static function fromArray(array $data): self
+    {
+        return new self($data['type'], $data['id'], $data['label'] ?? null);
     }
 
     /**
@@ -69,20 +80,9 @@ final readonly class Identity implements Stringable
     public function toArray(): array
     {
         return [
-            'type' => $this->type,
-            'id' => $this->id,
+            'type'  => $this->type,
+            'id'    => $this->id,
             'label' => $this->label,
         ];
-    }
-
-    /** @param array{type: string, id: int|string, label?: string|null} $data */
-    public static function fromArray(array $data): self
-    {
-        return new self($data['type'], $data['id'], $data['label'] ?? null);
-    }
-
-    public function __toString(): string
-    {
-        return $this->key();
     }
 }

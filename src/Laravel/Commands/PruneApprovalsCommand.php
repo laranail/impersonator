@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 
 /**
  * Expires break-glass requests nobody answered.
@@ -23,11 +23,6 @@ use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
 class PruneApprovalsCommand extends Command
 {
     use SupportsNamespacedNames;
-
-    protected function namespacedSignature(): string
-    {
-        return 'laranail::impersonator.prune-approvals {--limit=500 : Maximum requests to expire in one pass}';
-    }
 
     protected $description = 'Expire impersonation approval requests that were never decided';
 
@@ -64,5 +59,10 @@ class PruneApprovalsCommand extends Command
         ));
 
         return self::SUCCESS;
+    }
+
+    protected function namespacedSignature(): string
+    {
+        return 'laranail::impersonator.prune-approvals {--limit=500 : Maximum requests to expire in one pass}';
     }
 }

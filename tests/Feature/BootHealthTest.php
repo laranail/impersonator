@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
 use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
+use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
 use Simtabi\Laranail\Impersonator\Laravel\Failure\LaravelFailureReporter;
 
 /**

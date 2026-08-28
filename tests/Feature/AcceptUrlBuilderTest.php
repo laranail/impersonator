@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Values\Guards;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 use Simtabi\Laranail\Impersonator\Laravel\Tokens\AcceptUrlBuilder;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 function tokenRequest(?string $tenantId = null): ImpersonationRequest
 {

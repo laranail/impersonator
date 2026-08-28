@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Values;
 
-use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
 use Stringable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
 
 /**
  * The privilege envelope an impersonation runs inside.
@@ -32,6 +32,11 @@ final readonly class Mode implements Stringable
         if (! preg_match('/^[a-z][a-z0-9_]*$/', $name)) {
             throw InvalidMode::malformed($name);
         }
+    }
+
+    public function __toString(): string
+    {
+        return $this->name;
     }
 
     public static function readOnly(): self
@@ -78,10 +83,5 @@ final readonly class Mode implements Stringable
     public function permission(string $template = 'impersonator.mode.%s'): string
     {
         return sprintf($template, $this->name);
-    }
-
-    public function __toString(): string
-    {
-        return $this->name;
     }
 }

@@ -4,31 +4,32 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Listeners;
 
-use Illuminate\Contracts\Events\Dispatcher as Events;
-use Illuminate\Database\Eloquent\Collection;
+use Closure;
+use Throwable;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Facades\Notification;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Illuminate\Notifications\AnonymousNotifiable;
+use Illuminate\Contracts\Events\Dispatcher as Events;
 use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
+use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalRequested;
+use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExpired;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
-use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalDecided;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalRequestedNotification;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\ImpersonationSecurityAlert;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalDecided;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\ImpersonationSecurityAlert;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalRequestedNotification;
 
 /**
  * Sends the optional notifications, driven entirely by the event surface.
@@ -142,10 +143,10 @@ final readonly class SendImpersonationNotifications
 
             if (! $requester instanceof Model || ! method_exists($requester, 'notify')) {
                 $this->reporter->warn('Impersonator: approval requester cannot be notified.', [
-                    'operation' => 'impersonator.notify.approval_decided',
-                    'expected' => 'a notifiable requester model',
-                    'actual' => $requester === null ? 'requester not resolvable' : 'model is not notifiable',
-                    'decision' => 'tolerated',
+                    'operation'   => 'impersonator.notify.approval_decided',
+                    'expected'    => 'a notifiable requester model',
+                    'actual'      => $requester === null ? 'requester not resolvable' : 'model is not notifiable',
+                    'decision'    => 'tolerated',
                     'identifiers' => ['approval_id' => $approvalId],
                 ]);
 
@@ -173,10 +174,10 @@ final readonly class SendImpersonationNotifications
         $rule = $this->settings->raw('notifications.approvals.resolver');
 
         $callable = match (true) {
-            $rule instanceof \Closure => $rule,
+            $rule instanceof Closure                                                                    => $rule,
             is_string($rule) && $rule !== '' && class_exists($rule) && method_exists($rule, '__invoke') => new $rule,
-            is_callable($rule) => $rule,
-            default => null,
+            is_callable($rule)                                                                          => $rule,
+            default                                                                                     => null,
         };
 
         if ($callable === null) {
@@ -226,10 +227,10 @@ final readonly class SendImpersonationNotifications
             // configuration gap worth a warning, not a failure.
             if (! $target instanceof Model || ! method_exists($target, 'notify')) {
                 $this->reporter->warn('Impersonator: target cannot be notified.', [
-                    'operation' => 'impersonator.notify.target',
-                    'expected' => 'a notifiable target model',
-                    'actual' => $target === null ? 'target not resolvable' : 'model is not notifiable',
-                    'decision' => 'tolerated',
+                    'operation'   => 'impersonator.notify.target',
+                    'expected'    => 'a notifiable target model',
+                    'actual'      => $target === null ? 'target not resolvable' : 'model is not notifiable',
+                    'decision'    => 'tolerated',
                     'identifiers' => ['audit_id' => $session->auditId],
                 ]);
 

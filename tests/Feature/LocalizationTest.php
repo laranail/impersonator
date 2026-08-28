@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\Guards;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
+use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Laravel\Support\MessageCatalog;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
 
 /*
 | Localisation, at the render seam.
@@ -270,11 +270,11 @@ it('ships every case of the dynamically built keys', function (): void {
     // The keys the sweep above cannot see, because the calling code concatenates a runtime value onto
     // a prefix. Enumerated by hand precisely because a static check cannot reach them.
     $cases = [
-        'notifications.target.mode.' => ['read_only', 'limited', 'default'],
+        'notifications.target.mode.'              => ['read_only', 'limited', 'default'],
         'notifications.approval.decided.subject_' => ['approved', 'denied', 'expired'],
-        'notifications.security.summary.' => ['revoked', 'full_mode_enter', 'expired', 'default'],
-        'modes.' => ['full.name', 'full.short', 'read_only.name', 'read_only.short', 'limited.name', 'limited.short'],
-        'console.doctor.' => ['heading', 'failed', 'warnings', 'clean', 'check_failed', 'wrong_type'],
+        'notifications.security.summary.'         => ['revoked', 'full_mode_enter', 'expired', 'default'],
+        'modes.'                                  => ['full.name', 'full.short', 'read_only.name', 'read_only.short', 'limited.name', 'limited.short'],
+        'console.doctor.'                         => ['heading', 'failed', 'warnings', 'clean', 'check_failed', 'wrong_type'],
     ];
 
     $missing = [];

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 
 /**
@@ -72,9 +72,9 @@ class ApprovalDecided extends Notification implements ShouldQueue
     private function outcome(): string
     {
         return match (true) {
-            $this->expired => 'expired',
+            $this->expired             => 'expired',
             $this->request->approved() => 'approved',
-            default => 'denied',
+            default                    => 'denied',
         };
     }
 
@@ -87,9 +87,9 @@ class ApprovalDecided extends Notification implements ShouldQueue
     private function headline(): string
     {
         return match (true) {
-            $this->expired => (string) __('laranail-impersonator::notifications.approval.decided.expired'),
+            $this->expired             => (string) __('laranail-impersonator::notifications.approval.decided.expired'),
             $this->request->approved() => (string) __('laranail-impersonator::notifications.approval.decided.approved'),
-            default => (string) __('laranail-impersonator::notifications.approval.decided.denied'),
+            default                    => (string) __('laranail-impersonator::notifications.approval.decided.denied'),
         };
     }
 }

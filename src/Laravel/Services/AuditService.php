@@ -6,12 +6,12 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Services;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 
 /**
  * Reading the audit trail: filtering, paging, and the trail of one impersonation.
@@ -42,6 +42,7 @@ final readonly class AuditService
      * carries the credential hash and session id as attributes.
      *
      * @param array<string, mixed> $filters
+     *
      * @return LengthAwarePaginator<int, ImpersonationAudit>
      */
     public function paginate(array $filters = [], ?int $perPage = null): LengthAwarePaginator
@@ -79,6 +80,7 @@ final readonly class AuditService
 
     /**
      * @param array<string, mixed> $filters
+     *
      * @return Builder<ImpersonationAudit>
      */
     public function query(array $filters = []): Builder

@@ -5,23 +5,24 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Audit;
 
 use DateTimeImmutable;
-use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Database\ConnectionInterface;
+use DateTimeInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Contracts\Cache\Repository as Cache;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
-use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
-use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 
 /**
  * The durable audit store.
@@ -159,9 +160,9 @@ class EloquentAuditStore implements AuditStore
             }
 
             $row->forceFill([
-                'expires_at' => $grant->expiresAt,
+                'expires_at'  => $grant->expiresAt,
                 'extended_at' => $now,
-                'extensions' => $session->extensions + 1,
+                'extensions'  => $session->extensions + 1,
             ])->save();
 
             // The middleware reads the cached snapshot on every request, and that snapshot
@@ -174,25 +175,12 @@ class EloquentAuditStore implements AuditStore
         });
     }
 
-    /**
-     * The row, held under a write lock for the rest of the transaction.
-     *
-     * `find()` with a lock rather than an aggregate: PostgreSQL refuses `FOR UPDATE`
-     * alongside aggregate functions, so `exists()` or `count()` here would throw on every
-     * call. Note also that SQLite compiles `lockForUpdate()` to nothing, which is why the
-     * concurrency tests for this path are in the `locking` group and skip there.
-     */
-    protected function lockedRow(string $auditId): ?ImpersonationAudit
-    {
-        return $this->newQuery()->whereKey($auditId)->lockForUpdate()->first();
-    }
-
     public function attachCredential(string $auditId, Credential $credential): void
     {
         $row = $this->newQuery()->find($auditId) ?? throw AuditRowMissing::for($auditId);
 
         $row->forceFill(array_filter([
-            'session_id' => $credential->reference,
+            'session_id'      => $credential->reference,
             'credential_hash' => $credential->hash,
         ], static fn (mixed $value): bool => $value !== null))->save();
 
@@ -229,16 +217,6 @@ class EloquentAuditStore implements AuditStore
         return is_array($snapshot) ? ImpersonationSession::fromSnapshot($snapshot) : null;
     }
 
-    protected function loadActiveBySessionId(string $sessionId): ?ImpersonationSession
-    {
-        return $this->newQuery()
-            ->where('session_id', $sessionId)
-            ->whereNull('ended_at')
-            ->latest('started_at')
-            ->first()
-            ?->toSession();
-    }
-
     public function findActiveByCredentialHash(string $credentialHash): ?ImpersonationSession
     {
         $row = $this->newQuery()
@@ -257,9 +235,9 @@ class EloquentAuditStore implements AuditStore
         // Recorded, not closed. A session can only be ended from inside itself, so
         // the flag is what its next request sees.
         $row->forceFill([
-            'revoked_at' => $row->getAttribute('revoked_at') ?? now(),
+            'revoked_at'      => $row->getAttribute('revoked_at') ?? now(),
             'revoked_by_type' => $revokedBy?->type,
-            'revoked_by_id' => $revokedBy === null ? null : (string) $revokedBy->id,
+            'revoked_by_id'   => $revokedBy === null ? null : (string) $revokedBy->id,
             'revocation_note' => $note,
         ])->save();
 
@@ -291,21 +269,6 @@ class EloquentAuditStore implements AuditStore
         );
     }
 
-    /**
-     * @param Builder<ImpersonationAudit> $query
-     * @return list<ImpersonationSession>
-     */
-    protected function sessionsFrom(Builder $query): array
-    {
-        $sessions = [];
-
-        foreach ($query->get() as $row) {
-            $sessions[] = $row->toSession();
-        }
-
-        return $sessions;
-    }
-
     public function countActiveFor(Identity $impersonator): int
     {
         return $this->newQuery()
@@ -335,74 +298,6 @@ class EloquentAuditStore implements AuditStore
         return $rows->count();
     }
 
-    // ── Internals ───────────────────────────────────────────────────────────
-
-    protected function insert(
-        ImpersonationRequest $request,
-        ?Credential $credential,
-        ?DateTimeImmutable $expiresAt,
-    ): ImpersonationAudit {
-        $model = $this->newModel();
-        $startedAt = now();
-
-        $facts = $this->chainFacts($request, $startedAt->toDateTimeImmutable());
-
-        $model->forceFill([
-            'impersonator_type' => $request->impersonator->type,
-            'impersonator_id' => (string) $request->impersonator->id,
-            'impersonatable_type' => $request->target->type,
-            'impersonatable_id' => (string) $request->target->id,
-            'impersonator_label' => $request->impersonator->label,
-            'target_label' => $request->target->label,
-            'driver' => $request->driver,
-            'adapter' => $request->adapter,
-            'impersonator_guard' => $request->guards->impersonator,
-            'target_guard' => $request->guards->target,
-            'mode' => $request->mode->name,
-            'tenant_id' => $request->tenantId,
-            'session_id' => $credential?->reference,
-            'credential_hash' => $credential?->hash,
-            'ip' => $request->ip,
-            'user_agent' => $request->userAgent,
-            'reason' => $request->reason,
-            'metadata' => $request->metadata,
-            'started_at' => $startedAt,
-            'expires_at' => $expiresAt,
-        ] + $this->chainColumns($facts))->save();
-
-        return $model;
-    }
-
-    /**
-     * The chain columns for a new row, or nothing when tamper evidence is off.
-     *
-     * The predecessor is read under a row lock, so two concurrent opens cannot both chain off the
-     * same row and produce a fork that verification would report as tampering.
-     *
-     * @param array<string, mixed> $facts
-     * @return array<string, string|null>
-     */
-    protected function chainColumns(array $facts): array
-    {
-        if ($this->chain === null) {
-            return [];
-        }
-
-        $previous = $this->newQuery()
-            ->whereNotNull('hash')
-            ->orderByDesc('started_at')
-            ->orderByDesc('id')
-            ->lockForUpdate()
-            ->value('hash');
-
-        $previousHash = is_string($previous) && $previous !== '' ? $previous : null;
-
-        return [
-            'previous_hash' => $previousHash,
-            'hash' => $this->chain->digest($facts, $previousHash),
-        ];
-    }
-
     /**
      * The immutable opening facts a row is chained over.
      *
@@ -414,16 +309,16 @@ class EloquentAuditStore implements AuditStore
     public function chainFacts(ImpersonationRequest $request, DateTimeImmutable $startedAt): array
     {
         return [
-            'impersonator' => $request->impersonator->key(),
-            'target' => $request->target->key(),
-            'mode' => $request->mode->name,
-            'driver' => $request->driver,
-            'adapter' => $request->adapter,
+            'impersonator'       => $request->impersonator->key(),
+            'target'             => $request->target->key(),
+            'mode'               => $request->mode->name,
+            'driver'             => $request->driver,
+            'adapter'            => $request->adapter,
             'guard_impersonator' => $request->guards->impersonator,
-            'guard_target' => $request->guards->target,
-            'tenant_id' => $request->tenantId,
-            'reason' => $request->reason,
-            'started_at' => $startedAt->getTimestamp(),
+            'guard_target'       => $request->guards->target,
+            'tenant_id'          => $request->tenantId,
+            'reason'             => $request->reason,
+            'started_at'         => $startedAt->getTimestamp(),
         ];
     }
 
@@ -447,22 +342,125 @@ class EloquentAuditStore implements AuditStore
         };
 
         return [
-            'impersonator' => $str('impersonator_type') . ':' . $str('impersonator_id'),
-            'target' => $str('impersonatable_type') . ':' . $str('impersonatable_id'),
-            'mode' => $str('mode'),
-            'driver' => $str('driver'),
-            'adapter' => $str('adapter'),
+            'impersonator'       => $str('impersonator_type') . ':' . $str('impersonator_id'),
+            'target'             => $str('impersonatable_type') . ':' . $str('impersonatable_id'),
+            'mode'               => $str('mode'),
+            'driver'             => $str('driver'),
+            'adapter'            => $str('adapter'),
             'guard_impersonator' => $str('impersonator_guard'),
-            'guard_target' => $str('target_guard'),
-            'tenant_id' => $this->nullableString($row->getAttribute('tenant_id')),
-            'reason' => $this->nullableString($row->getAttribute('reason')),
-            'started_at' => $startedAt instanceof \DateTimeInterface ? $startedAt->getTimestamp() : 0,
+            'guard_target'       => $str('target_guard'),
+            'tenant_id'          => $this->nullableString($row->getAttribute('tenant_id')),
+            'reason'             => $this->nullableString($row->getAttribute('reason')),
+            'started_at'         => $startedAt instanceof DateTimeInterface ? $startedAt->getTimestamp() : 0,
         ];
     }
 
-    private function nullableString(mixed $value): ?string
+    /**
+     * The row, held under a write lock for the rest of the transaction.
+     *
+     * `find()` with a lock rather than an aggregate: PostgreSQL refuses `FOR UPDATE`
+     * alongside aggregate functions, so `exists()` or `count()` here would throw on every
+     * call. Note also that SQLite compiles `lockForUpdate()` to nothing, which is why the
+     * concurrency tests for this path are in the `locking` group and skip there.
+     */
+    protected function lockedRow(string $auditId): ?ImpersonationAudit
     {
-        return is_string($value) && $value !== '' ? $value : null;
+        return $this->newQuery()->whereKey($auditId)->lockForUpdate()->first();
+    }
+
+    protected function loadActiveBySessionId(string $sessionId): ?ImpersonationSession
+    {
+        return $this->newQuery()
+            ->where('session_id', $sessionId)
+            ->whereNull('ended_at')
+            ->latest('started_at')
+            ->first()
+            ?->toSession();
+    }
+
+    /**
+     * @param Builder<ImpersonationAudit> $query
+     *
+     * @return list<ImpersonationSession>
+     */
+    protected function sessionsFrom(Builder $query): array
+    {
+        $sessions = [];
+
+        foreach ($query->get() as $row) {
+            $sessions[] = $row->toSession();
+        }
+
+        return $sessions;
+    }
+
+    // ── Internals ───────────────────────────────────────────────────────────
+
+    protected function insert(
+        ImpersonationRequest $request,
+        ?Credential $credential,
+        ?DateTimeImmutable $expiresAt,
+    ): ImpersonationAudit {
+        $model = $this->newModel();
+        $startedAt = now();
+
+        $facts = $this->chainFacts($request, $startedAt->toDateTimeImmutable());
+
+        $model->forceFill([
+            'impersonator_type'   => $request->impersonator->type,
+            'impersonator_id'     => (string) $request->impersonator->id,
+            'impersonatable_type' => $request->target->type,
+            'impersonatable_id'   => (string) $request->target->id,
+            'impersonator_label'  => $request->impersonator->label,
+            'target_label'        => $request->target->label,
+            'driver'              => $request->driver,
+            'adapter'             => $request->adapter,
+            'impersonator_guard'  => $request->guards->impersonator,
+            'target_guard'        => $request->guards->target,
+            'mode'                => $request->mode->name,
+            'tenant_id'           => $request->tenantId,
+            'session_id'          => $credential?->reference,
+            'credential_hash'     => $credential?->hash,
+            'ip'                  => $request->ip,
+            'user_agent'          => $request->userAgent,
+            'reason'              => $request->reason,
+            'metadata'            => $request->metadata,
+            'started_at'          => $startedAt,
+            'expires_at'          => $expiresAt,
+        ] + $this->chainColumns($facts))->save();
+
+        return $model;
+    }
+
+    /**
+     * The chain columns for a new row, or nothing when tamper evidence is off.
+     *
+     * The predecessor is read under a row lock, so two concurrent opens cannot both chain off the
+     * same row and produce a fork that verification would report as tampering.
+     *
+     * @param array<string, mixed> $facts
+     *
+     * @return array<string, string|null>
+     */
+    protected function chainColumns(array $facts): array
+    {
+        if ($this->chain === null) {
+            return [];
+        }
+
+        $previous = $this->newQuery()
+            ->whereNotNull('hash')
+            ->orderByDesc('started_at')
+            ->orderByDesc('id')
+            ->lockForUpdate()
+            ->value('hash');
+
+        $previousHash = is_string($previous) && $previous !== '' ? $previous : null;
+
+        return [
+            'previous_hash' => $previousHash,
+            'hash'          => $this->chain->digest($facts, $previousHash),
+        ];
     }
 
     protected function forget(ImpersonationAudit $row): void
@@ -488,5 +486,10 @@ class EloquentAuditStore implements AuditStore
     protected function newQuery(): Builder
     {
         return $this->newModel()->newQuery();
+    }
+
+    private function nullableString(mixed $value): ?string
+    {
+        return is_string($value) && $value !== '' ? $value : null;
     }
 }

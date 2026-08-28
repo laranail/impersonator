@@ -4,12 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
+use DateTimeInterface;
 use Illuminate\Console\Command;
 use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
-use Simtabi\Laranail\Impersonator\Laravel\Audit\EloquentAuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\Audit\EloquentAuditStore;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 
 /**
  * Walks the audit chain and reports the first place it breaks.
@@ -24,9 +25,9 @@ use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
  */
 class VerifyAuditCommand extends Command
 {
-    protected $description = 'Verify the tamper-evidence chain over the impersonation audit trail';
-
     use SupportsNamespacedNames;
+
+    protected $description = 'Verify the tamper-evidence chain over the impersonation audit trail';
 
     public function handle(Settings $settings, EloquentAuditStore $store): int
     {
@@ -78,7 +79,7 @@ class VerifyAuditCommand extends Command
                     'The audit chain breaks at row [%s] (started %s). Every row from here on is '
                     . 'suspect: one was altered, deleted, or inserted after the fact.',
                     is_scalar($key) ? (string) $key : 'unknown',
-                    $startedAt instanceof \DateTimeInterface ? $startedAt->format(DATE_ATOM) : 'unknown',
+                    $startedAt instanceof DateTimeInterface ? $startedAt->format(DATE_ATOM) : 'unknown',
                 ));
 
                 return self::FAILURE;
@@ -96,6 +97,11 @@ class VerifyAuditCommand extends Command
         return self::SUCCESS;
     }
 
+    protected function namespacedSignature(): string
+    {
+        return 'laranail::impersonator.verify-audit';
+    }
+
     /** @return iterable<ImpersonationAudit> */
     private function rows(): iterable
     {
@@ -104,10 +110,5 @@ class VerifyAuditCommand extends Command
             ->orderBy('started_at')
             ->orderBy('id')
             ->lazy();
-    }
-
-    protected function namespacedSignature(): string
-    {
-        return 'laranail::impersonator.verify-audit';
     }
 }

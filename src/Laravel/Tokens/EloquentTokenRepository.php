@@ -4,16 +4,18 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Tokens;
 
-use Illuminate\Database\ConnectionResolverInterface;
-use Illuminate\Database\Query\Builder;
+use Throwable;
+use DateTimeImmutable;
+use DateTimeInterface;
 use Illuminate\Support\Str;
 use Psr\Clock\ClockInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\ConnectionResolverInterface;
 use Simtabi\Laranail\Impersonator\Core\Values\Token;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
+use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 
 /**
  * Single-use handoff tokens, in the database.
@@ -51,10 +53,10 @@ final readonly class EloquentTokenRepository implements TokenRepository
         $expiresAt = $this->clock->now()->modify('+' . max(1, $ttlSeconds) . ' seconds');
 
         $this->table()->insert([
-            'id' => strtolower((string) Str::ulid()),
+            'id'         => strtolower((string) Str::ulid()),
             'token_hash' => $this->digest($plaintext),
-            'audit_id' => null,
-            'request' => json_encode($request->toArray(), JSON_THROW_ON_ERROR),
+            'audit_id'   => null,
+            'request'    => json_encode($request->toArray(), JSON_THROW_ON_ERROR),
             'expires_at' => $expiresAt,
             'created_at' => $this->clock->now(),
             'updated_at' => $this->clock->now(),
@@ -166,18 +168,18 @@ final readonly class EloquentTokenRepository implements TokenRepository
         return hash('sha256', $plaintext);
     }
 
-    private function hasExpired(mixed $expiresAt, \DateTimeImmutable $now): bool
+    private function hasExpired(mixed $expiresAt, DateTimeImmutable $now): bool
     {
-        if (! is_string($expiresAt) && ! $expiresAt instanceof \DateTimeInterface) {
+        if (! is_string($expiresAt) && ! $expiresAt instanceof DateTimeInterface) {
             // An unreadable expiry is treated as expired. Failing closed here costs one
             // rejected handoff; failing open would hand out an unbounded token.
             return true;
         }
 
         try {
-            $parsed = $expiresAt instanceof \DateTimeInterface
-                ? \DateTimeImmutable::createFromInterface($expiresAt)
-                : new \DateTimeImmutable($expiresAt);
+            $parsed = $expiresAt instanceof DateTimeInterface
+                ? DateTimeImmutable::createFromInterface($expiresAt)
+                : new DateTimeImmutable($expiresAt);
         } catch (Throwable) {
             return true;
         }

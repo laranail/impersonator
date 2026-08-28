@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
 
@@ -37,10 +37,10 @@ class ImpersonationBadge extends Component
         }
 
         return $this->renderView('laranail-impersonator::components.badge', [
-            'mode' => $session->mode->name,
-            'modeName' => $presenter->modeName($session->mode->name, short: true),
+            'mode'        => $session->mode->name,
+            'modeName'    => $presenter->modeName($session->mode->name, short: true),
             'description' => $manager->modes()->descriptions()[$session->mode->name] ?? null,
-            'targetName' => $this->showTarget
+            'targetName'  => $this->showTarget
                 ? ($session->target->label ?? $manager->displayNameFor($manager->target()))
                 : null,
         ]);

@@ -30,6 +30,12 @@ final readonly class Credential
         public array $metadata = [],
     ) {}
 
+    /** @return array<string, mixed> */
+    public function __debugInfo(): array
+    {
+        return ['secret' => $this->secret === null ? null : '[redacted]'] + $this->toAuditArray();
+    }
+
     /** No secret leaves the server; the session itself is the credential. */
     public static function session(?string $sessionId = null): self
     {
@@ -82,17 +88,11 @@ final readonly class Credential
     public function toAuditArray(): array
     {
         return [
-            'type' => $this->type->value,
-            'hash' => $this->hash,
-            'reference' => $this->reference,
+            'type'       => $this->type->value,
+            'hash'       => $this->hash,
+            'reference'  => $this->reference,
             'expires_at' => $this->expiresAt?->format(DATE_ATOM),
-            'metadata' => $this->metadata,
+            'metadata'   => $this->metadata,
         ];
-    }
-
-    /** @return array<string, mixed> */
-    public function __debugInfo(): array
-    {
-        return ['secret' => $this->secret === null ? null : '[redacted]'] + $this->toAuditArray();
     }
 }

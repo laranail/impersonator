@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Adapters;
 
-use Illuminate\Database\Eloquent\Model;
+use Throwable;
 use Illuminate\Support\Str;
-use Laravel\Sanctum\PersonalAccessToken;
 use Laravel\Sanctum\Sanctum;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Illuminate\Database\Eloquent\Model;
+use Laravel\Sanctum\PersonalAccessToken;
 use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * Impersonation for Sanctum-authenticated APIs.
@@ -95,13 +95,13 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
 
         $accessToken->forceFill([
             'tokenable_type' => $target->getMorphClass(),
-            'tokenable_id' => $target->getKey(),
+            'tokenable_id'   => $target->getKey(),
             // The audit id in the name is the back-reference. Sanctum names are not unique, so
             // this is a label rather than a key — but it is the label a human reads when asking
             // which impersonation a token belongs to.
-            'name' => 'impersonation:' . $session->auditId,
-            'token' => hash('sha256', $plaintext),
-            'abilities' => [$this->ability()],
+            'name'       => 'impersonation:' . $session->auditId,
+            'token'      => hash('sha256', $plaintext),
+            'abilities'  => [$this->ability()],
             'expires_at' => $expiresAt,
         ])->save();
 
@@ -115,23 +115,10 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
             reference: $this->keyOf($accessToken),
             expiresAt: $expiresAt->toDateTimeImmutable(),
             metadata: [
-                'ability' => $this->ability(),
+                'ability'  => $this->ability(),
                 'audit_id' => $session->auditId,
             ],
         );
-    }
-
-    /**
-     * Sanctum's token string: an optional configured prefix, 40 random characters, and a CRC of
-     * them. Reproduced rather than borrowed because `generateTokenString()` lives on the trait,
-     * which is exactly the dependency this adapter avoids.
-     */
-    private function generateTokenString(): string
-    {
-        $entropy = Str::random(40);
-        $prefix = config('sanctum.token_prefix', '');
-
-        return (is_string($prefix) ? $prefix : '') . $entropy . hash('crc32b', $entropy);
     }
 
     /**
@@ -152,6 +139,19 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
     public function revoke(ImpersonationSession $session): bool
     {
         return $this->deleteToken($session);
+    }
+
+    /**
+     * Sanctum's token string: an optional configured prefix, 40 random characters, and a CRC of
+     * them. Reproduced rather than borrowed because `generateTokenString()` lives on the trait,
+     * which is exactly the dependency this adapter avoids.
+     */
+    private function generateTokenString(): string
+    {
+        $entropy = Str::random(40);
+        $prefix = config('sanctum.token_prefix', '');
+
+        return (is_string($prefix) ? $prefix : '') . $entropy . hash('crc32b', $entropy);
     }
 
     private function deleteToken(ImpersonationSession $session): bool

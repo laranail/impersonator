@@ -43,6 +43,65 @@ final readonly class ImpersonationSession
         public int $extensions = 0,
     ) {}
 
+    /**
+     * @param array<string, mixed> $snapshot
+     *
+     * @throws InvalidIdentity when the
+     *                         cached identities are unreadable, which means the entry cannot be trusted
+     */
+    public static function fromSnapshot(array $snapshot): self
+    {
+        $str = static fn (string $key, string $default = ''): string => is_string($snapshot[$key] ?? null)
+            && $snapshot[$key] !== ''
+                ? $snapshot[$key]
+                : $default;
+
+        $at = static fn (string $key): ?DateTimeImmutable => is_int($snapshot[$key] ?? null)
+            ? (new DateTimeImmutable)->setTimestamp($snapshot[$key])
+            : null;
+
+        $identity = static function (string $key) use ($snapshot): Identity {
+            $data = $snapshot[$key] ?? null;
+
+            if (! is_array($data) || ! isset($data['type'], $data['id'])) {
+                throw InvalidIdentity::emptyType();
+            }
+
+            $type = $data['type'];
+            $id = $data['id'];
+
+            if (! is_string($type) || (! is_int($id) && ! is_string($id))) {
+                throw InvalidIdentity::emptyType();
+            }
+
+            return new Identity($type, $id, is_string($data['label'] ?? null) ? $data['label'] : null);
+        };
+
+        $endedBy = $str('ended_by');
+        $metadata = $snapshot['metadata'] ?? null;
+
+        return new self(
+            auditId: $str('id'),
+            impersonator: $identity('impersonator'),
+            target: $identity('target'),
+            mode: Mode::of($str('mode', Mode::FULL)),
+            guards: new Guards($str('guard_impersonator', 'web'), $str('guard_target', 'web')),
+            driver: $str('driver', 'session'),
+            adapter: $str('adapter', 'session'),
+            startedAt: $at('started_at') ?? new DateTimeImmutable,
+            endedAt: $at('ended_at'),
+            endedBy: $endedBy === '' ? null : EndReason::tryFrom($endedBy),
+            tenantId: $str('tenant_id') ?: null,
+            sessionId: $str('session_id') ?: null,
+            credentialHash: $str('credential_hash') ?: null,
+            reason: $str('reason') ?: null,
+            expiresAt: $at('expires_at'),
+            metadata: is_array($metadata) ? self::stringKeys($metadata) : [],
+            revokedAt: $at('revoked_at'),
+            extensions: is_int($snapshot['extensions'] ?? null) ? $snapshot['extensions'] : 0,
+        );
+    }
+
     public function isActive(): bool
     {
         return $this->endedAt === null;
@@ -207,101 +266,27 @@ final readonly class ImpersonationSession
     public function toSnapshot(): array
     {
         return [
-            'v' => 1,
-            'id' => $this->auditId,
-            'impersonator' => $this->impersonator->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
+            'v'                  => 1,
+            'id'                 => $this->auditId,
+            'impersonator'       => $this->impersonator->toArray(),
+            'target'             => $this->target->toArray(),
+            'mode'               => $this->mode->name,
             'guard_impersonator' => $this->guards->impersonator,
-            'guard_target' => $this->guards->target,
-            'driver' => $this->driver,
-            'adapter' => $this->adapter,
-            'tenant_id' => $this->tenantId,
-            'session_id' => $this->sessionId,
-            'credential_hash' => $this->credentialHash,
-            'reason' => $this->reason,
-            'started_at' => $this->startedAt->getTimestamp(),
-            'ended_at' => $this->endedAt?->getTimestamp(),
-            'ended_by' => $this->endedBy?->value,
-            'expires_at' => $this->expiresAt?->getTimestamp(),
-            'revoked_at' => $this->revokedAt?->getTimestamp(),
-            'extensions' => $this->extensions,
-            'metadata' => $this->metadata,
+            'guard_target'       => $this->guards->target,
+            'driver'             => $this->driver,
+            'adapter'            => $this->adapter,
+            'tenant_id'          => $this->tenantId,
+            'session_id'         => $this->sessionId,
+            'credential_hash'    => $this->credentialHash,
+            'reason'             => $this->reason,
+            'started_at'         => $this->startedAt->getTimestamp(),
+            'ended_at'           => $this->endedAt?->getTimestamp(),
+            'ended_by'           => $this->endedBy?->value,
+            'expires_at'         => $this->expiresAt?->getTimestamp(),
+            'revoked_at'         => $this->revokedAt?->getTimestamp(),
+            'extensions'         => $this->extensions,
+            'metadata'           => $this->metadata,
         ];
-    }
-
-    /**
-     * @param array<string, mixed> $snapshot
-     *
-     * @throws InvalidIdentity when the
-     *                         cached identities are unreadable, which means the entry cannot be trusted
-     */
-    public static function fromSnapshot(array $snapshot): self
-    {
-        $str = static fn (string $key, string $default = ''): string => is_string($snapshot[$key] ?? null)
-            && $snapshot[$key] !== ''
-                ? $snapshot[$key]
-                : $default;
-
-        $at = static fn (string $key): ?DateTimeImmutable => is_int($snapshot[$key] ?? null)
-            ? (new DateTimeImmutable)->setTimestamp($snapshot[$key])
-            : null;
-
-        $identity = static function (string $key) use ($snapshot): Identity {
-            $data = $snapshot[$key] ?? null;
-
-            if (! is_array($data) || ! isset($data['type'], $data['id'])) {
-                throw InvalidIdentity::emptyType();
-            }
-
-            $type = $data['type'];
-            $id = $data['id'];
-
-            if (! is_string($type) || (! is_int($id) && ! is_string($id))) {
-                throw InvalidIdentity::emptyType();
-            }
-
-            return new Identity($type, $id, is_string($data['label'] ?? null) ? $data['label'] : null);
-        };
-
-        $endedBy = $str('ended_by');
-        $metadata = $snapshot['metadata'] ?? null;
-
-        return new self(
-            auditId: $str('id'),
-            impersonator: $identity('impersonator'),
-            target: $identity('target'),
-            mode: Mode::of($str('mode', Mode::FULL)),
-            guards: new Guards($str('guard_impersonator', 'web'), $str('guard_target', 'web')),
-            driver: $str('driver', 'session'),
-            adapter: $str('adapter', 'session'),
-            startedAt: $at('started_at') ?? new DateTimeImmutable,
-            endedAt: $at('ended_at'),
-            endedBy: $endedBy === '' ? null : EndReason::tryFrom($endedBy),
-            tenantId: $str('tenant_id') ?: null,
-            sessionId: $str('session_id') ?: null,
-            credentialHash: $str('credential_hash') ?: null,
-            reason: $str('reason') ?: null,
-            expiresAt: $at('expires_at'),
-            metadata: is_array($metadata) ? self::stringKeys($metadata) : [],
-            revokedAt: $at('revoked_at'),
-            extensions: is_int($snapshot['extensions'] ?? null) ? $snapshot['extensions'] : 0,
-        );
-    }
-
-    /**
-     * @param array<array-key, mixed> $data
-     * @return array<string, mixed>
-     */
-    private static function stringKeys(array $data): array
-    {
-        $narrowed = [];
-
-        foreach ($data as $key => $value) {
-            $narrowed[(string) $key] = $value;
-        }
-
-        return $narrowed;
     }
 
     /**
@@ -314,23 +299,39 @@ final readonly class ImpersonationSession
     public function toArray(): array
     {
         return [
-            'id' => $this->auditId,
+            'id'           => $this->auditId,
             'impersonator' => $this->impersonator->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
-            'guards' => $this->guards->toArray(),
-            'driver' => $this->driver,
-            'adapter' => $this->adapter,
-            'tenant_id' => $this->tenantId,
-            'reason' => $this->reason,
-            'started_at' => $this->startedAt->format(DATE_ATOM),
-            'ended_at' => $this->endedAt?->format(DATE_ATOM),
-            'ended_by' => $this->endedBy?->value,
-            'expires_at' => $this->expiresAt?->format(DATE_ATOM),
-            'revoked_at' => $this->revokedAt?->format(DATE_ATOM),
-            'extensions' => $this->extensions,
-            'active' => $this->isActive(),
-            'metadata' => $this->metadata,
+            'target'       => $this->target->toArray(),
+            'mode'         => $this->mode->name,
+            'guards'       => $this->guards->toArray(),
+            'driver'       => $this->driver,
+            'adapter'      => $this->adapter,
+            'tenant_id'    => $this->tenantId,
+            'reason'       => $this->reason,
+            'started_at'   => $this->startedAt->format(DATE_ATOM),
+            'ended_at'     => $this->endedAt?->format(DATE_ATOM),
+            'ended_by'     => $this->endedBy?->value,
+            'expires_at'   => $this->expiresAt?->format(DATE_ATOM),
+            'revoked_at'   => $this->revokedAt?->format(DATE_ATOM),
+            'extensions'   => $this->extensions,
+            'active'       => $this->isActive(),
+            'metadata'     => $this->metadata,
         ];
+    }
+
+    /**
+     * @param array<array-key, mixed> $data
+     *
+     * @return array<string, mixed>
+     */
+    private static function stringKeys(array $data): array
+    {
+        $narrowed = [];
+
+        foreach ($data as $key => $value) {
+            $narrowed[(string) $key] = $value;
+        }
+
+        return $narrowed;
     }
 }

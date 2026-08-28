@@ -6,14 +6,14 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Middleware;
 
 use Closure;
 use DateTimeImmutable;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Simtabi\Laranail\Impersonator\Core\Support\Redactor;
 use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Symfony\Component\HttpFoundation\Response;
+use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
  * Records one trail row per impersonated request.

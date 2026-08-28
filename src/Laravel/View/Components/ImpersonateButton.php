@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\View\Component;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\View\Component;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
  * `<x-impersonate-button :user="$user" />` — a POST form that enters an account.
@@ -74,20 +74,20 @@ class ImpersonateButton extends Component
         $this->label ??= (string) __('laranail-impersonator::components.impersonate');
 
         return $this->renderView('laranail-impersonator::components.impersonate-button', [
-            'user' => $this->user,
-            'action' => $this->action($settings),
+            'user'       => $this->user,
+            'action'     => $this->action($settings),
             'targetType' => $manager->identities()->aliasFor(
                 $this->user instanceof Model ? $this->user->getMorphClass() : $this->user::class,
             ),
             'targetId' => $this->user instanceof Model
                 ? $this->user->getKey()
                 : $this->user->getAuthIdentifier(),
-            'mode' => $this->mode,
-            'reason' => $this->reason,
-            'redirectTo' => $this->redirectTo,
-            'label' => $this->label,
-            'confirm' => $this->confirm,
-            'displayName' => $manager->displayNameFor($this->user),
+            'mode'           => $this->mode,
+            'reason'         => $this->reason,
+            'redirectTo'     => $this->redirectTo,
+            'label'          => $this->label,
+            'confirm'        => $this->confirm,
+            'displayName'    => $manager->displayNameFor($this->user),
             'reasonRequired' => $reasonRequired,
         ]);
     }

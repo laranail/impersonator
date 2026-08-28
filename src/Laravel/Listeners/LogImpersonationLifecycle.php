@@ -4,28 +4,29 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Listeners;
 
+use Throwable;
 use DateTimeImmutable;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Log\LogManager;
 use Psr\Log\LoggerInterface;
+use Illuminate\Log\LogManager;
+use Illuminate\Contracts\Config\Repository as Config;
+use Simtabi\Laranail\Impersonator\Core\Support\Redactor;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
+use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalRequested;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenIssued;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRedeemed;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRejected;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExpired;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExtended;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRequested;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
 use Simtabi\Laranail\Impersonator\Core\Events\ModeViolationBlocked;
-use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
-use Simtabi\Laranail\Impersonator\Core\Support\Redactor;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExtended;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRequested;
 
 /**
  * Writes every lifecycle transition to a PSR-3 channel with structured context.
@@ -82,10 +83,10 @@ final readonly class LogImpersonationLifecycle
     {
         $this->write($this->level(), 'Impersonation started.', [
             ...$this->fromSession($event->session),
-            'driver' => $event->session->driver,
-            'adapter' => $event->session->adapter,
-            'tenant_id' => $event->session->tenantId,
-            'reason' => $event->session->reason,
+            'driver'     => $event->session->driver,
+            'adapter'    => $event->session->adapter,
+            'tenant_id'  => $event->session->tenantId,
+            'reason'     => $event->session->reason,
             'expires_at' => $event->session->expiresAt?->format(DATE_ATOM),
         ], audit: true);
     }
@@ -98,7 +99,7 @@ final readonly class LogImpersonationLifecycle
 
         $this->write($level, 'Impersonation ended.', [
             ...$this->fromSession($event->session),
-            'ended_by' => $event->reason->value,
+            'ended_by'         => $event->reason->value,
             'duration_seconds' => $event->session->durationInSeconds(new DateTimeImmutable),
         ], audit: true);
     }
@@ -107,8 +108,8 @@ final readonly class LogImpersonationLifecycle
     {
         $this->write($this->rejectionLevel(), 'Impersonation rejected.', [
             ...$this->fromRequest($event->request),
-            'decision' => $event->decision->code,
-            'reason' => $event->decision->reason,
+            'decision'         => $event->decision->code,
+            'reason'           => $event->decision->reason,
             'decision_context' => $this->scrub($event->decision->context),
         ]);
     }
@@ -125,8 +126,8 @@ final readonly class LogImpersonationLifecycle
         $this->write($this->level(), 'Impersonation extended.', [
             ...$this->fromSession($event->session),
             'seconds_added' => $event->grant->seconds(),
-            'extensions' => $event->session->extensions,
-            'expires_at' => $event->session->expiresAt?->format(DATE_ATOM),
+            'extensions'    => $event->session->extensions,
+            'expires_at'    => $event->session->expiresAt?->format(DATE_ATOM),
         ], audit: true);
     }
 
@@ -136,7 +137,7 @@ final readonly class LogImpersonationLifecycle
         $this->write($this->rejectionLevel(), 'Impersonation revoked.', [
             ...$this->fromSession($event->session),
             'revoked_by' => $event->revokedBy?->key(),
-            'note' => $event->note,
+            'note'       => $event->note,
         ], audit: true);
     }
 
@@ -159,11 +160,11 @@ final readonly class LogImpersonationLifecycle
     {
         $this->write($this->rejectionLevel(), 'Mode violation blocked.', [
             ...$this->fromSession($event->session),
-            'decision' => $event->decision->code,
+            'decision'         => $event->decision->code,
             'attempted_method' => $event->action->normalizedMethod(),
-            'attempted_path' => $event->action->path,
-            'attempted_route' => $event->action->routeName,
-            'attempted_model' => $event->action->modelClass,
+            'attempted_path'   => $event->action->path,
+            'attempted_route'  => $event->action->routeName,
+            'attempted_model'  => $event->action->modelClass,
         ], audit: true);
     }
 
@@ -191,7 +192,7 @@ final readonly class LogImpersonationLifecycle
     {
         $this->write($this->rejectionLevel(), 'Handoff token rejected.', [
             'token_reason' => $event->reason,
-            'ip' => $event->ip,
+            'ip'           => $event->ip,
         ]);
     }
 
@@ -227,9 +228,9 @@ final readonly class LogImpersonationLifecycle
         // still the outcome of a request nobody answered, which is worth the higher level.
         $this->write($this->rejectionLevel(), 'Approval denied.', [
             'approval_id' => $event->approvalId,
-            'denied_by' => $event->deniedBy?->key(),
-            'note' => $event->note,
-            'expired' => $event->expired,
+            'denied_by'   => $event->deniedBy?->key(),
+            'note'        => $event->note,
+            'expired'     => $event->expired,
         ], audit: true);
     }
 
@@ -254,10 +255,10 @@ final readonly class LogImpersonationLifecycle
     private function fromSession(ImpersonationSession $session): array
     {
         return [
-            'audit_id' => $session->auditId,
+            'audit_id'     => $session->auditId,
             'impersonator' => $session->impersonator->key(),
-            'target' => $session->target->key(),
-            'mode' => $session->mode->name,
+            'target'       => $session->target->key(),
+            'mode'         => $session->mode->name,
         ];
     }
 
@@ -272,10 +273,10 @@ final readonly class LogImpersonationLifecycle
     {
         return [
             'impersonator' => $request->impersonator->key(),
-            'target' => $request->target->key(),
-            'mode' => $request->mode->name,
-            'driver' => $request->driver,
-            'ip' => $request->ip,
+            'target'       => $request->target->key(),
+            'mode'         => $request->mode->name,
+            'driver'       => $request->driver,
+            'ip'           => $request->ip,
         ];
     }
 
@@ -334,7 +335,7 @@ final readonly class LogImpersonationLifecycle
 
         try {
             return $this->logs->channel($channel);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return null;
         }
     }
@@ -348,6 +349,7 @@ final readonly class LogImpersonationLifecycle
      * sensitive in one place is not written in the other.
      *
      * @param array<string, mixed> $context
+     *
      * @return array<string, mixed>
      */
     private function scrub(array $context): array

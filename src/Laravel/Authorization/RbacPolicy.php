@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Authorization;
 
+use Closure;
+use Throwable;
 use Illuminate\Database\Eloquent\Model;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * The role-based layer, stacked on top of the always-on rules in BasePolicy.
@@ -260,7 +262,7 @@ class RbacPolicy extends BasePolicy
 
         try {
             return $user->hasPermissionTo($permission) === true;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -273,7 +275,7 @@ class RbacPolicy extends BasePolicy
 
         try {
             return $user->hasRole($role) === true;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -312,10 +314,10 @@ class RbacPolicy extends BasePolicy
         $target = $this->resolveTarget($request);
 
         $callable = match (true) {
-            $rule instanceof \Closure => $rule,
+            $rule instanceof Closure                                                    => $rule,
             is_string($rule) && class_exists($rule) && method_exists($rule, '__invoke') => new $rule,
-            is_callable($rule) => $rule,
-            default => null,
+            is_callable($rule)                                                          => $rule,
+            default                                                                     => null,
         };
 
         if ($callable === null) {
@@ -328,7 +330,7 @@ class RbacPolicy extends BasePolicy
 
         try {
             $allowed = $callable($impersonator, $target, $request);
-        } catch (\Throwable $e) {
+        } catch (Throwable $e) {
             return Decision::deny(
                 Decision::HIERARCHY_VIOLATION,
                 'The impersonation hierarchy rule refused this impersonation.',

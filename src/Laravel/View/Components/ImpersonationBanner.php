@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
 
 /**
@@ -41,9 +41,9 @@ class ImpersonationBanner extends Component
 
         return $this->renderView('laranail-impersonator::banner', [
             ...$data,
-            'theme' => $this->theme ?? $data['theme'],
-            'position' => $this->position ?? $data['position'],
-            'showMode' => $this->showMode ?? $data['showMode'],
+            'theme'        => $this->theme ?? $data['theme'],
+            'position'     => $this->position ?? $data['position'],
+            'showMode'     => $this->showMode ?? $data['showMode'],
             'showDuration' => $this->showDuration ?? $data['showDuration'],
         ]);
     }

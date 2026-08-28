@@ -92,10 +92,10 @@ final readonly class RlsContext
         $prefix = $this->settings->string('rls.prefix', 'app');
 
         return [
-            $prefix . '.impersonated_user_id' => (string) $session->target->id,
+            $prefix . '.impersonated_user_id'   => (string) $session->target->id,
             $prefix . '.impersonated_user_type' => $session->target->type,
-            $prefix . '.impersonator_id' => (string) $session->impersonator->id,
-            $prefix . '.impersonation_mode' => $session->mode->name,
+            $prefix . '.impersonator_id'        => (string) $session->impersonator->id,
+            $prefix . '.impersonation_mode'     => $session->mode->name,
             $prefix . '.impersonation_audit_id' => $session->auditId,
         ];
     }

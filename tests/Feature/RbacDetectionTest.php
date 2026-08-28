@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\BasePolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /*
 | Which policy gets selected, and by what.

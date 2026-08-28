@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Actions;
 
-use Illuminate\Contracts\Events\Dispatcher;
 use Psr\Clock\ClockInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
-use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Illuminate\Contracts\Events\Dispatcher;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
+use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 use Simtabi\Laranail\Impersonator\Laravel\Support\ReviewerDirectory;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
 
 /**
  * A second operator answers a break-glass request: yes or no.

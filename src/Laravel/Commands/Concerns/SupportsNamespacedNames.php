@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns;
 
 use Illuminate\Console\Parser;
-use Simtabi\Laranail\Console\Tools\Commands\Concerns\SupportsNamespacedNames as CanonicalNamespacedNames;
 use Symfony\Component\Console\Input\InputDefinition;
+use Simtabi\Laranail\Console\Tools\Commands\Concerns\SupportsNamespacedNames as CanonicalNamespacedNames;
 
 /**
  * Lets a command be named `laranail::impersonator.thing`.
@@ -53,31 +53,6 @@ trait SupportsNamespacedNames
         if ($aliases !== []) {
             $this->setAliases($aliases);
         }
-    }
-
-    /**
-     * The consuming command's own `$commandAliases`, if it declares one.
-     *
-     * Deliberately NOT a property on this trait, for the same reason `namespacedSignature()` is a
-     * method: a trait cannot declare a property that the using class also declares with a different
-     * default -- PHP rejects the composition outright. Declaring it here made "a command that wants
-     * aliases declares its own list" a compile-time fatal rather than the documented usage.
-     *
-     * @return list<string>
-     */
-    private function declaredCommandAliases(): array
-    {
-        if (! property_exists($this, 'commandAliases') || ! is_array($this->commandAliases)) {
-            return [];
-        }
-
-        // Filtered rather than cast: the property is the consuming command's, so its contents are
-        // not this trait's to assume. A stray null would reach Symfony's setAliases() as a type
-        // error at boot, which is the failure mode this whole method exists to avoid.
-        return array_values(array_filter(
-            $this->commandAliases,
-            static fn (mixed $alias): bool => is_string($alias) && $alias !== '',
-        ));
     }
 
     /**
@@ -136,5 +111,30 @@ trait SupportsNamespacedNames
     protected function namespacedSignature(): string
     {
         return '';
+    }
+
+    /**
+     * The consuming command's own `$commandAliases`, if it declares one.
+     *
+     * Deliberately NOT a property on this trait, for the same reason `namespacedSignature()` is a
+     * method: a trait cannot declare a property that the using class also declares with a different
+     * default -- PHP rejects the composition outright. Declaring it here made "a command that wants
+     * aliases declares its own list" a compile-time fatal rather than the documented usage.
+     *
+     * @return list<string>
+     */
+    private function declaredCommandAliases(): array
+    {
+        if (! property_exists($this, 'commandAliases') || ! is_array($this->commandAliases)) {
+            return [];
+        }
+
+        // Filtered rather than cast: the property is the consuming command's, so its contents are
+        // not this trait's to assume. A stray null would reach Symfony's setAliases() as a type
+        // error at boot, which is the failure mode this whole method exists to avoid.
+        return array_values(array_filter(
+            $this->commandAliases,
+            static fn (mixed $alias): bool => is_string($alias) && $alias !== '',
+        ));
     }
 }

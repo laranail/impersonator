@@ -5,39 +5,40 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel;
 
 use Closure;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Database\Eloquent\Model;
+use Throwable;
 use Illuminate\Http\Request;
 use Psr\Clock\ClockInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Contracts\Config\Repository as Config;
 use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 use Simtabi\Laranail\Impersonator\Laravel\Support\ReviewerDirectory;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * The facade root, and the point where the two orthogonal axes compose.
@@ -148,7 +149,7 @@ class ImpersonationManager
         if ($this->rbacDetector !== null) {
             try {
                 return ($this->rbacDetector)() === true;
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // Fail closed, as above. The base policy still enforces every identity rule; what is
                 // lost is the permission layer, which a detector that just threw cannot be trusted
                 // to describe anyway.
@@ -157,25 +158,6 @@ class ImpersonationManager
         }
 
         return array_any($this->rbacDetectionClasses(), fn (string $class): bool => class_exists($class) || interface_exists($class));
-    }
-
-    /**
-     * The class names probed by the default detector.
-     *
-     * Defaults to spatie/laravel-permission's provider, which is the package the RBAC policy was
-     * written against — but only as a *default*. The policy itself is duck-typed against
-     * `hasPermissionTo()` and `hasRole()`, so any package exposing that surface works once named
-     * here; nothing about it is spatie-specific beyond this list.
-     *
-     * @return list<string>
-     */
-    protected function rbacDetectionClasses(): array
-    {
-        $configured = new Settings($this->config)->stringList('authorization.rbac.detect');
-
-        return $configured === []
-            ? ['Spatie\Permission\PermissionServiceProvider']
-            : $configured;
     }
 
     /**
@@ -337,7 +319,7 @@ class ImpersonationManager
         foreach ($this->driverFactories as $name => $factory) {
             try {
                 $availability[$name] = $factory($this->app)->isAvailable();
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 $availability[$name] = false;
             }
         }
@@ -353,7 +335,7 @@ class ImpersonationManager
         foreach ($this->adapterFactories as $name => $factory) {
             try {
                 $availability[$name] = $factory($this->app)->isAvailable();
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 $availability[$name] = false;
             }
         }
@@ -729,11 +711,6 @@ class ImpersonationManager
         return $this->app->make(AuthorizationPolicy::class);
     }
 
-    protected function events(): Dispatcher
-    {
-        return $this->app->make(Dispatcher::class);
-    }
-
     /**
      * The orchestration layer.
      *
@@ -801,6 +778,78 @@ class ImpersonationManager
             $this->identities->fromUser($impersonator),
             $mode instanceof Mode ? $mode->name : $mode,
         );
+    }
+
+    /**
+     * The authenticated operator, or null. Public so a Form Request can require one
+     * without duplicating the guard lookup.
+     */
+    public function currentImpersonatorOrNull(): Authenticatable|Model|null
+    {
+        return $this->authenticated();
+    }
+
+    /** The impersonator on the active session, or null. */
+    public function currentImpersonatorIdentity(): ?Identity
+    {
+        return $this->current()?->impersonator;
+    }
+
+    /**
+     * A rate-limit key naming whoever is really making this request.
+     *
+     * Laravel keys `throttle` on `$request->user()`, which during an impersonation is the target — so
+     * an operator's traffic is billed to the customer's quota, and an operator can deliberately
+     * exhaust a chosen customer's limit. Rate limits exist to bound a *caller*, and the caller is the
+     * person who authenticated, not the account they are viewing.
+     *
+     * Returns null when nobody is impersonating, which lets a caller fall back to whatever it would
+     * otherwise have used — the framework's own signature, or `$request->user()?->getAuthIdentifier()`
+     * in a named limiter:
+     *
+     *     RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by(
+     *         impersonator()->rateLimitKey($request)
+     *             ?? (string) ($request->user()?->getAuthIdentifier() ?? $request->ip()),
+     *     ));
+     *
+     * A `ThrottleByOperator` middleware ships for the `throttle:60,1` form, where the key is chosen
+     * inside the framework's middleware rather than by the application.
+     */
+    public function rateLimitKey(?Request $request = null): ?string
+    {
+        $impersonator = $this->currentImpersonatorIdentity();
+
+        if ($impersonator === null) {
+            return null;
+        }
+
+        // Prefixed and keyed on the morph-qualified identity, so two models sharing an id — a
+        // `User` 7 and a `Vendor` 7 — never share a limiter bucket.
+        return 'impersonator-operator:' . $impersonator->key();
+    }
+
+    /**
+     * The class names probed by the default detector.
+     *
+     * Defaults to spatie/laravel-permission's provider, which is the package the RBAC policy was
+     * written against — but only as a *default*. The policy itself is duck-typed against
+     * `hasPermissionTo()` and `hasRole()`, so any package exposing that surface works once named
+     * here; nothing about it is spatie-specific beyond this list.
+     *
+     * @return list<string>
+     */
+    protected function rbacDetectionClasses(): array
+    {
+        $configured = new Settings($this->config)->stringList('authorization.rbac.detect');
+
+        return $configured === []
+            ? ['Spatie\Permission\PermissionServiceProvider']
+            : $configured;
+    }
+
+    protected function events(): Dispatcher
+    {
+        return $this->app->make(Dispatcher::class);
     }
 
     protected function authenticated(): Authenticatable|Model|null
@@ -883,53 +932,5 @@ class ImpersonationManager
             $key,
             get_debug_type($value),
         ));
-    }
-
-    /**
-     * The authenticated operator, or null. Public so a Form Request can require one
-     * without duplicating the guard lookup.
-     */
-    public function currentImpersonatorOrNull(): Authenticatable|Model|null
-    {
-        return $this->authenticated();
-    }
-
-    /** The impersonator on the active session, or null. */
-    public function currentImpersonatorIdentity(): ?Identity
-    {
-        return $this->current()?->impersonator;
-    }
-
-    /**
-     * A rate-limit key naming whoever is really making this request.
-     *
-     * Laravel keys `throttle` on `$request->user()`, which during an impersonation is the target — so
-     * an operator's traffic is billed to the customer's quota, and an operator can deliberately
-     * exhaust a chosen customer's limit. Rate limits exist to bound a *caller*, and the caller is the
-     * person who authenticated, not the account they are viewing.
-     *
-     * Returns null when nobody is impersonating, which lets a caller fall back to whatever it would
-     * otherwise have used — the framework's own signature, or `$request->user()?->getAuthIdentifier()`
-     * in a named limiter:
-     *
-     *     RateLimiter::for('api', fn (Request $request) => Limit::perMinute(60)->by(
-     *         impersonator()->rateLimitKey($request)
-     *             ?? (string) ($request->user()?->getAuthIdentifier() ?? $request->ip()),
-     *     ));
-     *
-     * A `ThrottleByOperator` middleware ships for the `throttle:60,1` form, where the key is chosen
-     * inside the framework's middleware rather than by the application.
-     */
-    public function rateLimitKey(?Request $request = null): ?string
-    {
-        $impersonator = $this->currentImpersonatorIdentity();
-
-        if ($impersonator === null) {
-            return null;
-        }
-
-        // Prefixed and keyed on the morph-qualified identity, so two models sharing an id — a
-        // `User` 7 and a `Vendor` 7 — never share a limiter bucket.
-        return 'impersonator-operator:' . $impersonator->key();
     }
 }

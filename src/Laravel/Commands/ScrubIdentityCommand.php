@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 
 /**
  * Removes a person's name from the audit trail without removing the trail.
@@ -34,13 +34,6 @@ class ScrubIdentityCommand extends Command
     use SupportsNamespacedNames;
 
     protected $description = 'Null the denormalised name of one identity across the audit trail, keeping the rows';
-
-    protected function namespacedSignature(): string
-    {
-        return 'laranail::impersonator.scrub-identity
-            {identity : The identity to scrub, as type:id — for example user:9902}
-            {--dry-run : Report what would change without writing}';
-    }
 
     public function handle(): int
     {
@@ -122,5 +115,12 @@ class ScrubIdentityCommand extends Command
         ));
 
         return self::SUCCESS;
+    }
+
+    protected function namespacedSignature(): string
+    {
+        return 'laranail::impersonator.scrub-identity
+            {identity : The identity to scrub, as type:id — for example user:9902}
+            {--dry-run : Report what would change without writing}';
     }
 }

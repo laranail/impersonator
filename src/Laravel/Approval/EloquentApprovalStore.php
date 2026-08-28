@@ -4,22 +4,23 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Approval;
 
+use RuntimeException;
 use DateTimeImmutable;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Str;
 use Psr\Clock\ClockInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\ConnectionInterface;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalVerdict;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 
 /**
  * Break-glass approvals, in the database.
@@ -48,26 +49,26 @@ final readonly class EloquentApprovalStore implements ApprovalStore
         $id = strtolower((string) Str::ulid());
 
         $this->table()->insert([
-            'id' => $id,
-            'requester_type' => $request->impersonator->type,
-            'requester_id' => (string) $request->impersonator->id,
+            'id'                  => $id,
+            'requester_type'      => $request->impersonator->type,
+            'requester_id'        => (string) $request->impersonator->id,
             'impersonatable_type' => $request->target->type,
-            'impersonatable_id' => (string) $request->target->id,
-            'mode' => $request->mode->name,
-            'reason' => $request->reason,
-            'request' => json_encode($request->toArray(), JSON_THROW_ON_ERROR),
-            'fingerprint' => ApprovalRequest::fingerprintFor(
+            'impersonatable_id'   => (string) $request->target->id,
+            'mode'                => $request->mode->name,
+            'reason'              => $request->reason,
+            'request'             => json_encode($request->toArray(), JSON_THROW_ON_ERROR),
+            'fingerprint'         => ApprovalRequest::fingerprintFor(
                 $request->impersonator,
                 $request->target,
                 $request->mode->name,
             ),
-            'state' => ApprovalState::Pending->value,
+            'state'      => ApprovalState::Pending->value,
             'expires_at' => $expiresAt,
             'created_at' => $now,
             'updated_at' => $now,
         ]);
 
-        return $this->find($id) ?? throw new \RuntimeException(
+        return $this->find($id) ?? throw new RuntimeException(
             'The approval request could not be read back after being opened.',
         );
     }
@@ -77,44 +78,6 @@ final readonly class EloquentApprovalStore implements ApprovalStore
         $request = $this->model()->newQuery()->find($id)?->toApprovalRequest();
 
         return $request === null ? null : $this->withRollup($request);
-    }
-
-    /**
-     * Fill the `decidedBy` / `decisionNote` rollup from the chain.
-     *
-     * One extra query, and only for a single request — never for a queue, where fifty rows would pay
-     * it fifty times. The fields exist because they are published API shape; the record is the
-     * decisions table.
-     *
-     * The closing decision is the denial if there is one, otherwise the last approval. On a partially
-     * approved request it stays null: naming one reviewer there would read as "decided by them" while
-     * the request is still waiting on somebody else.
-     */
-    private function withRollup(ApprovalRequest $request): ApprovalRequest
-    {
-        if (! $request->state->isDecided()) {
-            return $request;
-        }
-
-        $decisions = $this->decisions($request->id);
-
-        if ($decisions === []) {
-            return $request;
-        }
-
-        $closing = null;
-
-        foreach ($decisions as $decision) {
-            if ($decision->denied()) {
-                $closing = $decision;
-
-                break;
-            }
-
-            $closing = $decision;
-        }
-
-        return $request->withDecider($closing->reviewer, $closing->note);
     }
 
     public function grant(string $id, Identity $approver, ?string $note = null, ?string $role = null): ?ApprovalRequest
@@ -179,9 +142,9 @@ final readonly class EloquentApprovalStore implements ApprovalStore
             ->where('state', ApprovalState::Approved->value)
             ->where('expires_at', '>', $now)
             ->update([
-                'state' => ApprovalState::Consumed->value,
+                'state'       => ApprovalState::Consumed->value,
                 'consumed_at' => $now,
-                'updated_at' => $now,
+                'updated_at'  => $now,
             ]);
 
         if ($claimed !== 1) {
@@ -230,21 +193,6 @@ final readonly class EloquentApprovalStore implements ApprovalStore
         );
     }
 
-    /**
-     * @param array<array-key, ImpersonationApprovalRequest> $rows
-     * @return list<ApprovalRequest>
-     */
-    private function project(array $rows): array
-    {
-        $requests = [];
-
-        foreach ($rows as $row) {
-            $requests[] = $row->toApprovalRequest();
-        }
-
-        return $requests;
-    }
-
     public function attachAudit(string $id, string $auditId): void
     {
         $this->table()
@@ -277,7 +225,7 @@ final readonly class EloquentApprovalStore implements ApprovalStore
             ->whereIn('id', $ids)
             ->where('state', ApprovalState::Pending->value)
             ->update([
-                'state' => ApprovalState::Expired->value,
+                'state'      => ApprovalState::Expired->value,
                 'decided_at' => $now,
                 'updated_at' => $now,
             ]);
@@ -293,6 +241,60 @@ final readonly class EloquentApprovalStore implements ApprovalStore
         }
 
         return $expired;
+    }
+
+    /**
+     * Fill the `decidedBy` / `decisionNote` rollup from the chain.
+     *
+     * One extra query, and only for a single request — never for a queue, where fifty rows would pay
+     * it fifty times. The fields exist because they are published API shape; the record is the
+     * decisions table.
+     *
+     * The closing decision is the denial if there is one, otherwise the last approval. On a partially
+     * approved request it stays null: naming one reviewer there would read as "decided by them" while
+     * the request is still waiting on somebody else.
+     */
+    private function withRollup(ApprovalRequest $request): ApprovalRequest
+    {
+        if (! $request->state->isDecided()) {
+            return $request;
+        }
+
+        $decisions = $this->decisions($request->id);
+
+        if ($decisions === []) {
+            return $request;
+        }
+
+        $closing = null;
+
+        foreach ($decisions as $decision) {
+            if ($decision->denied()) {
+                $closing = $decision;
+
+                break;
+            }
+
+            $closing = $decision;
+        }
+
+        return $request->withDecider($closing->reviewer, $closing->note);
+    }
+
+    /**
+     * @param array<array-key, ImpersonationApprovalRequest> $rows
+     *
+     * @return list<ApprovalRequest>
+     */
+    private function project(array $rows): array
+    {
+        $requests = [];
+
+        foreach ($rows as $row) {
+            $requests[] = $row->toApprovalRequest();
+        }
+
+        return $requests;
     }
 
     /**
@@ -331,16 +333,16 @@ final readonly class EloquentApprovalStore implements ApprovalStore
 
             try {
                 $this->decisionsTable()->insert([
-                    'id' => strtolower((string) Str::ulid()),
-                    'approval_id' => $id,
+                    'id'            => strtolower((string) Str::ulid()),
+                    'approval_id'   => $id,
                     'reviewer_type' => $approver->type,
-                    'reviewer_id' => (string) $approver->id,
+                    'reviewer_id'   => (string) $approver->id,
                     'reviewer_role' => $role,
-                    'verdict' => $verdict->value,
-                    'note' => $note,
-                    'decided_at' => $now,
-                    'created_at' => $now,
-                    'updated_at' => $now,
+                    'verdict'       => $verdict->value,
+                    'note'          => $note,
+                    'decided_at'    => $now,
+                    'created_at'    => $now,
+                    'updated_at'    => $now,
                 ]);
             } catch (UniqueConstraintViolationException) {
                 // This reviewer has already decided. Treated as the answer rather than as an error:

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\RestApiCheck;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorCheck;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorService;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\RestApiCheck;
 
 /*
 | The family integration.

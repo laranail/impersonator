@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
 use DateTimeImmutable;
-use Illuminate\Support\Carbon;
 use Psr\Clock\ClockInterface;
+use Illuminate\Support\Carbon;
 
 /**
  * The current time, as the application understands it.

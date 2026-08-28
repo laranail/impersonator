@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 
-use Illuminate\Session\SessionManager;
-use Illuminate\Session\Store;
+use Throwable;
 use SessionHandlerInterface;
+use Illuminate\Session\Store;
+use Illuminate\Session\SessionManager;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
-use Throwable;
 
 /**
  * Whether a revocation can actually end a session, or only record the intent.

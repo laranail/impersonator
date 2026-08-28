@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -52,8 +52,8 @@ function apiUrl(string $path): string
 it('starts an impersonation and returns 201', function (): void {
     $response = $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id' => (string) $this->target->getKey(),
-        'reason' => 'Ticket #4182',
+        'target_id'   => (string) $this->target->getKey(),
+        'reason'      => 'Ticket #4182',
     ]);
 
     $response->assertCreated()
@@ -72,7 +72,7 @@ it('returns a pending handoff with an accept url for the token driver', function
 
     $response = $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id' => (string) $this->target->getKey(),
+        'target_id'   => (string) $this->target->getKey(),
     ]);
 
     $response->assertCreated()->assertJsonPath('data.pending', true);
@@ -85,18 +85,18 @@ it('validates the body exactly as the html endpoint does', function (): void {
     // The API extends the same Form Request, so two copies of these rules cannot drift.
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'App\\Models\\Anything',
-        'target_id' => '1',
+        'target_id'   => '1',
     ])->assertStatus(422)->assertJsonValidationErrors('target_type');
 
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id' => (string) $this->target->getKey(),
-        'mode' => 'god',
+        'target_id'   => (string) $this->target->getKey(),
+        'mode'        => 'god',
     ])->assertStatus(422)->assertJsonValidationErrors('mode');
 
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id' => (string) $this->target->getKey(),
+        'target_id'   => (string) $this->target->getKey(),
         'redirect_to' => 'https://evil.example',
     ])->assertStatus(422)->assertJsonValidationErrors('redirect_to');
 });
@@ -104,7 +104,7 @@ it('validates the body exactly as the html endpoint does', function (): void {
 it('refuses self-impersonation with a 403 and a reason code', function (): void {
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id' => (string) $this->admin->getKey(),
+        'target_id'   => (string) $this->admin->getKey(),
     ])->assertForbidden()->assertJsonPath('reason', 'self_impersonation');
 });
 
@@ -270,7 +270,7 @@ it('requires authentication to start', function (): void {
 
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id' => (string) $this->target->getKey(),
+        'target_id'   => (string) $this->target->getKey(),
     ])->assertForbidden();
 });
 

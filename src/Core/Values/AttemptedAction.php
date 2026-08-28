@@ -119,12 +119,12 @@ final readonly class AttemptedAction
     public function toArray(): array
     {
         return [
-            'method' => $this->normalizedMethod(),
-            'path' => $this->path,
-            'route_name' => $this->routeName,
-            'abilities' => $this->abilities,
+            'method'      => $this->normalizedMethod(),
+            'path'        => $this->path,
+            'route_name'  => $this->routeName,
+            'abilities'   => $this->abilities,
             'model_class' => $this->modelClass,
-            'context' => $this->context,
+            'context'     => $this->context,
         ];
     }
 }

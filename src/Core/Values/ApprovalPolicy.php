@@ -123,6 +123,7 @@ final readonly class ApprovalPolicy
      * Role slots still unfilled.
      *
      * @param list<ApprovalDecision> $approvals
+     *
      * @return array<string, int> role => how many more are needed
      */
     public function outstandingRoles(array $approvals): array
@@ -168,6 +169,7 @@ final readonly class ApprovalPolicy
      *
      * @param list<string> $reviewerRoles the roles this operator actually holds
      * @param list<ApprovalDecision> $approvals
+     *
      * @return list<string>
      */
     public function slotsFor(array $reviewerRoles, array $approvals): array
@@ -188,8 +190,8 @@ final readonly class ApprovalPolicy
     public function toArray(): array
     {
         return [
-            'quorum' => $this->quorum,
-            'roles' => $this->roles,
+            'quorum'   => $this->quorum,
+            'roles'    => $this->roles,
             'required' => $this->required(),
         ];
     }

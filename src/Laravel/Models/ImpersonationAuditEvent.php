@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Models;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
 
@@ -28,17 +28,6 @@ class ImpersonationAuditEvent extends Model
 
     protected $guarded = [];
 
-    /** @return array<string, string> */
-    protected function casts(): array
-    {
-        return [
-            'payload' => 'array',
-            'occurred_at' => 'datetime',
-            'status' => 'integer',
-            'duration_ms' => 'integer',
-        ];
-    }
-
     public function getTable(): string
     {
         $table = config('laranail.impersonator.trail.table', 'impersonator_audit_events');
@@ -57,28 +46,6 @@ class ImpersonationAuditEvent extends Model
     public function audit(): BelongsTo
     {
         return $this->belongsTo(ImpersonationAudit::class, 'audit_id');
-    }
-
-    private function str(string $attribute): string
-    {
-        $value = $this->getAttribute($attribute);
-
-        return is_scalar($value) ? (string) $value : '';
-    }
-
-    /**
-     * @param array<array-key, mixed> $payload
-     * @return array<string, mixed>
-     */
-    private function stringKeyed(array $payload): array
-    {
-        $narrowed = [];
-
-        foreach ($payload as $key => $value) {
-            $narrowed[(string) $key] = $value;
-        }
-
-        return $narrowed;
     }
 
     public function toTrailEvent(): TrailEvent
@@ -102,5 +69,39 @@ class ImpersonationAuditEvent extends Model
                 ? DateTimeImmutable::createFromInterface($occurred)
                 : null,
         );
+    }
+
+    /** @return array<string, string> */
+    protected function casts(): array
+    {
+        return [
+            'payload'     => 'array',
+            'occurred_at' => 'datetime',
+            'status'      => 'integer',
+            'duration_ms' => 'integer',
+        ];
+    }
+
+    private function str(string $attribute): string
+    {
+        $value = $this->getAttribute($attribute);
+
+        return is_scalar($value) ? (string) $value : '';
+    }
+
+    /**
+     * @param array<array-key, mixed> $payload
+     *
+     * @return array<string, mixed>
+     */
+    private function stringKeyed(array $payload): array
+    {
+        $narrowed = [];
+
+        foreach ($payload as $key => $value) {
+            $narrowed[(string) $key] = $value;
+        }
+
+        return $narrowed;
     }
 }

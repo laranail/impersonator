@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Services;
 
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Events\Dispatcher;
+use RuntimeException;
 use Illuminate\Database\Eloquent\Model;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\DecideApproval;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\EnterImpersonation;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
 
 /**
  * The break-glass orchestration layer.
@@ -87,11 +88,11 @@ final readonly class ApprovalService
         ));
 
         return [
-            'required' => $policy->required(),
-            'approved' => count($approvals),
-            'outstanding' => $policy->outstandingCount($approvals),
+            'required'          => $policy->required(),
+            'approved'          => count($approvals),
+            'outstanding'       => $policy->outstandingCount($approvals),
             'outstanding_roles' => $policy->outstandingRoles($approvals),
-            'policy' => $policy->toArray(),
+            'policy'            => $policy->toArray(),
         ];
     }
 
@@ -180,7 +181,7 @@ final readonly class ApprovalService
         }
 
         $operator = $this->manager->currentImpersonatorOrNull()
-            ?? throw new \RuntimeException('No authenticated operator to attribute this approval decision to.');
+            ?? throw new RuntimeException('No authenticated operator to attribute this approval decision to.');
 
         return $this->manager->identities()->fromUser($operator);
     }

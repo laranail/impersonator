@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Enums;
 
 use Simtabi\Laranail\Enumerator\Attributes\Label;
 use Simtabi\Laranail\Enumerator\Concerns\HasAttributes;
-use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 use Simtabi\Laranail\Enumerator\Contracts\Translatable;
+use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 
 /**
  * Why an impersonation stopped. A genuinely closed set, so unlike Mode this is
@@ -47,12 +47,6 @@ enum EndReason: string implements Translatable
     #[Label('Session lost')]
     case SessionLost = 'session_lost';
 
-    /** Whether the impersonation was ended by someone other than its owner. */
-    public function isInvoluntary(): bool
-    {
-        return $this !== self::Left;
-    }
-
     /**
      * The translation slug, pinned rather than derived.
      *
@@ -72,5 +66,11 @@ enum EndReason: string implements Translatable
     public static function translationNamespace(): string
     {
         return 'laranail-impersonator';
+    }
+
+    /** Whether the impersonation was ended by someone other than its owner. */
+    public function isInvoluntary(): bool
+    {
+        return $this !== self::Left;
     }
 }

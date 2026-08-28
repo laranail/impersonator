@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 
 /**
@@ -100,6 +100,11 @@ final class PersistenceGuard
         );
     }
 
+    public function session(): ?ImpersonationSession
+    {
+        return $this->session;
+    }
+
     /**
      * Whether a write to this table is none of the guard's business.
      *
@@ -114,11 +119,6 @@ final class PersistenceGuard
     {
         return in_array(strtolower($table['table']), $this->exemptTables, true)
             || in_array(strtolower($table['qualified']), $this->exemptTables, true);
-    }
-
-    public function session(): ?ImpersonationSession
-    {
-        return $this->session;
     }
 
     /**

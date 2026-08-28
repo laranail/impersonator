@@ -27,16 +27,16 @@ return [
 
     'doctor' => [
         'heading' => 'Impersonator diagnostics',
-        'failed' => ':failures check failed, :warnings. Impersonation is broken or a control is not enforcing.'
+        'failed'  => ':failures check failed, :warnings. Impersonation is broken or a control is not enforcing.'
             . '|:failures checks failed, :warnings. Impersonation is broken or a control is not enforcing.',
         // A second, independently-counted noun in the same sentence, so it cannot ride on the same
         // `trans_choice` — that call pluralises on one number. Composed separately and spliced in
         // already-pluralised, which also lets a translator inflect it to match the clause around it.
         'warning_count' => ':count warning|:count warnings',
-        'warnings' => 'No failures, :count warning worth reading.|No failures, :count warnings worth reading.',
-        'clean' => 'Everything checks out.',
-        'check_failed' => 'The check itself failed to run: :message',
-        'wrong_type' => 'The container returned :type for this check rather than a :expected.',
+        'warnings'      => 'No failures, :count warning worth reading.|No failures, :count warnings worth reading.',
+        'clean'         => 'Everything checks out.',
+        'check_failed'  => 'The check itself failed to run: :message',
+        'wrong_type'    => 'The container returned :type for this check rather than a :expected.',
     ],
 
     'prune_approvals' => [
@@ -60,14 +60,14 @@ return [
 
     'export_audit' => [
         'unknown_format' => 'Unknown format [:format]. Available: :formats.',
-        'unwritable' => 'Could not write the export to [:path].',
-        'exported' => 'Exported impersonation [:audit] to :path.',
+        'unwritable'     => 'Could not write the export to [:path].',
+        'exported'       => 'Exported impersonation [:audit] to :path.',
     ],
 
     'scrub_identity' => [
         'malformed' => 'Give the identity as type:id, for example user:9902.',
-        'no_rows' => 'No audit rows mention that identity.',
-        'dry_run' => ':count audit row would have its labels nulled. Nothing was written.'
+        'no_rows'   => 'No audit rows mention that identity.',
+        'dry_run'   => ':count audit row would have its labels nulled. Nothing was written.'
             . '|:count audit rows would have their labels nulled. Nothing was written.',
         'scrubbed' => ':count audit row scrubbed. The row and the hash chain are intact.'
             . '|:count audit rows scrubbed. The rows and the hash chain are intact.',

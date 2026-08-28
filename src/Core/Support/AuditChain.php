@@ -106,12 +106,12 @@ final readonly class AuditChain
     private function scalarise(mixed $value): string
     {
         return match (true) {
-            $value === null => "\x00null",
-            is_bool($value) => $value ? "\x00true" : "\x00false",
+            $value === null                  => "\x00null",
+            is_bool($value)                  => $value ? "\x00true" : "\x00false",
             is_int($value), is_float($value) => (string) $value,
-            is_string($value) => $value,
-            is_array($value) => $this->canonicalise($value),
-            default => "\x00" . get_debug_type($value),
+            is_string($value)                => $value,
+            is_array($value)                 => $this->canonicalise($value),
+            default                          => "\x00" . get_debug_type($value),
         };
     }
 }

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Values;
 
+use Stringable;
 use DateTimeImmutable;
 use SensitiveParameter;
-use Stringable;
 
 /**
  * A single-use handoff token.
@@ -27,6 +27,26 @@ final readonly class Token implements Stringable
     ) {}
 
     /**
+     * Keeps the plaintext out of stack traces, `var_dump` and any logger that
+     * serialises context objects.
+     *
+     * @return array<string, string>
+     */
+    public function __debugInfo(): array
+    {
+        return [
+            'plaintext' => '[redacted]',
+            'hash'      => $this->hash,
+            'expiresAt' => $this->expiresAt->format(DATE_ATOM),
+        ];
+    }
+
+    public function __toString(): string
+    {
+        return '[redacted impersonation token]';
+    }
+
+    /**
      * The raw value. Only ever handed to URL building and the one-time
      * response; treat every call site as a place a secret can escape.
      */
@@ -38,25 +58,5 @@ final readonly class Token implements Stringable
     public function isExpiredAt(DateTimeImmutable $now): bool
     {
         return $now > $this->expiresAt;
-    }
-
-    /**
-     * Keeps the plaintext out of stack traces, `var_dump` and any logger that
-     * serialises context objects.
-     *
-     * @return array<string, string>
-     */
-    public function __debugInfo(): array
-    {
-        return [
-            'plaintext' => '[redacted]',
-            'hash' => $this->hash,
-            'expiresAt' => $this->expiresAt->format(DATE_ATOM),
-        ];
-    }
-
-    public function __toString(): string
-    {
-        return '[redacted impersonation token]';
     }
 }

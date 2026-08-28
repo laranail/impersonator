@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 /*
 | GDPR erasure against a trail that is deliberately denormalised.
@@ -90,7 +90,7 @@ it('writes nothing on a dry run', function (): void {
     Impersonator::leave();
 
     $this->artisan('laranail::impersonator.scrub-identity', [
-        'identity' => 'user:' . $this->target->getKey(),
+        'identity'  => 'user:' . $this->target->getKey(),
         '--dry-run' => true,
     ])->assertSuccessful();
 

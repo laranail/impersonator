@@ -178,6 +178,7 @@ final readonly class MessageCatalog
      * refusal is worse than the placeholder going unreplaced.
      *
      * @param array<string, mixed> $context
+     *
      * @return array<string, string>
      */
     private function replacements(array $context): array

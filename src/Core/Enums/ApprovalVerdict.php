@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Enums;
 
 use Simtabi\Laranail\Enumerator\Attributes\Label;
 use Simtabi\Laranail\Enumerator\Concerns\HasAttributes;
-use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 use Simtabi\Laranail\Enumerator\Contracts\Translatable;
+use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 
 /**
  * What one reviewer said about one request.
@@ -29,6 +29,17 @@ enum ApprovalVerdict: string implements Translatable
     #[Label('Denied')]
     case Denied = 'denied';
 
+    /** Pinned, for the reason given on the other Core enums. @see EndReason::translationSlug() */
+    public static function translationSlug(): string
+    {
+        return 'approval_verdict';
+    }
+
+    public static function translationNamespace(): string
+    {
+        return 'laranail-impersonator';
+    }
+
     /**
      * Whether this verdict ends the chain on its own.
      *
@@ -39,16 +50,5 @@ enum ApprovalVerdict: string implements Translatable
     public function isTerminal(): bool
     {
         return $this === self::Denied;
-    }
-
-    /** Pinned, for the reason given on the other Core enums. @see EndReason::translationSlug() */
-    public static function translationSlug(): string
-    {
-        return 'approval_verdict';
-    }
-
-    public static function translationNamespace(): string
-    {
-        return 'laranail-impersonator';
     }
 }

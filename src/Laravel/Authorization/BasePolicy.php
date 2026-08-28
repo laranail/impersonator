@@ -4,18 +4,19 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Authorization;
 
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Contracts\Session\Session;
+use Throwable;
 use Illuminate\Database\Eloquent\Model;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 
 /**
  * The always-on authorization rules — the checks that apply whether or not an
@@ -270,7 +271,7 @@ class BasePolicy implements AuthorizationPolicy
 
         try {
             $allowed = $this->callEligibility($rule, $target, $request);
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return Decision::deny(
                 Decision::TARGET_NOT_ELIGIBLE,
                 'That account cannot be impersonated right now.',
@@ -285,28 +286,6 @@ class BasePolicy implements AuthorizationPolicy
                 'That account cannot be impersonated right now.',
                 ['detail' => 'rule'],
             );
-    }
-
-    /**
-     * Invoke the configured eligibility rule, whatever shape it was given in.
-     *
-     * A closure, or the name of an invokable class resolved through the container so the rule can
-     * declare its own dependencies. Anything else returns false rather than being coerced: a config
-     * value that is neither is a misconfiguration, and guessing at it would fail *open*.
-     */
-    private function callEligibility(mixed $rule, Model $target, ImpersonationRequest $request): mixed
-    {
-        if (is_callable($rule)) {
-            return $rule($target, $request);
-        }
-
-        if (is_string($rule) && $rule !== '') {
-            $resolved = app($rule);
-
-            return is_callable($resolved) ? $resolved($target, $request) : false;
-        }
-
-        return false;
     }
 
     /**
@@ -496,5 +475,27 @@ class BasePolicy implements AuthorizationPolicy
     protected function currentlyImpersonating(): bool
     {
         return $this->state->has();
+    }
+
+    /**
+     * Invoke the configured eligibility rule, whatever shape it was given in.
+     *
+     * A closure, or the name of an invokable class resolved through the container so the rule can
+     * declare its own dependencies. Anything else returns false rather than being coerced: a config
+     * value that is neither is a misconfiguration, and guessing at it would fail *open*.
+     */
+    private function callEligibility(mixed $rule, Model $target, ImpersonationRequest $request): mixed
+    {
+        if (is_callable($rule)) {
+            return $rule($target, $request);
+        }
+
+        if (is_string($rule) && $rule !== '') {
+            $resolved = app($rule);
+
+            return is_callable($resolved) ? $resolved($target, $request) : false;
+        }
+
+        return false;
     }
 }

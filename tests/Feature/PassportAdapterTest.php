@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Laravel\Passport\Passport;
-use Laravel\Passport\PassportServiceProvider;
 use Laravel\Passport\Token;
+use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Laravel\Passport\PassportServiceProvider;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\PassportUser;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 uses()->group('passport');
 
@@ -40,9 +40,9 @@ beforeEach(function (): void {
     // Personal access tokens need a personal access client to exist. An installation without
     // one cannot issue any, which is why the adapter names this in its failure message.
     $this->artisan('passport:client', [
-        '--personal' => true,
-        '--name' => 'Impersonation tests',
-        '--provider' => 'users',
+        '--personal'       => true,
+        '--name'           => 'Impersonation tests',
+        '--provider'       => 'users',
         '--no-interaction' => true,
     ])->run();
 

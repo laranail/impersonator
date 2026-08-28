@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Doctor;
 
+use Throwable;
 use Illuminate\Contracts\Container\Container;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorCheck;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
-use Throwable;
 
 /**
  * The shared base for this package's diagnostics.
@@ -41,6 +41,7 @@ abstract class Check implements DoctorCheck
      * @template T of object
      *
      * @param class-string<T> $service
+     *
      * @return T|null
      */
     protected function resolve(string $service): ?object

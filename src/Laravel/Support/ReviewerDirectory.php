@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
 use Closure;
-use Illuminate\Database\Eloquent\Model;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 use Throwable;
 use Traversable;
+use Illuminate\Database\Eloquent\Model;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 
 /**
  * What roles a reviewer holds, and whether they may decide a particular request.
@@ -56,6 +56,7 @@ final class ReviewerDirectory
      * roles that matter avoids pulling a full role list to answer a question about two of them.
      *
      * @param list<string> $roles
+     *
      * @return list<string>
      */
     public function rolesFor(Model $reviewer, array $roles): array

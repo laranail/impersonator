@@ -6,13 +6,13 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\Console\Output\OutputInterface;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Starts an impersonation from the CLI and prints a one-time accept URL.
@@ -91,6 +91,15 @@ class EnterCommand extends Command
         return self::SUCCESS;
     }
 
+    protected function namespacedSignature(): string
+    {
+        return 'laranail::impersonator.enter
+            {user : the target, as type:id or a bare id when only one type is registered}
+            {--as= : the operator to record as the impersonator, as type:id or a bare id}
+            {--mode= : impersonation mode; defaults to impersonator.default_mode}
+            {--reason= : why, recorded on the audit row}';
+    }
+
     /**
      * Resolve `type:id` or a bare id against the registered target types.
      *
@@ -115,9 +124,9 @@ class EnterCommand extends Command
             if (count($aliases) !== 1) {
                 $this->components->error(__('laranail-impersonator::console.enter.ambiguous', [
                     'subject' => $label,
-                    'value' => $reference,
-                    'count' => count($aliases),
-                    'types' => implode(', ', $aliases) ?: 'none',
+                    'value'   => $reference,
+                    'count'   => count($aliases),
+                    'types'   => implode(', ', $aliases) ?: 'none',
                 ]));
 
                 return null;
@@ -134,14 +143,5 @@ class EnterCommand extends Command
         }
 
         return $model;
-    }
-
-    protected function namespacedSignature(): string
-    {
-        return 'laranail::impersonator.enter
-            {user : the target, as type:id or a bare id when only one type is registered}
-            {--as= : the operator to record as the impersonator, as type:id or a bare id}
-            {--mode= : impersonation mode; defaults to impersonator.default_mode}
-            {--reason= : why, recorded on the audit row}';
     }
 }

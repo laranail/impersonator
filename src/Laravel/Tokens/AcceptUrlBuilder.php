@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Tokens;
 
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Throwable;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * Builds the URL that completes a cross-domain handoff.
@@ -45,8 +46,8 @@ final readonly class AcceptUrlBuilder
 
         return match ($strategy) {
             'subdomain' => $this->subdomain($request, $token),
-            'path' => $this->path($request, $token),
-            default => $this->domain($token),
+            'path'      => $this->path($request, $token),
+            default     => $this->domain($token),
         };
     }
 
@@ -143,7 +144,7 @@ final readonly class AcceptUrlBuilder
             $domain = is_object($first) && property_exists($first, 'domain') ? $first->domain : null;
 
             return is_string($domain) && $domain !== '' ? $domain : null;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             // A tenancy package mid-migration, or a tenant without domains configured. The
             // caller falls back to the configured base domain.
             return null;

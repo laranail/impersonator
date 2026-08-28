@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Illuminate\Database\Schema\Blueprint;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
 use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
 use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 /*
 | The lifecycle across every session driver a real application uses.

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
-use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\ImpersonationSecurityAlert;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
-use Simtabi\Laranail\Impersonator\Laravel\Support\CauserResolver;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
+use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Laravel\Support\CauserResolver;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\ImpersonationSecurityAlert;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -252,7 +252,8 @@ it('warns rather than failing when the target cannot be notified', function (): 
     config()->set('laranail.impersonator.targets.allowlist', ['plain' => PlainUser::class]);
 
     $warnings = [];
-    app()->instance(FailureReporter::class,
+    app()->instance(
+        FailureReporter::class,
         new class($warnings) implements FailureReporter
         {
             public function __construct(public array &$seen) {}
@@ -266,7 +267,8 @@ it('warns rather than failing when the target cannot be notified', function (): 
             {
                 $this->seen[] = $context['actual'] ?? $message;
             }
-        });
+        },
+    );
 
     $plain = PlainUser::create(['name' => 'Plain']);
     Auth::guard('web')->setUser($this->admin);

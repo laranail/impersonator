@@ -161,11 +161,11 @@ final readonly class ExtensionPolicy
     public function toArray(): array
     {
         return [
-            'enabled' => $this->enabled,
-            'minutes' => $this->minutes,
-            'max' => $this->max,
+            'enabled'           => $this->enabled,
+            'minutes'           => $this->minutes,
+            'max'               => $this->max,
             'max_total_minutes' => $this->maxTotalMinutes,
-            'within_minutes' => $this->withinMinutes,
+            'within_minutes'    => $this->withinMinutes,
         ];
     }
 }

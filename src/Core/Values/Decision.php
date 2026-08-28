@@ -118,11 +118,6 @@ final readonly class Decision
         return new self(false, $code, $reason, $context);
     }
 
-    public function denied(): bool
-    {
-        return ! $this->allowed;
-    }
-
     /**
      * Short-circuiting conjunction: the first denial wins and is returned
      * intact, so the caller always learns the specific rule that refused.
@@ -142,13 +137,18 @@ final readonly class Decision
         return self::allow();
     }
 
+    public function denied(): bool
+    {
+        return ! $this->allowed;
+    }
+
     /** @return array<string, mixed> */
     public function toArray(): array
     {
         return [
             'allowed' => $this->allowed,
-            'code' => $this->code,
-            'reason' => $this->reason,
+            'code'    => $this->code,
+            'reason'  => $this->reason,
             'context' => $this->context,
         ];
     }

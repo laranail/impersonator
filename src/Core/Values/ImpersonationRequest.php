@@ -34,53 +34,6 @@ final readonly class ImpersonationRequest
         public array $metadata = [],
     ) {}
 
-    public function isSelfImpersonation(): bool
-    {
-        return $this->impersonator->is($this->target);
-    }
-
-    public function hasReason(): bool
-    {
-        return $this->reason !== null && trim($this->reason) !== '';
-    }
-
-    public function withMode(Mode $mode): self
-    {
-        return new self(
-            $this->impersonator,
-            $this->target,
-            $mode,
-            $this->guards,
-            $this->driver,
-            $this->adapter,
-            $this->reason,
-            $this->redirectTo,
-            $this->tenantId,
-            $this->ip,
-            $this->userAgent,
-            $this->metadata,
-        );
-    }
-
-    /** @param array<string, mixed> $metadata */
-    public function withMetadata(array $metadata): self
-    {
-        return new self(
-            $this->impersonator,
-            $this->target,
-            $this->mode,
-            $this->guards,
-            $this->driver,
-            $this->adapter,
-            $this->reason,
-            $this->redirectTo,
-            $this->tenantId,
-            $this->ip,
-            $this->userAgent,
-            [...$this->metadata, ...$metadata],
-        );
-    }
-
     /**
      * Rebuild from the array form.
      *
@@ -139,8 +92,75 @@ final readonly class ImpersonationRequest
         );
     }
 
+    public function isSelfImpersonation(): bool
+    {
+        return $this->impersonator->is($this->target);
+    }
+
+    public function hasReason(): bool
+    {
+        return $this->reason !== null && trim($this->reason) !== '';
+    }
+
+    public function withMode(Mode $mode): self
+    {
+        return new self(
+            $this->impersonator,
+            $this->target,
+            $mode,
+            $this->guards,
+            $this->driver,
+            $this->adapter,
+            $this->reason,
+            $this->redirectTo,
+            $this->tenantId,
+            $this->ip,
+            $this->userAgent,
+            $this->metadata,
+        );
+    }
+
+    /** @param array<string, mixed> $metadata */
+    public function withMetadata(array $metadata): self
+    {
+        return new self(
+            $this->impersonator,
+            $this->target,
+            $this->mode,
+            $this->guards,
+            $this->driver,
+            $this->adapter,
+            $this->reason,
+            $this->redirectTo,
+            $this->tenantId,
+            $this->ip,
+            $this->userAgent,
+            [...$this->metadata, ...$metadata],
+        );
+    }
+
+    /** @return array<string, mixed> */
+    public function toArray(): array
+    {
+        return [
+            'impersonator' => $this->impersonator->toArray(),
+            'target'       => $this->target->toArray(),
+            'mode'         => $this->mode->name,
+            'guards'       => $this->guards->toArray(),
+            'driver'       => $this->driver,
+            'adapter'      => $this->adapter,
+            'reason'       => $this->reason,
+            'redirect_to'  => $this->redirectTo,
+            'tenant_id'    => $this->tenantId,
+            'ip'           => $this->ip,
+            'user_agent'   => $this->userAgent,
+            'metadata'     => $this->metadata,
+        ];
+    }
+
     /**
      * @param array<array-key, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private static function stringKeys(array $data): array
@@ -152,24 +172,5 @@ final readonly class ImpersonationRequest
         }
 
         return $narrowed;
-    }
-
-    /** @return array<string, mixed> */
-    public function toArray(): array
-    {
-        return [
-            'impersonator' => $this->impersonator->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
-            'guards' => $this->guards->toArray(),
-            'driver' => $this->driver,
-            'adapter' => $this->adapter,
-            'reason' => $this->reason,
-            'redirect_to' => $this->redirectTo,
-            'tenant_id' => $this->tenantId,
-            'ip' => $this->ip,
-            'user_agent' => $this->userAgent,
-            'metadata' => $this->metadata,
-        ];
     }
 }

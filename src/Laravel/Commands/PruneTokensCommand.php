@@ -20,11 +20,6 @@ class PruneTokensCommand extends Command
 {
     use SupportsNamespacedNames;
 
-    protected function namespacedSignature(): string
-    {
-        return 'laranail::impersonator.prune-tokens';
-    }
-
     protected $description = 'Delete expired, spent and revoked impersonation handoff tokens';
 
     public function handle(TokenRepository $tokens): int
@@ -38,5 +33,10 @@ class PruneTokensCommand extends Command
         ));
 
         return self::SUCCESS;
+    }
+
+    protected function namespacedSignature(): string
+    {
+        return 'laranail::impersonator.prune-tokens';
     }
 }

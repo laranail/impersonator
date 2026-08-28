@@ -4,15 +4,37 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Tests;
 
-use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Simtabi\Laranail\Enumerator\Providers\EnumeratorServiceProvider;
-use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 use Simtabi\Laranail\Package\Tools\Providers\PackageToolsServiceProvider;
+use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
+    /**
+     * Release the connection between tests.
+     *
+     * Testbench builds a fresh application per test, and on a real driver each one opens its own
+     * PDO connection. Left alone they accumulate until the server refuses — PostgreSQL answers
+     * "sorry, too many clients already" a few hundred tests in, which looks like a package failure
+     * and is not one.
+     */
+    protected function tearDown(): void
+    {
+        // Not for SQLite. An in-memory database *is* the connection, so purging it destroys the
+        // schema — and Testbench still touches it during its own teardown, which surfaces as
+        // "no such table: migrations" in whichever test ran real migrations. There is no connection
+        // limit to protect against there anyway.
+        if ($this->app !== null && getenv('IMPERSONATOR_TEST_DB') !== false
+            && getenv('IMPERSONATOR_TEST_DB') !== 'sqlite') {
+            $this->app->make('db')->purge('testing');
+        }
+
+        parent::tearDown();
+    }
+
     /**
      * @return list<class-string>
      *
@@ -79,32 +101,32 @@ abstract class TestCase extends Orchestra
 
         return match ($driver) {
             'pgsql' => [
-                'driver' => 'pgsql',
-                'host' => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
-                'port' => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '5432',
-                'database' => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
-                'username' => getenv('IMPERSONATOR_TEST_DB_USER') ?: get_current_user(),
-                'password' => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
-                'charset' => 'utf8',
-                'prefix' => '',
+                'driver'      => 'pgsql',
+                'host'        => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
+                'port'        => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '5432',
+                'database'    => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
+                'username'    => getenv('IMPERSONATOR_TEST_DB_USER') ?: get_current_user(),
+                'password'    => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
+                'charset'     => 'utf8',
+                'prefix'      => '',
                 'search_path' => 'public',
-                'sslmode' => 'prefer',
+                'sslmode'     => 'prefer',
             ],
             'mysql' => [
-                'driver' => 'mysql',
-                'host' => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
-                'port' => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '3306',
-                'database' => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
-                'username' => getenv('IMPERSONATOR_TEST_DB_USER') ?: 'root',
-                'password' => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
-                'charset' => 'utf8mb4',
+                'driver'    => 'mysql',
+                'host'      => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
+                'port'      => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '3306',
+                'database'  => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
+                'username'  => getenv('IMPERSONATOR_TEST_DB_USER') ?: 'root',
+                'password'  => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
+                'charset'   => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
-                'prefix' => '',
+                'prefix'    => '',
             ],
             default => [
-                'driver' => 'sqlite',
+                'driver'   => 'sqlite',
                 'database' => ':memory:',
-                'prefix' => '',
+                'prefix'   => '',
             ],
         };
     }
@@ -166,28 +188,6 @@ abstract class TestCase extends Orchestra
                 }
             }
         });
-    }
-
-    /**
-     * Release the connection between tests.
-     *
-     * Testbench builds a fresh application per test, and on a real driver each one opens its own
-     * PDO connection. Left alone they accumulate until the server refuses — PostgreSQL answers
-     * "sorry, too many clients already" a few hundred tests in, which looks like a package failure
-     * and is not one.
-     */
-    protected function tearDown(): void
-    {
-        // Not for SQLite. An in-memory database *is* the connection, so purging it destroys the
-        // schema — and Testbench still touches it during its own teardown, which surfaces as
-        // "no such table: migrations" in whichever test ran real migrations. There is no connection
-        // limit to protect against there anyway.
-        if ($this->app !== null && getenv('IMPERSONATOR_TEST_DB') !== false
-            && getenv('IMPERSONATOR_TEST_DB') !== 'sqlite') {
-            $this->app->make('db')->purge('testing');
-        }
-
-        parent::tearDown();
     }
 
     protected function packageMigration(): Migration

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Schema;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Support\PackageTables;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
 
 /*
 | The published documentation, checked against the code.
@@ -27,8 +27,8 @@ it('names the right number of doctor checks', function (): void {
     // in the message rather than silently comparing against zero — a count that cannot be parsed is not
     // the same as a count that disagrees, and only one of the two is fixed by editing the doctor.
     $words = [
-        'Sixteen' => 16, 'Seventeen' => 17, 'Eighteen' => 18, 'Nineteen' => 19, 'Twenty' => 20,
-        'Twenty-one' => 21, 'Twenty-two' => 22, 'Twenty-three' => 23, 'Twenty-four' => 24,
+        'Sixteen'     => 16, 'Seventeen' => 17, 'Eighteen' => 18, 'Nineteen' => 19, 'Twenty' => 20,
+        'Twenty-one'  => 21, 'Twenty-two' => 22, 'Twenty-three' => 23, 'Twenty-four' => 24,
         'Twenty-five' => 25,
     ];
 

@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Adapters;
 
+use Throwable;
 use Illuminate\Auth\SessionGuard;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Session\Session;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * Authenticates the target on a stateful guard — the always-available adapter,
@@ -62,7 +63,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
     {
         try {
             return $this->auth->guard($this->targetGuardName()) instanceof StatefulGuard;
-        } catch (\Throwable) {
+        } catch (Throwable) {
             return false;
         }
     }
@@ -134,6 +135,27 @@ final readonly class SessionGuardAdapter implements AuthAdapter
     }
 
     /**
+     * Destroy the impersonated session from outside it.
+     *
+     * True when the session record was actually removed, which is the difference between
+     * revocation taking effect now and taking effect whenever the operator next loads a
+     * page — potentially an hour later, which is the exact case revocation exists for.
+     *
+     * False for the drivers that hold no server-side record (`array`, `cookie`) and when
+     * the audit row never captured a session id. Both fall back to the enforcement
+     * middleware, so revocation is still correct — just not instant. That is why the
+     * middleware exists as well as this rather than instead of it.
+     */
+    public function revoke(ImpersonationSession $session): bool
+    {
+        if ($session->sessionId === null) {
+            return false;
+        }
+
+        return $this->terminator->terminate($session->sessionId);
+    }
+
+    /**
      * Stop the target's guard from being authenticated, without touching their account.
      *
      * Deliberately **not** `$guard->logout()`. `SessionGuard::logout()` calls
@@ -170,27 +192,6 @@ final readonly class SessionGuardAdapter implements AuthAdapter
         // operator unauthenticated with nothing to re-resolve from, which is the opposite of what
         // leaving should do.
         $guard->forgetUser();
-    }
-
-    /**
-     * Destroy the impersonated session from outside it.
-     *
-     * True when the session record was actually removed, which is the difference between
-     * revocation taking effect now and taking effect whenever the operator next loads a
-     * page — potentially an hour later, which is the exact case revocation exists for.
-     *
-     * False for the drivers that hold no server-side record (`array`, `cookie`) and when
-     * the audit row never captured a session id. Both fall back to the enforcement
-     * middleware, so revocation is still correct — just not instant. That is why the
-     * middleware exists as well as this rather than instead of it.
-     */
-    public function revoke(ImpersonationSession $session): bool
-    {
-        if ($session->sessionId === null) {
-            return false;
-        }
-
-        return $this->terminator->terminate($session->sessionId);
     }
 
     /**

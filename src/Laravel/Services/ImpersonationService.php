@@ -4,24 +4,25 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Services;
 
-use Illuminate\Contracts\Auth\Authenticatable;
+use Throwable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\EnterImpersonation;
-use Simtabi\Laranail\Impersonator\Laravel\Actions\ExtendImpersonation;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\LeaveImpersonation;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Actions\ExtendImpersonation;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\RevokeImpersonation;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
  * The lifecycle orchestration layer, composing the actions.
@@ -140,7 +141,7 @@ final readonly class ImpersonationService
         if ($session !== null && $this->manager->hasAdapter($session->adapter)) {
             try {
                 $adapter = $this->manager->adapter($session->adapter);
-            } catch (\Throwable) {
+            } catch (Throwable) {
                 // An adapter whose package has since been removed cannot revoke a
                 // credential, but the row must still be marked. Degrading here is
                 // what keeps the kill switch working through a dependency change.

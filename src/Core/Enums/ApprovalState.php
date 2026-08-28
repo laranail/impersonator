@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Enums;
 
 use Simtabi\Laranail\Enumerator\Attributes\Label;
 use Simtabi\Laranail\Enumerator\Concerns\HasAttributes;
-use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 use Simtabi\Laranail\Enumerator\Contracts\Translatable;
+use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 
 /**
  * Where a break-glass approval request stands.
@@ -57,6 +57,22 @@ enum ApprovalState: string implements Translatable
     case Expired = 'expired';
 
     /**
+     * Pinned rather than derived. `IsTranslatable::translationSlug()` defaults to
+     * `class_basename()`, a Laravel helper called without a `function_exists()` guard — the only
+     * unguarded one in that trait. Overriding it keeps this enum usable outside a booted
+     * application, and stops a class rename silently relocating every translation key.
+     */
+    public static function translationSlug(): string
+    {
+        return 'approval_state';
+    }
+
+    public static function translationNamespace(): string
+    {
+        return 'laranail-impersonator';
+    }
+
+    /**
      * Whether this state can still become an impersonation.
      *
      * `PartiallyApproved` is included, and omitting it would be the dangerous mistake: a chain short
@@ -85,21 +101,5 @@ enum ApprovalState: string implements Translatable
     public function acceptsDecisions(): bool
     {
         return $this === self::Pending || $this === self::PartiallyApproved;
-    }
-
-    /**
-     * Pinned rather than derived. `IsTranslatable::translationSlug()` defaults to
-     * `class_basename()`, a Laravel helper called without a `function_exists()` guard — the only
-     * unguarded one in that trait. Overriding it keeps this enum usable outside a booted
-     * application, and stops a class rename silently relocating every translation key.
-     */
-    public static function translationSlug(): string
-    {
-        return 'approval_state';
-    }
-
-    public static function translationNamespace(): string
-    {
-        return 'laranail-impersonator';
     }
 }

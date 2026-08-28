@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Enums;
 
 use Simtabi\Laranail\Enumerator\Attributes\Label;
 use Simtabi\Laranail\Enumerator\Concerns\HasAttributes;
-use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 use Simtabi\Laranail\Enumerator\Contracts\Translatable;
+use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 
 /**
  * What kind of thing an AuthAdapter handed back to authenticate the target.
@@ -36,12 +36,6 @@ enum CredentialType: string implements Translatable
     #[Label('JWT')]
     case Jwt = 'jwt';
 
-    /** True when a secret was returned to the caller and must be treated as one. */
-    public function isBearer(): bool
-    {
-        return $this !== self::Session;
-    }
-
     /**
      * Pinned rather than derived. `IsTranslatable::translationSlug()` defaults to
      * `class_basename()`, a Laravel helper called without a `function_exists()` guard — the only
@@ -56,5 +50,11 @@ enum CredentialType: string implements Translatable
     public static function translationNamespace(): string
     {
         return 'laranail-impersonator';
+    }
+
+    /** True when a secret was returned to the caller and must be treated as one. */
+    public function isBearer(): bool
+    {
+        return $this !== self::Session;
     }
 }

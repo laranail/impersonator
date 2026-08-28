@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api;
 
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Illuminate\Foundation\Http\FormRequest;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 
 /**
  * Validation for the audit listing.
@@ -45,15 +45,15 @@ class ListAuditsRequest extends FormRequest
 
         return [
             'impersonator' => ['sometimes', 'string', 'max:255'],
-            'target' => ['sometimes', 'string', 'max:255'],
-            'tenant' => ['sometimes', 'string', 'max:255'],
-            'mode' => ['sometimes', 'string', Rule::in(app(ModeRegistry::class)->names())],
-            'driver' => ['sometimes', 'string', 'max:64'],
-            'ended_by' => ['sometimes', 'string', Rule::in(array_column(EndReason::cases(), 'value'))],
-            'active' => ['sometimes', 'boolean'],
-            'from' => ['sometimes', 'date'],
-            'to' => ['sometimes', 'date', 'after_or_equal:from'],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:' . $settings->int('api.max_per_page', 100)],
+            'target'       => ['sometimes', 'string', 'max:255'],
+            'tenant'       => ['sometimes', 'string', 'max:255'],
+            'mode'         => ['sometimes', 'string', Rule::in(app(ModeRegistry::class)->names())],
+            'driver'       => ['sometimes', 'string', 'max:64'],
+            'ended_by'     => ['sometimes', 'string', Rule::in(array_column(EndReason::cases(), 'value'))],
+            'active'       => ['sometimes', 'boolean'],
+            'from'         => ['sometimes', 'date'],
+            'to'           => ['sometimes', 'date', 'after_or_equal:from'],
+            'per_page'     => ['sometimes', 'integer', 'min:1', 'max:' . $settings->int('api.max_per_page', 100)],
         ];
     }
 
@@ -61,7 +61,7 @@ class ListAuditsRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'mode.in' => 'That impersonation mode is not registered.',
+            'mode.in'     => 'That impersonation mode is not registered.',
             'ended_by.in' => 'That is not a recognised end reason.',
         ];
     }

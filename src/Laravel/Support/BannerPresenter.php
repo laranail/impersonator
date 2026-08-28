@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
+use Psr\Clock\ClockInterface;
+use Illuminate\Routing\Router;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Routing\UrlGenerator;
 use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Routing\Router;
-use Psr\Clock\ClockInterface;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
@@ -69,25 +69,25 @@ final readonly class BannerPresenter
         $extension = $this->impersonator->canExtendSession();
 
         return [
-            'impersonation' => $session,
-            'theme' => $this->theme(),
-            'position' => $this->position(),
-            'targetName' => $this->label($session->target->label, $this->impersonator->target()),
+            'impersonation'    => $session,
+            'theme'            => $this->theme(),
+            'position'         => $this->position(),
+            'targetName'       => $this->label($session->target->label, $this->impersonator->target()),
             'impersonatorName' => $this->label($session->impersonator->label, $this->impersonator->actor()),
-            'showMode' => $this->settings->bool('banner.show_mode', true),
-            'modeName' => $this->modeName($session->mode->name, short: true),
-            'showDuration' => $this->settings->bool('banner.show_duration', true),
-            'expiresAt' => $session->expiresAt,
-            'leaveUrl' => $this->leaveUrl(),
+            'showMode'         => $this->settings->bool('banner.show_mode', true),
+            'modeName'         => $this->modeName($session->mode->name, short: true),
+            'showDuration'     => $this->settings->bool('banner.show_duration', true),
+            'expiresAt'        => $session->expiresAt,
+            'leaveUrl'         => $this->leaveUrl(),
 
             // The countdown and the button that answers it. An operator watching a session
             // expire needs the way to keep it in the same place as the news that it is going
             // to — a banner that only announces the deadline forces them to leave and
             // re-enter, which mints a second audit row for one piece of work.
             'remainingSeconds' => $session->remainingSeconds($this->clock->now()),
-            'canExtend' => $extension->granted(),
-            'extendReason' => $extension->denied() ? $extension->decision->reason : null,
-            'extendUrl' => $this->extendUrl(),
+            'canExtend'        => $extension->granted(),
+            'extendReason'     => $extension->denied() ? $extension->decision->reason : null,
+            'extendUrl'        => $this->extendUrl(),
         ];
     }
 

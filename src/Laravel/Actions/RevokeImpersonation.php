@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Actions;
 
 use Illuminate\Contracts\Events\Dispatcher;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 
 /**
  * The kill switch: end somebody else's impersonation.

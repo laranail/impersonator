@@ -90,52 +90,6 @@ final class TargetRegistry
     }
 
     /**
-     * Teach Eloquent the aliases this registry knows, at the moment it learns them.
-     *
-     * Here rather than in the service provider, and the reason is a bug that shape produced:
-     * calling this registry during boot **memoises it against boot-time config**, so a later
-     * `registerTarget()` — or any config change — was silently ignored for the rest of the request.
-     * Publishing from inside the resolution instead means the map is populated exactly when the
-     * allowlist is first needed and re-populated whenever `flush()` or `add()` invalidates it.
-     *
-     * Eloquent needs this because the package's own `morphTo()` relations read a `*_type` column
-     * holding an alias. With no entry for `user`, Eloquent instantiates a class literally named
-     * `user` — *"Class \"user\" not found"*. Everything else here resolves aliases through this
-     * registry, which is why nothing but a relation depends on Laravel's map.
-     *
-     * **An alias already in the map is never overwritten.** Repointing one changes which class every
-     * historic row resolves to, application-wide and not merely in this package's tables.
-     *
-     * @param array<string, ImpersonatableType> $types
-     */
-    private function publishMorphAliases(array $types): void
-    {
-        if (! $this->settings->bool('morphs.register_map', true)) {
-            return;
-        }
-
-        $aliases = [];
-
-        foreach ($types as $type) {
-            // An entry whose "alias" is its own class name has no alias — that is what the
-            // allowlist's shorthand form produces. Publishing `Foo::class => Foo::class` buys
-            // nothing (Eloquent resolves a class name natively) and actively harms: additions are
-            // prepended to the morph map, so a pseudo-alias would be found *before* a real one the
-            // application had registered, and `aliasFor()` would start writing class names into
-            // rows that should carry the alias.
-            if ($type->alias !== $type->model) {
-                $aliases[$type->alias] = $type->model;
-            }
-        }
-
-        $additions = array_diff_key($aliases, Relation::morphMap());
-
-        if ($additions !== []) {
-            Relation::morphMap($additions);
-        }
-    }
-
-    /**
      * Find a type by its alias, its class name, or a globally registered morph alias.
      *
      * Three lookups because callers legitimately hold different forms: request input
@@ -215,5 +169,51 @@ final class TargetRegistry
         $this->resolved = null;
 
         return $this;
+    }
+
+    /**
+     * Teach Eloquent the aliases this registry knows, at the moment it learns them.
+     *
+     * Here rather than in the service provider, and the reason is a bug that shape produced:
+     * calling this registry during boot **memoises it against boot-time config**, so a later
+     * `registerTarget()` — or any config change — was silently ignored for the rest of the request.
+     * Publishing from inside the resolution instead means the map is populated exactly when the
+     * allowlist is first needed and re-populated whenever `flush()` or `add()` invalidates it.
+     *
+     * Eloquent needs this because the package's own `morphTo()` relations read a `*_type` column
+     * holding an alias. With no entry for `user`, Eloquent instantiates a class literally named
+     * `user` — *"Class \"user\" not found"*. Everything else here resolves aliases through this
+     * registry, which is why nothing but a relation depends on Laravel's map.
+     *
+     * **An alias already in the map is never overwritten.** Repointing one changes which class every
+     * historic row resolves to, application-wide and not merely in this package's tables.
+     *
+     * @param array<string, ImpersonatableType> $types
+     */
+    private function publishMorphAliases(array $types): void
+    {
+        if (! $this->settings->bool('morphs.register_map', true)) {
+            return;
+        }
+
+        $aliases = [];
+
+        foreach ($types as $type) {
+            // An entry whose "alias" is its own class name has no alias — that is what the
+            // allowlist's shorthand form produces. Publishing `Foo::class => Foo::class` buys
+            // nothing (Eloquent resolves a class name natively) and actively harms: additions are
+            // prepended to the morph map, so a pseudo-alias would be found *before* a real one the
+            // application had registered, and `aliasFor()` would start writing class names into
+            // rows that should carry the alias.
+            if ($type->alias !== $type->model) {
+                $aliases[$type->alias] = $type->model;
+            }
+        }
+
+        $additions = array_diff_key($aliases, Relation::morphMap());
+
+        if ($additions !== []) {
+            Relation::morphMap($additions);
+        }
     }
 }
