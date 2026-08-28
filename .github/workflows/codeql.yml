@@ -5,7 +5,7 @@ on:
     branches: [main]
   schedule:
     # Weekly, so a newly published query finds an old problem without waiting on a commit.
-    - cron: '17 6 * * 1'
+    - cron: '0 6 * * 1'
 
 permissions:
   contents: read
