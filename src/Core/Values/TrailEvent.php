@@ -44,13 +44,13 @@ final readonly class TrailEvent
     public function toArray(): array
     {
         return [
-            'audit_id'    => $this->auditId,
-            'method'      => strtoupper($this->method),
-            'path'        => $this->path,
-            'route_name'  => $this->routeName,
-            'status'      => $this->status,
+            'audit_id' => $this->auditId,
+            'method' => strtoupper($this->method),
+            'path' => $this->path,
+            'route_name' => $this->routeName,
+            'status' => $this->status,
             'duration_ms' => $this->durationMs,
-            'payload'     => $this->payload,
+            'payload' => $this->payload,
             'occurred_at' => $this->occurredAt?->format(DATE_ATOM),
         ];
     }

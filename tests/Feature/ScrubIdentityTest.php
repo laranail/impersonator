@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | GDPR erasure against a trail that is deliberately denormalised.
@@ -43,7 +43,7 @@ it('nulls the name and keeps the row', function (): void {
     $auditId = Impersonator::current()?->auditId;
     Impersonator::leave();
 
-    $this->artisan('laranail::impersonator.scrub-identity', ['identity' => 'user:' . $this->target->getKey()])
+    $this->artisan('laranail::impersonator.scrub-identity', ['identity' => 'user:'.$this->target->getKey()])
         ->assertSuccessful();
 
     $row = ImpersonationAudit::query()->find($auditId);
@@ -63,7 +63,7 @@ it('leaves the hash chain verifiable', function (): void {
     Impersonator::enter($this->target);
     Impersonator::leave();
 
-    $this->artisan('laranail::impersonator.scrub-identity', ['identity' => 'user:' . $this->target->getKey()])
+    $this->artisan('laranail::impersonator.scrub-identity', ['identity' => 'user:'.$this->target->getKey()])
         ->assertSuccessful();
 
     $this->artisan('laranail::impersonator.verify-audit')->assertSuccessful();
@@ -75,7 +75,7 @@ it('scrubs an identity that appears on both sides of a row', function (): void {
     $auditId = Impersonator::current()?->auditId;
     Impersonator::leave();
 
-    $this->artisan('laranail::impersonator.scrub-identity', ['identity' => 'user:' . $this->admin->getKey()])
+    $this->artisan('laranail::impersonator.scrub-identity', ['identity' => 'user:'.$this->admin->getKey()])
         ->assertSuccessful();
 
     $row = ImpersonationAudit::query()->find($auditId);
@@ -90,7 +90,7 @@ it('writes nothing on a dry run', function (): void {
     Impersonator::leave();
 
     $this->artisan('laranail::impersonator.scrub-identity', [
-        'identity'  => 'user:' . $this->target->getKey(),
+        'identity' => 'user:'.$this->target->getKey(),
         '--dry-run' => true,
     ])->assertSuccessful();
 

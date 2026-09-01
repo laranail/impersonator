@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Listeners;
 
-use Throwable;
 use Illuminate\Contracts\Container\Container;
 use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
 use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
+use Throwable;
 
 /**
  * Clears the two singletons that hold **request** state, between requests.

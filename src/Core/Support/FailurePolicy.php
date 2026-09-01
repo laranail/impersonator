@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Support;
 
-use Throwable;
-use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
 use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
+use Throwable;
 
 /**
  * The one runner that applies the failure classification uniformly.
@@ -33,9 +33,8 @@ final readonly class FailurePolicy
      *
      * @template T
      *
-     * @param callable(): T $operation
-     * @param array<string, mixed> $identifiers redacted; names and ids only
-     *
+     * @param  callable(): T  $operation
+     * @param  array<string, mixed>  $identifiers  redacted; names and ids only
      * @return T|null the operation's value, or null when a degradable one failed
      *
      * @throws OperationFailed when a critical operation fails
@@ -92,9 +91,8 @@ final readonly class FailurePolicy
      *
      * @template T
      *
-     * @param callable(): T $operation
-     * @param array<string, mixed> $identifiers
-     *
+     * @param  callable(): T  $operation
+     * @param  array<string, mixed>  $identifiers
      * @return T
      */
     public function critical(
@@ -116,9 +114,8 @@ final readonly class FailurePolicy
      *
      * @template T
      *
-     * @param callable(): T $operation
-     * @param array<string, mixed> $identifiers
-     *
+     * @param  callable(): T  $operation
+     * @param  array<string, mixed>  $identifiers
      * @return T|null
      */
     public function degradable(
@@ -134,15 +131,15 @@ final readonly class FailurePolicy
      * Log a tolerated anomaly: a fallback fired, a value was out of range but
      * accepted. Not a failure, so it never reaches the catch path above.
      *
-     * @param array<string, mixed> $identifiers
+     * @param  array<string, mixed>  $identifiers
      */
     public function warn(string $operation, string $expected, string $actual, array $identifiers = []): void
     {
         $this->reporter->warn(sprintf('Impersonator: %s used a fallback.', $operation), [
-            'operation'   => $operation,
-            'expected'    => $expected,
-            'actual'      => $actual,
-            'decision'    => 'tolerated',
+            'operation' => $operation,
+            'expected' => $expected,
+            'actual' => $actual,
+            'decision' => 'tolerated',
             'identifiers' => $identifiers,
         ]);
     }

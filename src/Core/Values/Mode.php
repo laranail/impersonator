@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Values;
 
-use Stringable;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
+use Stringable;
 
 /**
  * The privilege envelope an impersonation runs inside.

@@ -28,7 +28,7 @@ class RevokeImpersonationRequest extends FormRequest
         return [
             // ULID length, so a malformed id is a 422 rather than a database lookup.
             'audit' => ['sometimes', 'string', 'size:26'],
-            'note'  => ['sometimes', 'nullable', 'string', 'max:500'],
+            'note' => ['sometimes', 'nullable', 'string', 'max:500'],
         ];
     }
 }

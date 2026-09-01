@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\Vendor;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
-use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\Vendor;
 
 /*
 | More than one impersonatable model — the normal case for anything beyond a single-model
@@ -39,12 +39,12 @@ beforeEach(function (): void {
     config()->set('auth.guards.vendor', ['driver' => 'session', 'provider' => 'vendors']);
 
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user'   => User::class,
+        'user' => User::class,
         'vendor' => [
-            'model'        => Vendor::class,
-            'guard'        => 'vendor',
+            'model' => Vendor::class,
+            'guard' => 'vendor',
             'display_name' => 'company_name',
-            'label'        => 'Vendor account',
+            'label' => 'Vendor account',
         ],
     ]);
     config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
@@ -85,15 +85,15 @@ it('finds a type by alias, class or model instance', function (): void {
 
 it('exposes human labels for a type picker', function (): void {
     expect(app(TargetRegistry::class)->labels())->toBe([
-        'user'   => 'User',
+        'user' => 'User',
         'vendor' => 'Vendor account',
     ]);
 });
 
 it('drops an entry that is not an installed Eloquent model', function (): void {
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user'   => User::class,
-        'ghost'  => 'App\\Models\\Removed',
+        'user' => User::class,
+        'ghost' => 'App\\Models\\Removed',
         'broken' => ['guard' => 'vendor'],
     ]);
     app(TargetRegistry::class)->flush();

@@ -6,12 +6,12 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Services;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
+use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
 use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 
 /**
  * Reading the audit trail: filtering, paging, and the trail of one impersonation.
@@ -41,8 +41,7 @@ final readonly class AuditService
      * interface would push every caller into serialising the Eloquent model instead — and the model
      * carries the credential hash and session id as attributes.
      *
-     * @param array<string, mixed> $filters
-     *
+     * @param  array<string, mixed>  $filters
      * @return LengthAwarePaginator<int, ImpersonationAudit>
      */
     public function paginate(array $filters = [], ?int $perPage = null): LengthAwarePaginator
@@ -79,8 +78,7 @@ final readonly class AuditService
     }
 
     /**
-     * @param array<string, mixed> $filters
-     *
+     * @param  array<string, mixed>  $filters
      * @return Builder<ImpersonationAudit>
      */
     public function query(array $filters = []): Builder
@@ -124,9 +122,9 @@ final readonly class AuditService
     }
 
     /**
-     * @param Builder<ImpersonationAudit> $query
-     * @param string $columnPrefix the morph pair to match on, **not** the
-     *                             public filter name — see the call site
+     * @param  Builder<ImpersonationAudit>  $query
+     * @param  string  $columnPrefix  the morph pair to match on, **not** the
+     *                                public filter name — see the call site
      */
     private function applyIdentity(Builder $query, string $columnPrefix, mixed $reference): void
     {
@@ -135,7 +133,7 @@ final readonly class AuditService
         }
 
         if (! str_contains($reference, ':')) {
-            $query->where($columnPrefix . '_id', $reference);
+            $query->where($columnPrefix.'_id', $reference);
 
             return;
         }
@@ -148,8 +146,8 @@ final readonly class AuditService
         // filter on a model that has since been removed from the allowlist still finds its history.
         $resolved = $this->identities->typeFor($type);
 
-        $query->where($columnPrefix . '_type', $resolved === null ? $type : $resolved->alias)
-            ->where($columnPrefix . '_id', $id);
+        $query->where($columnPrefix.'_type', $resolved === null ? $type : $resolved->alias)
+            ->where($columnPrefix.'_id', $id);
     }
 
     private function resolvePerPage(?int $requested): int

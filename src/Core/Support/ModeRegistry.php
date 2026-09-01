@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Support;
 
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * The set of modes this installation recognises.

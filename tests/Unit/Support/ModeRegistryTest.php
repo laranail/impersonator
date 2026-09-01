@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * A stand-in enforcer. The built-in three arrive with the mode layer; the
@@ -93,6 +93,6 @@ it('describes every registered mode', function (): void {
 
     expect($registry->descriptions())->toBe([
         'read_only' => 'the read_only envelope',
-        'full'      => 'the full envelope',
+        'full' => 'the full envelope',
     ]);
 });

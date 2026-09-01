@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Services\AuditService;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Services\AuditService;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | The polymorphic columns.
@@ -138,10 +138,10 @@ it('still filters by the public target field after the column rename', function 
 
     $service = app(AuditService::class);
 
-    expect($service->query(['target' => 'user:' . $this->target->getKey()])->count())->toBe(1)
+    expect($service->query(['target' => 'user:'.$this->target->getKey()])->count())->toBe(1)
         ->and($service->query(['target' => (string) $this->target->getKey()])->count())->toBe(1)
         ->and($service->query(['target' => 'user:999999'])->count())->toBe(0)
-        ->and($service->query(['impersonator' => 'user:' . $this->admin->getKey()])->count())->toBe(1);
+        ->and($service->query(['impersonator' => 'user:'.$this->admin->getKey()])->count())->toBe(1);
 });
 
 it('leaves the audit hash chain verifiable across the rename', function (): void {
@@ -157,7 +157,7 @@ it('leaves the audit hash chain verifiable across the rename', function (): void
     $facts = $store->chainFactsFromRow($row);
 
     expect($facts)->toHaveKey('target')
-        ->and($facts['target'])->toBe('user:' . $this->target->getKey())
+        ->and($facts['target'])->toBe('user:'.$this->target->getKey())
         ->and($facts)->not->toHaveKey('impersonatable');
 });
 

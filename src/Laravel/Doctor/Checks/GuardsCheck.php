@@ -46,7 +46,7 @@ final class GuardsCheck extends Check
             $unknown = [];
 
             foreach ($configured as $guard) {
-                if (! is_array(config('auth.guards.' . $guard))) {
+                if (! is_array(config('auth.guards.'.$guard))) {
                     $unknown[] = $guard;
                 }
             }

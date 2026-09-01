@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | Rate limits must bound the caller, and while impersonating the caller is the operator.
@@ -52,7 +52,7 @@ it('keys on the operator while impersonating, not the target', function (): void
     $key = app(ImpersonationManager::class)->rateLimitKey(request());
 
     expect($key)->toContain((string) $this->admin->getKey())
-        ->and($key)->not->toContain('user:' . $this->target->getKey());
+        ->and($key)->not->toContain('user:'.$this->target->getKey());
 });
 
 it('qualifies the key by morph type so two models sharing an id do not share a bucket', function (): void {
@@ -60,7 +60,7 @@ it('qualifies the key by morph type so two models sharing an id do not share a b
     Impersonator::enter($this->target);
 
     expect(app(ImpersonationManager::class)->rateLimitKey(request()))
-        ->toBe('impersonator-operator:user:' . $this->admin->getKey());
+        ->toBe('impersonator-operator:user:'.$this->admin->getKey());
 });
 
 it('spends the operator budget rather than the target budget', function (): void {

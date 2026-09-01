@@ -2,29 +2,29 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Notification;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
+use Illuminate\Support\Facades\Schema;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalRequested;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
-use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalDecided;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalDecided;
 use Simtabi\Laranail\Impersonator\Laravel\Notifications\ApprovalRequestedNotification;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -49,14 +49,14 @@ beforeEach(function (): void {
     RbacUser::$registered = [];
 
     $this->operator = RbacUser::create([
-        'name'        => 'Operator',
+        'name' => 'Operator',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full', 'impersonator.mode.read_only'],
     ]);
 
     // The approver holds `approve` and deliberately *not* `enter`: authorising access and
     // using it are separate roles, and the test suite should not be able to confuse them.
     $this->approver = RbacUser::create([
-        'name'        => 'Approver',
+        'name' => 'Approver',
         'permissions' => ['impersonator.approve'],
     ]);
 
@@ -267,7 +267,7 @@ it('requires the approve permission, which entering does not confer', function (
     // A colleague who may impersonate but was never given `approve`. If entering implied
     // approving, any two support staff could clear each other's requests.
     $colleague = RbacUser::create([
-        'name'        => 'Colleague',
+        'name' => 'Colleague',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
 
@@ -327,7 +327,7 @@ it('cannot be spent by a different operator', function (): void {
     approvals()->grant($approvalId, $this->approver);
 
     $colleague = RbacUser::create([
-        'name'        => 'Colleague',
+        'name' => 'Colleague',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
     Auth::guard('web')->setUser($colleague);

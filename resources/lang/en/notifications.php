@@ -30,14 +30,14 @@ return [
         // attempt at exactly the moment they are deciding whether to trust the mail.
         'fallback_app_name' => 'Our team',
 
-        'subject'  => ':app accessed your account',
+        'subject' => ':app accessed your account',
         'accessed' => 'A member of our support team accessed your account on :date.',
-        'routine'  => 'This is a routine part of helping with a support request. If you were not expecting it, please reply to this message.',
+        'routine' => 'This is a routine part of helping with a support request. If you were not expecting it, please reply to this message.',
 
         'mode' => [
             'read_only' => 'They could view your account but could not change anything.',
-            'limited'   => 'They could help with your account, but could not change your password, security settings or billing details.',
-            'default'   => 'They had the same access to your account that you do.',
+            'limited' => 'They could help with your account, but could not change your password, security settings or billing details.',
+            'default' => 'They had the same access to your account that you do.',
         ],
     ],
 
@@ -46,14 +46,14 @@ return [
      * differently in the security alert than in the approval request.
      */
     'fields' => [
-        'operator'   => 'Operator: :value',
-        'target'     => 'Target: :value',
-        'mode'       => 'Mode: :value',
-        'reason'     => 'Reason: :value',
-        'audit_id'   => 'Audit id: :value',
+        'operator' => 'Operator: :value',
+        'target' => 'Target: :value',
+        'mode' => 'Mode: :value',
+        'reason' => 'Reason: :value',
+        'audit_id' => 'Audit id: :value',
         'request_id' => 'Request id: :value',
-        'expires'    => 'Expires: :value',
-        'note'       => 'Note from the approver: :value',
+        'expires' => 'Expires: :value',
+        'note' => 'Note from the approver: :value',
         'none_given' => 'none given',
     ],
 
@@ -61,29 +61,29 @@ return [
         'subject' => '[:app] Impersonation alert: :summary',
 
         'summary' => [
-            'revoked'         => 'An impersonation was revoked by an administrator.',
+            'revoked' => 'An impersonation was revoked by an administrator.',
             'full_mode_enter' => 'An operator entered an account with full access.',
-            'expired'         => 'An impersonation was force-ended after reaching its time limit.',
-            'default'         => 'An impersonation event occurred.',
+            'expired' => 'An impersonation was force-ended after reaching its time limit.',
+            'default' => 'An impersonation event occurred.',
         ],
     ],
 
     'approval' => [
         'requested' => [
             'subject' => '[:app] Impersonation approval requested',
-            'line'    => 'An operator is asking for approval to impersonate an account.',
-            'action'  => 'Approve or deny it from your administration area. You cannot approve your own request.',
+            'line' => 'An operator is asking for approval to impersonate an account.',
+            'action' => 'Approve or deny it from your administration area. You cannot approve your own request.',
         ],
 
         // Three complete sentences, never an adjective spliced into a template. Word order is not
         // universal, so "Your request was :outcome" cannot be translated correctly for every locale.
         'decided' => [
-            'approved'         => 'Your impersonation request was approved.',
-            'denied'           => 'Your impersonation request was denied.',
-            'expired'          => 'Your impersonation request expired before anyone decided it.',
+            'approved' => 'Your impersonation request was approved.',
+            'denied' => 'Your impersonation request was denied.',
+            'expired' => 'Your impersonation request expired before anyone decided it.',
             'subject_approved' => '[:app] Impersonation request approved',
-            'subject_denied'   => '[:app] Impersonation request denied',
-            'subject_expired'  => '[:app] Impersonation request expired',
+            'subject_denied' => '[:app] Impersonation request denied',
+            'subject_expired' => '[:app] Impersonation request expired',
 
             // The window is the one on the *approval*, not a fresh one. An operator who thinks they
             // have fifteen minutes from reading the mail will find the permit already dead.

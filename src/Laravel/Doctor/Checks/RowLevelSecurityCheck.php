@@ -69,7 +69,7 @@ final class RowLevelSecurityCheck extends Check
             // and not exposed by the standard views.
             $rows = $connection->select(
                 'select relname, relrowsecurity, relforcerowsecurity from pg_class where relname = any(?)',
-                ['{' . implode(',', $tables) . '}'],
+                ['{'.implode(',', $tables).'}'],
             );
 
             $enabled = [];
@@ -86,18 +86,18 @@ final class RowLevelSecurityCheck extends Check
                 $forced = ($row->relforcerowsecurity ?? false) === true;
 
                 if (is_string($name) && ($on || $forced)) {
-                    $enabled[] = $name . ($forced ? ' (FORCED)' : '');
+                    $enabled[] = $name.($forced ? ' (FORCED)' : '');
                 }
             }
 
             return $enabled === []
                 ? DoctorResult::pass('Row-level security is not enabled on any package table.')
                 : DoctorResult::fail(
-                    'Row-level security is enabled on: ' . implode(', ', $enabled)
-                    . '. A policy that hides an audit row makes verify-audit report a chain break that '
-                    . 'never happened — the digest is computed over the previous row — and makes an '
-                    . 'export return an empty trail. Exempt these tables, or policy them explicitly '
-                    . 'for the application\'s database user.',
+                    'Row-level security is enabled on: '.implode(', ', $enabled)
+                    .'. A policy that hides an audit row makes verify-audit report a chain break that '
+                    .'never happened — the digest is computed over the previous row — and makes an '
+                    .'export return an empty trail. Exempt these tables, or policy them explicitly '
+                    .'for the application\'s database user.',
                     ['tables' => $enabled],
                 );
         }, 'inspect row-level security on the audit connection');

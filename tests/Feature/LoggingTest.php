@@ -2,18 +2,18 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Log;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 use Simtabi\Laranail\Impersonator\Laravel\Listeners\LogImpersonationLifecycle;
 use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /**
  * The first captured line with this message.
@@ -22,7 +22,7 @@ use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Imperson
  * how many lines the package writes altogether means every new event breaks it — which is exactly what
  * happened when `ImpersonationRequested` began logging.
  *
- * @param list<object> $captured
+ * @param  list<object>  $captured
  */
 function lineFor(array $captured, string $message): object
 {
@@ -65,8 +65,8 @@ it('logs a start with structured context', function (): void {
     $line = lineFor($captured, 'Impersonation started.');
 
     expect($line->level)->toBe('info')
-        ->and($line->context['impersonator'])->toBe('user:' . $this->admin->getKey())
-        ->and($line->context['target'])->toBe('user:' . $this->target->getKey())
+        ->and($line->context['impersonator'])->toBe('user:'.$this->admin->getKey())
+        ->and($line->context['target'])->toBe('user:'.$this->target->getKey())
         ->and($line->context['mode'])->toBe('full')
         ->and($line->context['reason'])->toBe('Ticket #4182')
         // The correlation id, on every session-bearing line.
@@ -193,7 +193,7 @@ it('has a handler for every event the package dispatches', function (): void {
     // handler.
     $events = [];
 
-    foreach (glob(dirname(__DIR__, 2) . '/src/Core/Events/*.php') ?: [] as $file) {
+    foreach (glob(dirname(__DIR__, 2).'/src/Core/Events/*.php') ?: [] as $file) {
         $events[] = basename($file, '.php');
     }
 
@@ -211,7 +211,7 @@ it('has a handler for every event the package dispatches', function (): void {
 
     // And every one is actually wired, not merely implemented.
     foreach ($events as $event) {
-        $class = 'Simtabi\\Laranail\\Impersonator\\Core\\Events\\' . $event;
+        $class = 'Simtabi\\Laranail\\Impersonator\\Core\\Events\\'.$event;
 
         expect(Event::hasListeners($class))->toBeTrue("no listener for {$event}");
     }

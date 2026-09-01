@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\Secret;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\NotAModel;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\NotAModel;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\Secret;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -78,7 +78,7 @@ it('denies every target when the allowlist is empty', function (): void {
 
 it('drops allowlist entries that are not installed Eloquent models', function (): void {
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user'  => User::class,
+        'user' => User::class,
         'ghost' => 'App\\Models\\Removed',
         'plain' => NotAModel::class,
     ]);

@@ -5,19 +5,19 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Middleware;
 
 use Closure;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\Events\Dispatcher;
-use Symfony\Component\HttpFoundation\Response;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Illuminate\Http\Request;
+use Simtabi\Laranail\Impersonator\Core\Events\ModeViolationBlocked;
 use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\LivewireAction;
-use Simtabi\Laranail\Impersonator\Core\Events\ModeViolationBlocked;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Applies the active mode to the current request.

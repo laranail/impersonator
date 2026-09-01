@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Values;
 
-use Stringable;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
+use Stringable;
 
 /**
  * A framework-agnostic reference to a user.
@@ -68,7 +68,7 @@ final readonly class Identity implements Stringable
     /** A stable key for cache entries, locks and de-duplication. */
     public function key(): string
     {
-        return $this->type . ':' . $this->id;
+        return $this->type.':'.$this->id;
     }
 
     public function withLabel(?string $label): self
@@ -80,8 +80,8 @@ final readonly class Identity implements Stringable
     public function toArray(): array
     {
         return [
-            'type'  => $this->type,
-            'id'    => $this->id,
+            'type' => $this->type,
+            'id' => $this->id,
             'label' => $this->label,
         ];
     }

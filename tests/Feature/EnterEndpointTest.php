@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Testing\TestResponse;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\Secret;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Testing\TestResponse;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\Secret;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -61,8 +61,8 @@ it('rejects an unregistered mode with a 422 rather than a 500', function (): voi
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'mode'        => 'god',
+        'target_id' => (string) $this->target->getKey(),
+        'mode' => 'god',
     ])->assertSessionHasErrors('mode');
 });
 
@@ -71,8 +71,8 @@ it('accepts each registered mode', function (string $mode): void {
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'mode'        => $mode,
+        'target_id' => (string) $this->target->getKey(),
+        'mode' => $mode,
     ])->assertRedirect();
 
     expect(Impersonator::mode()?->name)->toBe($mode);
@@ -83,8 +83,8 @@ it('rejects a guard that does not exist', function (): void {
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'guard'       => 'nonexistent',
+        'target_id' => (string) $this->target->getKey(),
+        'guard' => 'nonexistent',
     ])->assertSessionHasErrors('guard');
 });
 
@@ -95,7 +95,7 @@ it('rejects an open redirect', function (string $redirect): void {
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
         'redirect_to' => $redirect,
     ])->assertSessionHasErrors('redirect_to');
 })->with([
@@ -110,7 +110,7 @@ it('honours a safe relative redirect', function (): void {
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
         'redirect_to' => '/dashboard',
     ])->assertRedirect('/dashboard');
 });
@@ -130,8 +130,8 @@ it('bounds the reason length', function (): void {
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'reason'      => str_repeat('x', 21),
+        'target_id' => (string) $this->target->getKey(),
+        'reason' => str_repeat('x', 21),
     ])->assertSessionHasErrors('reason');
 });
 
@@ -140,8 +140,8 @@ it('records the reason on the audit row', function (): void {
 
     postEnter([
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'reason'      => 'Ticket #4182',
+        'target_id' => (string) $this->target->getKey(),
+        'reason' => 'Ticket #4182',
     ]);
 
     expect(Impersonator::current()?->reason)->toBe('Ticket #4182');

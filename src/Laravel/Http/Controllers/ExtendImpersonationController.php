@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers;
 
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Http\Request;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Extends the current impersonation from inside it.
@@ -39,7 +39,7 @@ final readonly class ExtendImpersonationController
             if ($request->expectsJson()) {
                 return response()->json([
                     'message' => $outcome->grant->decision->reason,
-                    'reason'  => $outcome->grant->decision->code,
+                    'reason' => $outcome->grant->decision->code,
                 ], 403);
             }
 

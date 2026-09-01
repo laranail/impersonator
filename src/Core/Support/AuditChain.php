@@ -42,13 +42,13 @@ final readonly class AuditChain
     /**
      * The digest for a row, given its predecessor's.
      *
-     * @param array<string, mixed> $facts the row's immutable opening facts
+     * @param  array<string, mixed>  $facts  the row's immutable opening facts
      */
     public function digest(array $facts, ?string $previousHash): string
     {
         return hash_hmac(
             'sha256',
-            ($previousHash ?? self::GENESIS) . "\n" . $this->canonicalise($facts),
+            ($previousHash ?? self::GENESIS)."\n".$this->canonicalise($facts),
             $this->key,
         );
     }
@@ -59,7 +59,7 @@ final readonly class AuditChain
      * `hash_equals` rather than `===`: a timing-safe comparison costs nothing here and this is
      * exactly the kind of check that gets copied into a context where it matters.
      *
-     * @param array<string, mixed> $facts
+     * @param  array<string, mixed>  $facts
      */
     public function verify(array $facts, ?string $previousHash, string $recordedHash): bool
     {
@@ -69,7 +69,7 @@ final readonly class AuditChain
     /**
      * A deterministic string for a set of facts.
      *
-     * @param array<array-key, mixed> $facts
+     * @param  array<array-key, mixed>  $facts
      *
      * Keys are sorted and values normalised, because the digest has to be reproducible from a
      * database row years later — by a different PHP version, a different JSON extension, or a
@@ -89,7 +89,7 @@ final readonly class AuditChain
         $parts = [];
 
         foreach ($normalised as $key => $value) {
-            $parts[] = $key . '=' . $value;
+            $parts[] = $key.'='.$value;
         }
 
         // A separator that cannot appear in a normalised value, so `a=1&b=2` and `a=1&b` are
@@ -106,12 +106,12 @@ final readonly class AuditChain
     private function scalarise(mixed $value): string
     {
         return match (true) {
-            $value === null                  => "\x00null",
-            is_bool($value)                  => $value ? "\x00true" : "\x00false",
+            $value === null => "\x00null",
+            is_bool($value) => $value ? "\x00true" : "\x00false",
             is_int($value), is_float($value) => (string) $value,
-            is_string($value)                => $value,
-            is_array($value)                 => $this->canonicalise($value),
-            default                          => "\x00" . get_debug_type($value),
+            is_string($value) => $value,
+            is_array($value) => $this->canonicalise($value),
+            default => "\x00".get_debug_type($value),
         };
     }
 }

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api;
 
-use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Simtabi\Laranail\Impersonator\Laravel\Audit\AuditExporter;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
-use Simtabi\Laranail\Impersonator\Laravel\Services\AuditService;
+use Illuminate\Http\Response;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\TrailEventResource;
+use Simtabi\Laranail\Impersonator\Laravel\Audit\AuditExporter;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\ListAuditsRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\ImpersonationResource;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\TrailEventResource;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Services\AuditService;
 
 /**
  * Reading the audit trail.
@@ -63,9 +63,9 @@ final readonly class AuditController
         return ImpersonationResource::make($session)
             ->additional([
                 'trail' => TrailEventResource::collection($this->audits->trail($audit, $limit)),
-                'meta'  => [
+                'meta' => [
                     'trail_events' => $this->audits->trailCount($audit),
-                    'trail_limit'  => $limit,
+                    'trail_limit' => $limit,
                 ],
             ])
             ->response();
@@ -92,7 +92,7 @@ final readonly class AuditController
         }
 
         return new Response($document, 200, [
-            'Content-Type'        => $format === AuditExporter::CSV ? 'text/csv' : 'application/json',
+            'Content-Type' => $format === AuditExporter::CSV ? 'text/csv' : 'application/json',
             'Content-Disposition' => sprintf(
                 'attachment; filename="impersonation-%s.%s"',
                 $audit,

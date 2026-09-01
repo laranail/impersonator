@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
+use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
-use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
 
 /*
 | Multi-reviewer approval chains.
@@ -45,18 +45,18 @@ beforeEach(function (): void {
 
     // Two reviewers, one of each role, plus a requester who holds everything.
     $this->requester = RbacUser::create([
-        'name'        => 'Requester',
-        'roles'       => ['manager', 'auditor'],
+        'name' => 'Requester',
+        'roles' => ['manager', 'auditor'],
         'permissions' => ['impersonator.enter', 'impersonator.mode.full', 'impersonator.approve'],
     ]);
     $this->manager = RbacUser::create([
-        'name'        => 'Manager',
-        'roles'       => ['manager'],
+        'name' => 'Manager',
+        'roles' => ['manager'],
         'permissions' => ['impersonator.approve'],
     ]);
     $this->auditor = RbacUser::create([
-        'name'        => 'Auditor',
-        'roles'       => ['auditor'],
+        'name' => 'Auditor',
+        'roles' => ['auditor'],
         'permissions' => ['impersonator.approve'],
     ]);
     $this->target = RbacUser::create(['name' => 'Customer']);
@@ -188,8 +188,8 @@ it('lets one reviewer fill only one role slot', function (): void {
     ]);
 
     $both = RbacUser::create([
-        'name'        => 'Both',
-        'roles'       => ['manager', 'auditor'],
+        'name' => 'Both',
+        'roles' => ['manager', 'auditor'],
         'permissions' => ['impersonator.approve'],
     ]);
 
@@ -301,7 +301,7 @@ it('applies a per-mode policy, falling back to default', function (): void {
     // shape of this control.
     config()->set('laranail.impersonator.approval.policies', [
         'default' => ['quorum' => 1],
-        'full'    => ['quorum' => 2],
+        'full' => ['quorum' => 2],
     ]);
 
     $id = openChainRequest($this->target);
@@ -376,7 +376,7 @@ it('never puts the fingerprint in a decision projection', function (): void {
 
     $request = app(ApprovalService::class)->find($id);
     $encoded = json_encode([
-        'request'   => $request->toArray(),
+        'request' => $request->toArray(),
         'decisions' => array_map(
             static fn (ApprovalDecision $decision): array => $decision->toArray(),
             app(ApprovalService::class)->decisions($id),

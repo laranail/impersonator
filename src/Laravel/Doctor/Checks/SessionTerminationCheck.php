@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 
-use Throwable;
-use SessionHandlerInterface;
-use Illuminate\Session\Store;
 use Illuminate\Session\SessionManager;
+use Illuminate\Session\Store;
+use SessionHandlerInterface;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
+use Throwable;
 
 /**
  * Whether a revocation can actually end a session, or only record the intent.
@@ -38,15 +38,15 @@ final class SessionTerminationCheck extends Check
         if (! $this->settings->bool('session.destroy_on_revoke', true)) {
             return DoctorResult::warn(
                 'impersonator.session.destroy_on_revoke is off, so a revocation is only recorded. '
-                . 'The impersonated session ends on its next request, which for an idle tab may be a while.',
+                .'The impersonated session ends on its next request, which for an idle tab may be a while.',
             );
         }
 
         if (in_array($driver, ['cookie', 'array'], true)) {
             return DoctorResult::warn(sprintf(
                 'The [%s] session driver keeps no server-side record, so a revocation cannot be '
-                . 'enforced out of band — it is recorded and the middleware ends the session on its '
-                . 'next request. Use database, redis or file for an immediate kill switch.',
+                .'enforced out of band — it is recorded and the middleware ends the session on its '
+                .'next request. Use database, redis or file for an immediate kill switch.',
                 $driver,
             ));
         }

@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Simtabi\Laranail\Enumerator\Contracts\Translatable;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
+use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 
 /*
 | Enum labels, now resolved through laranail/enumerator.
@@ -32,23 +32,23 @@ it('keeps every label byte-identical to the hand-written version', function (
     }
 })->with([
     'EndReason' => [EndReason::class, [
-        'left'         => 'Left',
-        'expired'      => 'Expired',
-        'revoked'      => 'Revoked',
+        'left' => 'Left',
+        'expired' => 'Expired',
+        'revoked' => 'Revoked',
         'session_lost' => 'Session lost',
     ]],
     'ApprovalState' => [ApprovalState::class, [
-        'pending'  => 'Awaiting approval',
+        'pending' => 'Awaiting approval',
         'approved' => 'Approved',
         'consumed' => 'Used',
-        'denied'   => 'Denied',
-        'expired'  => 'Expired',
+        'denied' => 'Denied',
+        'expired' => 'Expired',
     ]],
     'CredentialType' => [CredentialType::class, [
-        'session'        => 'Session',
-        'sanctum_token'  => 'Sanctum token',
+        'session' => 'Session',
+        'sanctum_token' => 'Sanctum token',
         'passport_token' => 'Passport token',
-        'jwt'            => 'JWT',
+        'jwt' => 'JWT',
     ]],
 ]);
 

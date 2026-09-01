@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Model;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
@@ -52,7 +52,7 @@ final readonly class CauserResolver
 
         return match ($this->strategy()) {
             self::TARGET => $this->impersonator->target() ?? $this->impersonator->actor(),
-            default      => $this->impersonator->actor(),
+            default => $this->impersonator->actor(),
         };
     }
 
@@ -75,9 +75,9 @@ final readonly class CauserResolver
         }
 
         $properties = [
-            'impersonated'           => true,
+            'impersonated' => true,
             'impersonation_audit_id' => $session->auditId,
-            'impersonation_mode'     => $session->mode->name,
+            'impersonation_mode' => $session->mode->name,
         ];
 
         if ($this->strategy() === self::BOTH) {

@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\StaffUser;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {

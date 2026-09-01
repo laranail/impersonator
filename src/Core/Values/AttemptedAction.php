@@ -17,8 +17,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Values;
 final readonly class AttemptedAction
 {
     /**
-     * @param list<string> $abilities gate abilities this action would exercise
-     * @param array<string, mixed> $context
+     * @param  list<string>  $abilities  gate abilities this action would exercise
+     * @param  array<string, mixed>  $context
      */
     public function __construct(
         public string $method,
@@ -67,7 +67,7 @@ final readonly class AttemptedAction
      * say on its own — a Livewire request's component and method, which are in the payload rather than
      * in the route.
      *
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     public function withContext(array $context): self
     {
@@ -119,12 +119,12 @@ final readonly class AttemptedAction
     public function toArray(): array
     {
         return [
-            'method'      => $this->normalizedMethod(),
-            'path'        => $this->path,
-            'route_name'  => $this->routeName,
-            'abilities'   => $this->abilities,
+            'method' => $this->normalizedMethod(),
+            'path' => $this->path,
+            'route_name' => $this->routeName,
+            'abilities' => $this->abilities,
             'model_class' => $this->modelClass,
-            'context'     => $this->context,
+            'context' => $this->context,
         ];
     }
 }

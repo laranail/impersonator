@@ -6,9 +6,9 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * Ends the current impersonation.

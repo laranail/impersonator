@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Core\Contracts;
 
 use DateTimeImmutable;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 
 /**

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 
 /**
@@ -113,7 +113,7 @@ final class PersistenceGuard
      * own session write on PostgreSQL: the statement said `"public"."sessions"`, the exempt list
      * said `sessions`, and nothing lined up.
      *
-     * @param array{qualified: string, table: string} $table
+     * @param  array{qualified: string, table: string}  $table
      */
     private function isExempt(array $table): bool
     {
@@ -155,7 +155,7 @@ final class PersistenceGuard
     {
         $identifier = '(?:[`"\[]?[\w$]+[`"\]]?)';
         $pattern = '/^\s*(?:insert\s+into|update|delete\s+from|replace\s+into)\s+'
-            . '((?:' . $identifier . '\.)*' . $identifier . ')/i';
+            .'((?:'.$identifier.'\.)*'.$identifier.')/i';
 
         if (preg_match($pattern, $query, $m) !== 1) {
             return null;

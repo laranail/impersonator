@@ -4,20 +4,20 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Adapters;
 
-use Throwable;
 use Illuminate\Auth\SessionGuard;
-use Illuminate\Contracts\Session\Session;
-use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Contracts\Config\Repository as Config;
-use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Illuminate\Contracts\Session\Session;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Throwable;
 
 /**
  * Authenticates the target on a stateful guard — the always-available adapter,
@@ -78,7 +78,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
         if ($target === null) {
             throw new ImpersonationException(sprintf(
                 'Cannot impersonate [%s]: the target could not be resolved. It may have been '
-                . 'deleted, or its type may not be in the impersonator.targets.allowlist.',
+                .'deleted, or its type may not be in the impersonator.targets.allowlist.',
                 $request->target->key(),
             ));
         }
@@ -89,7 +89,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
         if (! $target instanceof Authenticatable) {
             throw new ImpersonationException(sprintf(
                 'Cannot impersonate [%s]: %s does not implement %s, so it cannot be '
-                . 'authenticated on a guard.',
+                .'authenticated on a guard.',
                 $request->target->key(),
                 $target::class,
                 Authenticatable::class,
@@ -241,7 +241,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
      */
     private function syncPasswordHash(StatefulGuard $guard, Authenticatable $user): void
     {
-        $key = 'password_hash_' . $this->defaultGuardName();
+        $key = 'password_hash_'.$this->defaultGuardName();
         $password = $user->getAuthPassword();
 
         if (! is_string($password) || $password === '') {
@@ -342,7 +342,7 @@ final readonly class SessionGuardAdapter implements AuthAdapter
         if (! $guard instanceof StatefulGuard) {
             throw new ImpersonationException(sprintf(
                 'Guard [%s] is not stateful, so the session adapter cannot log a user in on it. '
-                . 'Use an API adapter (sanctum, passport, jwt) for token guards.',
+                .'Use an API adapter (sanctum, passport, jwt) for token guards.',
                 $name,
             ));
         }

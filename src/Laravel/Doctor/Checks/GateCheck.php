@@ -38,9 +38,9 @@ final class GateCheck extends Check
             ? DoctorResult::pass(sprintf('The [%s] ability is defined and will be consulted.', $ability))
             : DoctorResult::warn(sprintf(
                 'impersonator.authorization.gate_ability is [%s] but no such ability is defined, '
-                . 'so it is skipped. That is deliberate — an undefined ability denies everything '
-                . 'in Laravel, and treating "not defined" as "denied" would break every install '
-                . 'that never opted in — but if you meant to define it, it is not being enforced.',
+                .'so it is skipped. That is deliberate — an undefined ability denies everything '
+                .'in Laravel, and treating "not defined" as "denied" would break every install '
+                .'that never opted in — but if you meant to define it, it is not being enforced.',
                 $ability,
             ));
     }

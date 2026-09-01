@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Adapters;
 
-use Throwable;
-use Illuminate\Support\Str;
-use Laravel\Sanctum\Sanctum;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\PersonalAccessToken;
-use Simtabi\Laranail\Impersonator\Core\Values\Credential;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
+use Laravel\Sanctum\Sanctum;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
+use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Throwable;
 
 /**
  * Impersonation for Sanctum-authenticated APIs.
@@ -95,13 +95,13 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
 
         $accessToken->forceFill([
             'tokenable_type' => $target->getMorphClass(),
-            'tokenable_id'   => $target->getKey(),
+            'tokenable_id' => $target->getKey(),
             // The audit id in the name is the back-reference. Sanctum names are not unique, so
             // this is a label rather than a key — but it is the label a human reads when asking
             // which impersonation a token belongs to.
-            'name'       => 'impersonation:' . $session->auditId,
-            'token'      => hash('sha256', $plaintext),
-            'abilities'  => [$this->ability()],
+            'name' => 'impersonation:'.$session->auditId,
+            'token' => hash('sha256', $plaintext),
+            'abilities' => [$this->ability()],
             'expires_at' => $expiresAt,
         ])->save();
 
@@ -111,11 +111,11 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
             type: CredentialType::SanctumToken,
             // Sanctum's wire format is `{id}|{plaintext}`, which its own guard splits on. The
             // one and only copy: returned to the caller, hashed for the audit row, never stored.
-            secret: $this->keyOf($accessToken) . '|' . $plaintext,
+            secret: $this->keyOf($accessToken).'|'.$plaintext,
             reference: $this->keyOf($accessToken),
             expiresAt: $expiresAt->toDateTimeImmutable(),
             metadata: [
-                'ability'  => $this->ability(),
+                'ability' => $this->ability(),
                 'audit_id' => $session->auditId,
             ],
         );
@@ -151,7 +151,7 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
         $entropy = Str::random(40);
         $prefix = config('sanctum.token_prefix', '');
 
-        return (is_string($prefix) ? $prefix : '') . $entropy . hash('crc32b', $entropy);
+        return (is_string($prefix) ? $prefix : '').$entropy.hash('crc32b', $entropy);
     }
 
     private function deleteToken(ImpersonationSession $session): bool
@@ -167,7 +167,7 @@ final readonly class SanctumTokenAdapter implements AuthAdapter
                 return $query->whereKey($reference)->delete() > 0;
             }
 
-            return $query->where('name', 'impersonation:' . $session->auditId)->delete() > 0;
+            return $query->where('name', 'impersonation:'.$session->auditId)->delete() > 0;
         } catch (Throwable) {
             // Sanctum's table may not exist, or the connection may be gone. Reporting false
             // is correct: the audit row is still marked and the middleware still refuses.

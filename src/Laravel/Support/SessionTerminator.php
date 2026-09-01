@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
-use Throwable;
-use SessionHandlerInterface;
 use Illuminate\Contracts\Session\Session;
-use Illuminate\Session\NullSessionHandler;
 use Illuminate\Session\CookieSessionHandler;
-use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
+use Illuminate\Session\NullSessionHandler;
+use SessionHandlerInterface;
 use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
+use Throwable;
 
 /**
  * Destroys another user's session by id, without being inside it.
@@ -64,9 +64,9 @@ final readonly class SessionTerminator
         if (! $this->canTerminate()) {
             $this->reporter->warn('Impersonator: session cannot be destroyed out of band.', [
                 'operation' => 'impersonator.session.terminate',
-                'expected'  => 'a server-side session driver',
-                'actual'    => sprintf('driver [%s] holds no server-side session record', $this->driver()),
-                'decision'  => 'tolerated, revocation enforced on the next request instead',
+                'expected' => 'a server-side session driver',
+                'actual' => sprintf('driver [%s] holds no server-side session record', $this->driver()),
+                'decision' => 'tolerated, revocation enforced on the next request instead',
             ]);
 
             return false;
@@ -122,14 +122,14 @@ final readonly class SessionTerminator
     {
         if (! $this->settings->bool('session.destroy_on_revoke', true)) {
             return 'Disabled by session.destroy_on_revoke; revocation takes effect on the '
-                . "target's next request.";
+                ."target's next request.";
         }
 
         return $this->canTerminate()
             ? sprintf('Revocation destroys the session immediately (driver: %s).', $this->driver())
             : sprintf(
                 'Driver [%s] keeps no server-side session record, so revocation takes effect '
-                . "on the target's next request.",
+                ."on the target's next request.",
                 $this->driver(),
             );
     }

@@ -27,8 +27,8 @@ final class MaxDurationCheck extends Check
         return $max === null
             ? DoctorResult::warn(
                 'impersonator.limits.max_duration is unlimited, so an impersonation left open stays '
-                . 'open. An abandoned session inside a customer account is the one that shows up in '
-                . 'an audit with no explanation.',
+                .'open. An abandoned session inside a customer account is the one that shows up in '
+                .'an audit with no explanation.',
             )
             : DoctorResult::pass(sprintf(
                 'Impersonations are force-ended after %d %s.',

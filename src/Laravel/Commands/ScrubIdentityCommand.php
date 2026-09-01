@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 
 /**
  * Removes a person's name from the audit trail without removing the trail.

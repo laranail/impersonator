@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
 use Simtabi\Laranail\Impersonator\Laravel\Audit\ConcurrencyLimitReached;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -197,9 +197,9 @@ it('redacts a recorded payload', function (): void {
     $auditId = startImpersonation($this->admin, $this->target);
 
     $this->post('/app/save', [
-        'email'    => 'ada@example.com',
+        'email' => 'ada@example.com',
         'password' => 'hunter2',
-        'nested'   => ['api_token' => 'abc'],
+        'nested' => ['api_token' => 'abc'],
     ]);
 
     $payload = app(TrailStore::class)->forAudit($auditId)[0]->payload;

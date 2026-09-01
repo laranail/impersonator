@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 
 /**
@@ -42,7 +42,7 @@ class ImpersonationSecurityAlert extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject(__('laranail-impersonator::notifications.security.subject', [
-                'app'     => $appName,
+                'app' => $appName,
                 'summary' => $this->headline(),
             ]))
             ->line($this->headline())
@@ -60,7 +60,7 @@ class ImpersonationSecurityAlert extends Notification implements ShouldQueue
         // alert is forwarded, pasted into chat and archived in places the audit table
         // is not.
         return [
-            'trigger'  => $this->trigger,
+            'trigger' => $this->trigger,
             'headline' => $this->headline(),
         ] + $this->session->toArray();
     }
@@ -68,10 +68,10 @@ class ImpersonationSecurityAlert extends Notification implements ShouldQueue
     private function headline(): string
     {
         return match ($this->trigger) {
-            'revoked'         => (string) __('laranail-impersonator::notifications.security.summary.revoked'),
+            'revoked' => (string) __('laranail-impersonator::notifications.security.summary.revoked'),
             'full_mode_enter' => (string) __('laranail-impersonator::notifications.security.summary.full_mode_enter'),
-            'expired'         => (string) __('laranail-impersonator::notifications.security.summary.expired'),
-            default           => (string) __('laranail-impersonator::notifications.security.summary.default'),
+            'expired' => (string) __('laranail-impersonator::notifications.security.summary.expired'),
+            default => (string) __('laranail-impersonator::notifications.security.summary.default'),
         };
     }
 }

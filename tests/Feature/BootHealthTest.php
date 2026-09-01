@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Contracts\Debug\ExceptionHandler;
-use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
 use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
 use Simtabi\Laranail\Impersonator\Laravel\Failure\LaravelFailureReporter;
 
 /**
@@ -19,7 +19,7 @@ it('boots healthy, with nothing degraded', function (): void {
     $report = app(FailureReport::class);
 
     expect($report->isHealthy())->toBeTrue(
-        'the package booted degraded: ' . json_encode($report->degraded()),
+        'the package booted degraded: '.json_encode($report->degraded()),
     );
 });
 

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
+use Illuminate\Support\Facades\Schema;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
+use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -35,7 +35,7 @@ beforeEach(function (): void {
     // Both permissions: `default_mode` is `full`, and the enter permission alone is
     // deliberately not enough — see the defence-in-depth test below.
     $this->admin = RbacUser::create([
-        'name'        => 'Admin',
+        'name' => 'Admin',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
     $this->target = RbacUser::create(['name' => 'Customer']);
@@ -75,7 +75,7 @@ it('refuses an operator without the enter permission', function (): void {
 it('honours a renamed enter permission', function (): void {
     config()->set('laranail.impersonator.authorization.permissions.enter', 'acme.support.impersonate');
     $operator = RbacUser::create([
-        'name'        => 'Op',
+        'name' => 'Op',
         'permissions' => ['acme.support.impersonate', 'impersonator.mode.full'],
     ]);
 
@@ -96,7 +96,7 @@ it('treats an unregistered permission as not held rather than erroring', functio
 it('gates each mode behind its own permission', function (): void {
     // The rule that pins junior staff to read_only.
     $junior = RbacUser::create([
-        'name'        => 'Junior',
+        'name' => 'Junior',
         'permissions' => ['impersonator.enter', 'impersonator.mode.read_only'],
     ]);
 
@@ -107,7 +107,7 @@ it('gates each mode behind its own permission', function (): void {
 
 it('allows a senior operator every mode they hold', function (): void {
     $senior = RbacUser::create([
-        'name'        => 'Senior',
+        'name' => 'Senior',
         'permissions' => [
             'impersonator.enter',
             'impersonator.mode.read_only',
@@ -124,7 +124,7 @@ it('allows a senior operator every mode they hold', function (): void {
 it('honours a custom mode permission template', function (): void {
     config()->set('laranail.impersonator.authorization.permissions.mode', 'acme.imp.%s');
     $operator = RbacUser::create([
-        'name'        => 'Op',
+        'name' => 'Op',
         'permissions' => ['impersonator.enter', 'acme.imp.full'],
     ]);
 
@@ -133,7 +133,7 @@ it('honours a custom mode permission template', function (): void {
 
 it('reports mode availability without impersonating, for a UI', function (): void {
     $junior = RbacUser::create([
-        'name'        => 'Junior',
+        'name' => 'Junior',
         'permissions' => ['impersonator.enter', 'impersonator.mode.read_only'],
     ]);
 
@@ -156,9 +156,9 @@ it('protects a role regardless of how privileged the impersonator is', function 
     // A property of the target, not a comparison — no amount of privilege gets past it.
     config()->set('laranail.impersonator.authorization.roles.protected', ['super-admin']);
     $god = RbacUser::create([
-        'name'        => 'God',
+        'name' => 'God',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
-        'roles'       => ['super-admin'],
+        'roles' => ['super-admin'],
     ]);
     $founder = RbacUser::create(['name' => 'Founder', 'roles' => ['super-admin']]);
 
@@ -178,14 +178,14 @@ it('requires the impersonator to outrank the target', function (): void {
     config()->set('laranail.impersonator.authorization.roles.levels', ['admin' => 80, 'support' => 40]);
 
     $admin = RbacUser::create([
-        'name'        => 'Admin',
+        'name' => 'Admin',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
-        'roles'       => ['admin'],
+        'roles' => ['admin'],
     ]);
     $support = RbacUser::create([
-        'name'        => 'Support',
+        'name' => 'Support',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
-        'roles'       => ['support'],
+        'roles' => ['support'],
     ]);
 
     expect(decide($admin, $support)->allowed)->toBeTrue()
@@ -215,9 +215,9 @@ it('uses a configured closure in preference to the built-in comparison', functio
     config()->set('laranail.impersonator.authorization.roles.hierarchy', fn (): bool => true);
 
     $a = RbacUser::create([
-        'name'        => 'A',
+        'name' => 'A',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
-        'roles'       => ['support'],
+        'roles' => ['support'],
     ]);
     $b = RbacUser::create(['name' => 'B', 'roles' => ['support']]);
 
@@ -274,7 +274,7 @@ it('gates audit access behind its own permission', function (): void {
 
 it('still refuses self-impersonation with every permission held', function (): void {
     $god = RbacUser::create([
-        'name'        => 'God',
+        'name' => 'God',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
 

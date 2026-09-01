@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationApprovalRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -38,18 +38,18 @@ beforeEach(function (): void {
     RbacUser::$registered = [];
 
     $this->operator = RbacUser::create([
-        'name'        => 'Operator',
+        'name' => 'Operator',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
 
     $this->approver = RbacUser::create([
-        'name'        => 'Approver',
+        'name' => 'Approver',
         'permissions' => ['impersonator.approve'],
     ]);
 
     $this->target = RbacUser::create(['name' => 'Customer']);
 
-    require dirname(__DIR__, 2) . '/routes/api.php';
+    require dirname(__DIR__, 2).'/routes/api.php';
 
     $this->startSession();
     Auth::guard('web')->setUser($this->operator);
@@ -61,7 +61,7 @@ afterEach(function (): void {
 
 function approvalUrl(string $path): string
 {
-    return '/impersonator/api/v1/' . ltrim($path, '/');
+    return '/impersonator/api/v1/'.ltrim($path, '/');
 }
 
 /** Open a pending request the way the API does, and return its id. */
@@ -69,7 +69,7 @@ function openRequest(RbacUser $target): string
 {
     $response = test()->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $target->getKey(),
+        'target_id' => (string) $target->getKey(),
     ]);
 
     $response->assertStatus(202);
@@ -84,7 +84,7 @@ it('answers 202 rather than 403 when approval is required', function (): void {
     // would send them asking for permissions they already have.
     $response = $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ]);
 
     $response->assertStatus(202)
@@ -99,7 +99,7 @@ it('never returns a credential alongside a pending approval', function (): void 
     // The 202 body is not a started impersonation, so it must carry nothing spendable.
     $body = $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ])->assertStatus(202)->content();
 
     expect($body)->not->toContain('credential')
@@ -191,7 +191,7 @@ it('grants and then lets the requester enter once', function (): void {
 
     $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ])->assertCreated()->assertJsonPath('data.pending', false);
 
     expect(app(ApprovalService::class)->find($id)->state)->toBe(ApprovalState::Consumed);
@@ -210,7 +210,7 @@ it('denies with a reason and blocks the entry', function (): void {
 
     $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ])->assertStatus(202);
 
     expect(Impersonator::isImpersonating())->toBeFalse();
@@ -248,7 +248,7 @@ it('refuses to decide without the approve permission', function (): void {
     $id = openRequest($this->target);
 
     $colleague = RbacUser::create([
-        'name'        => 'Colleague',
+        'name' => 'Colleague',
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
     Auth::guard('web')->setUser($colleague);
@@ -300,7 +300,7 @@ it('links the approval to the impersonation it produced', function (): void {
     Auth::guard('web')->setUser($this->operator);
     $auditId = $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ])->assertCreated()->json('data.impersonation.id');
 
     // Both directions, so an auditor holding either row can reach the other.
@@ -326,7 +326,7 @@ it('still enters directly when approval is not required', function (): void {
 
     $this->postJson(approvalUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ])->assertCreated();
 
     expect(Impersonator::isImpersonating())->toBeTrue()

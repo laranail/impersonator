@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
 use DateTimeImmutable;
-use Illuminate\Contracts\Session\Session;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Illuminate\Contracts\Config\Repository as Config;
-use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Illuminate\Contracts\Session\Session;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\Guards;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * The server-side record of an in-progress impersonation, kept in the session.
@@ -34,21 +34,21 @@ final readonly class SessionState
     public function put(ImpersonationSession $impersonation): void
     {
         $this->session->put($this->key(), [
-            'audit_id'        => $impersonation->auditId,
-            'impersonator'    => $impersonation->impersonator->toArray(),
-            'target'          => $impersonation->target->toArray(),
-            'mode'            => $impersonation->mode->name,
-            'guards'          => $impersonation->guards->toArray(),
-            'driver'          => $impersonation->driver,
-            'adapter'         => $impersonation->adapter,
-            'tenant_id'       => $impersonation->tenantId,
-            'session_id'      => $impersonation->sessionId,
+            'audit_id' => $impersonation->auditId,
+            'impersonator' => $impersonation->impersonator->toArray(),
+            'target' => $impersonation->target->toArray(),
+            'mode' => $impersonation->mode->name,
+            'guards' => $impersonation->guards->toArray(),
+            'driver' => $impersonation->driver,
+            'adapter' => $impersonation->adapter,
+            'tenant_id' => $impersonation->tenantId,
+            'session_id' => $impersonation->sessionId,
             'credential_hash' => $impersonation->credentialHash,
-            'reason'          => $impersonation->reason,
-            'started_at'      => $impersonation->startedAt->getTimestamp(),
-            'expires_at'      => $impersonation->expiresAt?->getTimestamp(),
-            'extensions'      => $impersonation->extensions,
-            'metadata'        => $impersonation->metadata,
+            'reason' => $impersonation->reason,
+            'started_at' => $impersonation->startedAt->getTimestamp(),
+            'expires_at' => $impersonation->expiresAt?->getTimestamp(),
+            'extensions' => $impersonation->extensions,
+            'metadata' => $impersonation->metadata,
         ]);
     }
 
@@ -120,12 +120,12 @@ final readonly class SessionState
      */
     public function flashEnded(EndReason $reason): void
     {
-        $this->session->flash($this->key() . '_ended', $reason->value);
+        $this->session->flash($this->key().'_ended', $reason->value);
     }
 
     public function endedReason(): ?EndReason
     {
-        $value = $this->session->get($this->key() . '_ended');
+        $value = $this->session->get($this->key().'_ended');
 
         return is_string($value) ? EndReason::tryFrom($value) : null;
     }

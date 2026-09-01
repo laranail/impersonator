@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Tymon\JWTAuth\Providers\JWT\Lcobucci;
-use Tymon\JWTAuth\Providers\Auth\Illuminate;
-use Tymon\JWTAuth\Providers\LaravelServiceProvider;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\JwtUser;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
 use Simtabi\Laranail\Impersonator\Laravel\Adapters\JwtAdapter;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\JwtUser;
+use Tymon\JWTAuth\Providers\Auth\Illuminate;
+use Tymon\JWTAuth\Providers\JWT\Lcobucci;
+use Tymon\JWTAuth\Providers\LaravelServiceProvider;
 
 uses()->group('jwt');
 
@@ -22,8 +22,8 @@ beforeEach(function (): void {
     config()->set('jwt.ttl', 60);
     config()->set('jwt.blacklist_enabled', true);
     config()->set('jwt.providers', [
-        'jwt'     => Lcobucci::class,
-        'auth'    => Illuminate::class,
+        'jwt' => Lcobucci::class,
+        'auth' => Illuminate::class,
         'storage' => Tymon\JWTAuth\Providers\Storage\Illuminate::class,
     ]);
 
@@ -78,7 +78,7 @@ it('writes the impersonation claims into the token', function (): void {
 
     $claims = decodeClaims((string) $outcome->credential?->secret());
 
-    expect($claims['imp_by'])->toBe('user:' . $this->admin->getKey())
+    expect($claims['imp_by'])->toBe('user:'.$this->admin->getKey())
         ->and($claims['imp_audit'])->toBe($outcome->auditId())
         ->and($claims['imp_mode'])->toBe('read_only');
 });

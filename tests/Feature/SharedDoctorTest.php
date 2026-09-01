@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\RestApiCheck;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorCheck;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorService;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\RestApiCheck;
 
 /*
 | The family integration.
@@ -97,7 +97,7 @@ it('no check throws, whatever the configuration', function (): void {
 it('never leaks the audit hash key into a check result', function (): void {
     // The key lives outside the database on purpose. A diagnostic that echoed it would put it in
     // whatever terminal, CI log or pasted issue the operator was working in.
-    $secret = 'sk-' . str_repeat('z', 60);
+    $secret = 'sk-'.str_repeat('z', 60);
 
     config()->set('laranail.impersonator.audit.tamper_evident', true);
     config()->set('laranail.impersonator.audit.hash_key', $secret);
