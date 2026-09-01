@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Actions;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRequested;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 
 /**
  * Begin an impersonation: authorize, clear approval, then hand off to the driver.

@@ -41,15 +41,15 @@ final class ExtensionCheck extends Check
         if ($count === null && $total === null) {
             return DoctorResult::warn(
                 'Extensions are unlimited in both count and total duration, so limits.max_duration '
-                . 'bounds nothing — an impersonation can run indefinitely a window at a time. Set '
-                . 'limits.extension.max_total_duration to a real ceiling.',
+                .'bounds nothing — an impersonation can run indefinitely a window at a time. Set '
+                .'limits.extension.max_total_duration to a real ceiling.',
             );
         }
 
         if ($max === null) {
             return DoctorResult::warn(
                 'Extension is on but limits.max_duration is unlimited, so there is no deadline to '
-                . 'extend. Set a duration, or switch limits.extension.enabled off.',
+                .'extend. Set a duration, or switch limits.extension.enabled off.',
             );
         }
 

@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Actions;
 
-use Psr\Clock\ClockInterface;
 use Illuminate\Contracts\Events\Dispatcher;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Psr\Clock\ClockInterface;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
 use Simtabi\Laranail\Impersonator\Core\Events\ApprovalRequested;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 
 /**
  * Open a break-glass request: ask a second operator to authorise an impersonation.
@@ -48,7 +48,7 @@ final readonly class RequestApproval
 
         $approval = $this->approvals->open(
             $request,
-            $this->clock->now()->modify('+' . $ttl . ' minutes'),
+            $this->clock->now()->modify('+'.$ttl.' minutes'),
         );
 
         // Nobody is impersonating anything at this point. A listener that provisioned access

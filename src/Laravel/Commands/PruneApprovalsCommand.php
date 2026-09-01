@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
 
 /**
  * Expires break-glass requests nobody answered.

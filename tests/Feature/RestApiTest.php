@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -34,7 +34,7 @@ beforeEach(function (): void {
 
     // Routes are loaded at boot, so the group has to be registered again once config changed.
     $this->app->booted(fn (): null => null);
-    require dirname(__DIR__, 2) . '/routes/api.php';
+    require dirname(__DIR__, 2).'/routes/api.php';
 
     $this->startSession();
     Auth::guard('web')->setUser($this->admin);
@@ -42,7 +42,7 @@ beforeEach(function (): void {
 
 function apiUrl(string $path): string
 {
-    return '/impersonator/api/v1/' . ltrim($path, '/');
+    return '/impersonator/api/v1/'.ltrim($path, '/');
 }
 
 // ── the API is opt-in ───────────────────────────────────────────────────────
@@ -52,8 +52,8 @@ function apiUrl(string $path): string
 it('starts an impersonation and returns 201', function (): void {
     $response = $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'reason'      => 'Ticket #4182',
+        'target_id' => (string) $this->target->getKey(),
+        'reason' => 'Ticket #4182',
     ]);
 
     $response->assertCreated()
@@ -72,7 +72,7 @@ it('returns a pending handoff with an accept url for the token driver', function
 
     $response = $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ]);
 
     $response->assertCreated()->assertJsonPath('data.pending', true);
@@ -85,18 +85,18 @@ it('validates the body exactly as the html endpoint does', function (): void {
     // The API extends the same Form Request, so two copies of these rules cannot drift.
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'App\\Models\\Anything',
-        'target_id'   => '1',
+        'target_id' => '1',
     ])->assertStatus(422)->assertJsonValidationErrors('target_type');
 
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
-        'mode'        => 'god',
+        'target_id' => (string) $this->target->getKey(),
+        'mode' => 'god',
     ])->assertStatus(422)->assertJsonValidationErrors('mode');
 
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
         'redirect_to' => 'https://evil.example',
     ])->assertStatus(422)->assertJsonValidationErrors('redirect_to');
 });
@@ -104,7 +104,7 @@ it('validates the body exactly as the html endpoint does', function (): void {
 it('refuses self-impersonation with a 403 and a reason code', function (): void {
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->admin->getKey(),
+        'target_id' => (string) $this->admin->getKey(),
     ])->assertForbidden()->assertJsonPath('reason', 'self_impersonation');
 });
 
@@ -206,7 +206,7 @@ it('filters by mode, target and active state', function (): void {
     Impersonator::enter($other, mode: 'full');
 
     expect($this->getJson(apiUrl('audits?mode=read_only'))->json('meta.total'))->toBe(1)
-        ->and($this->getJson(apiUrl('audits?target=user:' . $other->getKey()))->json('meta.total'))->toBe(1)
+        ->and($this->getJson(apiUrl('audits?target=user:'.$other->getKey()))->json('meta.total'))->toBe(1)
         ->and($this->getJson(apiUrl('audits?active=1'))->json('meta.total'))->toBe(1)
         ->and($this->getJson(apiUrl('audits?active=0'))->json('meta.total'))->toBe(1);
 });
@@ -251,7 +251,7 @@ it('exports as a download', function (): void {
     $response = $this->get(apiUrl("audits/{$auditId}/export"))->assertOk();
 
     expect($response->headers->get('content-type'))->toContain('application/json')
-        ->and($response->headers->get('content-disposition'))->toContain('impersonation-' . $auditId . '.json');
+        ->and($response->headers->get('content-disposition'))->toContain('impersonation-'.$auditId.'.json');
 });
 
 it('exports as csv when asked', function (): void {
@@ -270,7 +270,7 @@ it('requires authentication to start', function (): void {
 
     $this->postJson(apiUrl('impersonations'), [
         'target_type' => 'user',
-        'target_id'   => (string) $this->target->getKey(),
+        'target_id' => (string) $this->target->getKey(),
     ])->assertForbidden();
 });
 

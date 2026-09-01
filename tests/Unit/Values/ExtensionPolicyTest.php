@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Core\Values\Guards;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /*
 | The extension rules, with no container and no database.

@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\RevokeImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\RevokeImpersonationRequest;
 
 /**
  * Ends somebody else's impersonation.

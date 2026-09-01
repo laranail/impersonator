@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 
 it('rejects an empty type', function (): void {
     Identity::of('  ', 1);

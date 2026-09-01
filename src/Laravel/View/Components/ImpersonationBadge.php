@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\View\Component;
-use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Contracts\View\View;
+use Illuminate\View\Component;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
 
@@ -37,10 +37,10 @@ class ImpersonationBadge extends Component
         }
 
         return $this->renderView('laranail-impersonator::components.badge', [
-            'mode'        => $session->mode->name,
-            'modeName'    => $presenter->modeName($session->mode->name, short: true),
+            'mode' => $session->mode->name,
+            'modeName' => $presenter->modeName($session->mode->name, short: true),
             'description' => $manager->modes()->descriptions()[$session->mode->name] ?? null,
-            'targetName'  => $this->showTarget
+            'targetName' => $this->showTarget
                 ? ($session->target->label ?? $manager->displayNameFor($manager->target()))
                 : null,
         ]);
@@ -53,7 +53,7 @@ class ImpersonationBadge extends Component
      * is typed for verifiable application views, and these are namespaced package
      * views the analyser cannot resolve — the factory takes a plain string.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private function renderView(string $name, array $data = []): View
     {

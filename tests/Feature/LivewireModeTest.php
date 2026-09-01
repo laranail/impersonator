@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Laravel\Support\LivewireAction;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
+use Simtabi\Laranail\Impersonator\Laravel\Support\LivewireAction;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | `limited` mode under Livewire.
@@ -58,8 +58,8 @@ function livewireV3(string $component, string $method): array
     return [
         'components' => [[
             'snapshot' => json_encode(['data' => [], 'memo' => ['id' => 'abc123', 'name' => $component]]),
-            'updates'  => [],
-            'calls'    => [['path' => '', 'method' => $method, 'params' => []]],
+            'updates' => [],
+            'calls' => [['path' => '', 'method' => $method, 'params' => []]],
         ]],
     ];
 }
@@ -121,7 +121,7 @@ it('denies every call in a batched payload, not just the first', function (): vo
         'components' => [
             [
                 'snapshot' => json_encode(['memo' => ['name' => 'ProfileForm']]),
-                'calls'    => [['method' => 'save'], ['method' => 'destroy']],
+                'calls' => [['method' => 'save'], ['method' => 'destroy']],
             ],
         ],
     ])->assertForbidden();

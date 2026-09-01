@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\View\Component;
-use Illuminate\Contracts\View\View;
 use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Contracts\View\View;
+use Illuminate\View\Component;
 use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
 
 /**
@@ -41,9 +41,9 @@ class ImpersonationBanner extends Component
 
         return $this->renderView('laranail-impersonator::banner', [
             ...$data,
-            'theme'        => $this->theme ?? $data['theme'],
-            'position'     => $this->position ?? $data['position'],
-            'showMode'     => $this->showMode ?? $data['showMode'],
+            'theme' => $this->theme ?? $data['theme'],
+            'position' => $this->position ?? $data['position'],
+            'showMode' => $this->showMode ?? $data['showMode'],
             'showDuration' => $this->showDuration ?? $data['showDuration'],
         ]);
     }
@@ -55,7 +55,7 @@ class ImpersonationBanner extends Component
      * is typed for verifiable application views, and these are namespaced package
      * views the analyser cannot resolve — the factory takes a plain string.
      *
-     * @param array<string, mixed> $data
+     * @param  array<string, mixed>  $data
      */
     private function renderView(string $name, array $data = []): View
     {

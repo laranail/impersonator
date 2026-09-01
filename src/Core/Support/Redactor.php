@@ -48,8 +48,7 @@ final readonly class Redactor
     }
 
     /**
-     * @param array<array-key, mixed> $payload
-     *
+     * @param  array<array-key, mixed>  $payload
      * @return array<string, mixed>
      */
     public function scrub(array $payload, int $depth = 0): array
@@ -95,8 +94,8 @@ final readonly class Redactor
     {
         return match (true) {
             $value === null, is_scalar($value) => $value,
-            is_object($value)                  => '[object ' . $value::class . ']',
-            default                            => '[' . get_debug_type($value) . ']',
+            is_object($value) => '[object '.$value::class.']',
+            default => '['.get_debug_type($value).']',
         };
     }
 }

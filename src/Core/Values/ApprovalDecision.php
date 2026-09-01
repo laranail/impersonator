@@ -60,11 +60,11 @@ final readonly class ApprovalDecision
     public function toArray(): array
     {
         return [
-            'id'         => $this->id,
-            'reviewer'   => $this->reviewer->toArray(),
-            'verdict'    => $this->verdict->value,
-            'role'       => $this->role,
-            'note'       => $this->note,
+            'id' => $this->id,
+            'reviewer' => $this->reviewer->toArray(),
+            'verdict' => $this->verdict->value,
+            'role' => $this->role,
+            'note' => $this->note,
             'decided_at' => $this->decidedAt->format(DATE_ATOM),
         ];
     }

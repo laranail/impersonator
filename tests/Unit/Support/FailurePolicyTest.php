@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
+use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
 use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
 use Simtabi\Laranail\Impersonator\Core\Support\FailurePolicy;
 use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
-use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
 
 /**
  * The failure-handling standard's own tests. A fake reporter is used throughout, so

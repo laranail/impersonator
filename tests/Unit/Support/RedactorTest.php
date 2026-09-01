@@ -34,7 +34,7 @@ it('redacts recursively', function (): void {
     // the usual reason redaction misses one.
     $scrubbed = redactor()->scrub([
         'user' => [
-            'name'        => 'Ada',
+            'name' => 'Ada',
             'credentials' => ['password' => 'hunter2', 'token' => 'abc'],
         ],
     ]);

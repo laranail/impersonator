@@ -30,11 +30,11 @@ use DateTimeImmutable;
 final readonly class ExtensionPolicy
 {
     /**
-     * @param bool $enabled whether extension is offered at all
-     * @param int $minutes length of one extension
-     * @param int|null $max how many extensions per impersonation; null is unlimited
-     * @param int|null $maxTotalMinutes total lifetime ceiling from `startedAt`; null is unlimited
-     * @param int|null $withinMinutes only extend inside the final N minutes; null is any time
+     * @param  bool  $enabled  whether extension is offered at all
+     * @param  int  $minutes  length of one extension
+     * @param  int|null  $max  how many extensions per impersonation; null is unlimited
+     * @param  int|null  $maxTotalMinutes  total lifetime ceiling from `startedAt`; null is unlimited
+     * @param  int|null  $withinMinutes  only extend inside the final N minutes; null is any time
      */
     public function __construct(
         public bool $enabled = true,
@@ -107,7 +107,7 @@ final readonly class ExtensionPolicy
         }
 
         if ($this->withinMinutes !== null) {
-            $opensAt = $session->expiresAt->sub(new DateInterval('PT' . $this->withinMinutes . 'M'));
+            $opensAt = $session->expiresAt->sub(new DateInterval('PT'.$this->withinMinutes.'M'));
 
             if ($now < $opensAt) {
                 return ExtensionGrant::refuse(Decision::deny(
@@ -118,7 +118,7 @@ final readonly class ExtensionPolicy
             }
         }
 
-        $requested = $session->expiresAt->add(new DateInterval('PT' . $this->minutes . 'M'));
+        $requested = $session->expiresAt->add(new DateInterval('PT'.$this->minutes.'M'));
         $ceiling = $this->ceilingFor($session);
 
         if ($ceiling === null) {
@@ -148,7 +148,7 @@ final readonly class ExtensionPolicy
             return null;
         }
 
-        return $session->startedAt->add(new DateInterval('PT' . $this->maxTotalMinutes . 'M'));
+        return $session->startedAt->add(new DateInterval('PT'.$this->maxTotalMinutes.'M'));
     }
 
     /** How many extensions remain, or null when unlimited. */
@@ -161,11 +161,11 @@ final readonly class ExtensionPolicy
     public function toArray(): array
     {
         return [
-            'enabled'           => $this->enabled,
-            'minutes'           => $this->minutes,
-            'max'               => $this->max,
+            'enabled' => $this->enabled,
+            'minutes' => $this->minutes,
+            'max' => $this->max,
             'max_total_minutes' => $this->maxTotalMinutes,
-            'within_minutes'    => $this->withinMinutes,
+            'within_minutes' => $this->withinMinutes,
         ];
     }
 }

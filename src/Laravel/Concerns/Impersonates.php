@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Concerns;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\Authenticatable;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Illuminate\Database\Eloquent\Model;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
  * Adds the impersonation API to a user model.
@@ -53,7 +53,7 @@ trait Impersonates
     /**
      * Begin impersonating another user.
      *
-     * @param array<string, mixed> $metadata
+     * @param  array<string, mixed>  $metadata
      *
      * @throws ImpersonationDenied
      *                             when any rule in the authorization stack refuses

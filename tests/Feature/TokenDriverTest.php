@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenIssued;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRedeemed;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRejected;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {

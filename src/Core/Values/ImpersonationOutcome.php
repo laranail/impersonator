@@ -94,10 +94,10 @@ final readonly class ImpersonationOutcome
     public function toArray(): array
     {
         return [
-            'pending'     => $this->pending,
-            'session'     => $this->session->toArray(),
+            'pending' => $this->pending,
+            'session' => $this->session->toArray(),
             'redirect_to' => $this->redirectTo,
-            'credential'  => $this->credential?->toAuditArray(),
+            'credential' => $this->credential?->toAuditArray(),
         ];
     }
 }

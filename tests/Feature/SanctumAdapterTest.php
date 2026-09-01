@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
 use Laravel\Sanctum\PersonalAccessToken;
-use Illuminate\Database\Schema\Blueprint;
 use Laravel\Sanctum\SanctumServiceProvider;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\ApiUser;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\ApiUser;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
 
 uses()->group('sanctum');
 
@@ -90,7 +90,7 @@ it('names the token after the audit row so a leak traces back to the operator', 
     $outcome = Impersonator::enter($this->target);
 
     expect(PersonalAccessToken::query()->firstOrFail()->name)
-        ->toBe('impersonation:' . $outcome->auditId());
+        ->toBe('impersonation:'.$outcome->auditId());
 });
 
 it('issues the token to the target, not the operator', function (): void {
@@ -154,7 +154,7 @@ it('impersonates a target that does not use the HasApiTokens trait', function ()
     // it *without* the contract — so requiring either would refuse the most common setup there
     // is. Writing through Sanctum's own model instead means any Eloquent target works.
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user'  => ApiUser::class,
+        'user' => ApiUser::class,
         'plain' => PlainUser::class,
     ]);
 

@@ -4,127 +4,127 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Providers;
 
+use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Contracts\Cache\Repository as Cache;
+use Illuminate\Contracts\Config\Repository as Config;
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Contracts\Routing\UrlGenerator;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Contracts\Session\Session as SessionContract;
+use Illuminate\Contracts\Translation\Translator;
+use Illuminate\Contracts\View\Factory as ViewFactory;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Database\ConnectionResolverInterface;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Console\AboutCommand;
 use Illuminate\Http\Request;
-use InvalidArgumentException;
-use Psr\Clock\ClockInterface;
 use Illuminate\Log\LogManager;
 use Illuminate\Routing\Router;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\ServiceProvider;
-use Illuminate\Cache\RateLimiting\Limit;
-use Illuminate\Contracts\Session\Session;
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Database\ConnectionInterface;
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Routing\UrlGenerator;
-use Illuminate\Foundation\Console\AboutCommand;
-use Illuminate\Contracts\Debug\ExceptionHandler;
-use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Contracts\Translation\Translator;
-use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Database\ConnectionResolverInterface;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
-use Symfony\Component\HttpKernel\Exception\HttpException;
-use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Illuminate\Contracts\Session\Session as SessionContract;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
-use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
-use Simtabi\Laranail\Impersonator\Core\Support\FailurePolicy;
-use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
-use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
-use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
-use Simtabi\Laranail\Impersonator\Laravel\Adapters\JwtAdapter;
-use Simtabi\Laranail\Impersonator\Laravel\Drivers\TokenDriver;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\ServiceProvider;
+use InvalidArgumentException;
+use Psr\Clock\ClockInterface;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Support\LaravelClock;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
-use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorCheck;
-use Simtabi\Laranail\Impersonator\Core\Events\ApprovalRequested;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\EnterCommand;
-use Simtabi\Laranail\Impersonator\Laravel\Drivers\SessionDriver;
-use Simtabi\Laranail\Impersonator\Laravel\Drivers\TenancyDriver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
+use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Simtabi\Laranail\Impersonator\Core\Events\ApprovalDenied;
+use Simtabi\Laranail\Impersonator\Core\Events\ApprovalGranted;
+use Simtabi\Laranail\Impersonator\Core\Events\ApprovalRequested;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenIssued;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\DoctorCommand;
-use Simtabi\Laranail\Impersonator\Laravel\Modes\FullModeEnforcer;
-use Simtabi\Laranail\Impersonator\Laravel\Support\CauserResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\MessageCatalog;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
-use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorService;
-use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
-use Simtabi\Laranail\Impersonator\Laravel\Tokens\AcceptUrlBuilder;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRedeemed;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRejected;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExpired;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExtended;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRequested;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
 use Simtabi\Laranail\Impersonator\Core\Events\ModeViolationBlocked;
+use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalRequired;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
+use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
+use Simtabi\Laranail\Impersonator\Core\Support\FailurePolicy;
+use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
+use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
+use Simtabi\Laranail\Impersonator\Laravel\Adapters\JwtAdapter;
 use Simtabi\Laranail\Impersonator\Laravel\Adapters\PassportAdapter;
+use Simtabi\Laranail\Impersonator\Laravel\Adapters\SanctumTokenAdapter;
+use Simtabi\Laranail\Impersonator\Laravel\Adapters\SessionGuardAdapter;
+use Simtabi\Laranail\Impersonator\Laravel\Approval\EloquentApprovalStore;
+use Simtabi\Laranail\Impersonator\Laravel\Audit\ConcurrencyLimitReached;
 use Simtabi\Laranail\Impersonator\Laravel\Audit\EloquentAuditStore;
 use Simtabi\Laranail\Impersonator\Laravel\Audit\EloquentTrailStore;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\BasePolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExtended;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Modes\LimitedModeEnforcer;
-use Simtabi\Laranail\Impersonator\Laravel\Support\ReviewerDirectory;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRequested;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\ApplyRlsContext;
-use Simtabi\Laranail\Impersonator\Laravel\Modes\ReadOnlyModeEnforcer;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\DoctorCommand;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\EnterCommand;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\ExportAuditCommand;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\PruneTokensCommand;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\VerifyAuditCommand;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ApprovalNotDecidable;
-use Simtabi\Laranail\Impersonator\Laravel\Adapters\SanctumTokenAdapter;
-use Simtabi\Laranail\Impersonator\Laravel\Adapters\SessionGuardAdapter;
-use Simtabi\Laranail\Impersonator\Laravel\Audit\ConcurrencyLimitReached;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\ScrubIdentityCommand;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\ThrottleByOperator;
-use Simtabi\Laranail\Impersonator\Laravel\Approval\EloquentApprovalStore;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\PruneApprovalsCommand;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\PruneTokensCommand;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\ScrubIdentityCommand;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\VerifyAuditCommand;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
+use Simtabi\Laranail\Impersonator\Laravel\Drivers\SessionDriver;
+use Simtabi\Laranail\Impersonator\Laravel\Drivers\TenancyDriver;
+use Simtabi\Laranail\Impersonator\Laravel\Drivers\TokenDriver;
 use Simtabi\Laranail\Impersonator\Laravel\Failure\LaravelFailureReporter;
-use Simtabi\Laranail\Impersonator\Laravel\Tokens\EloquentTokenRepository;
-use Simtabi\Laranail\Impersonator\Laravel\Listeners\ResetImpersonatorState;
-use Simtabi\Laranail\Impersonator\Laravel\Policies\ImpersonationAuditPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\View\Components\ImpersonateButton;
-use Simtabi\Laranail\Impersonator\Laravel\View\Components\WhenImpersonating;
-use Simtabi\Laranail\Impersonator\Laravel\View\Components\ImpersonationBadge;
-use Simtabi\Laranail\Impersonator\Laravel\Listeners\LogImpersonationLifecycle;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
-use Simtabi\Laranail\Impersonator\Laravel\View\Components\ImpersonationBanner;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
-use Simtabi\Laranail\Impersonator\Laravel\Listeners\SendImpersonationNotifications;
-use Simtabi\Laranail\Impersonator\Laravel\View\Components\LeaveImpersonationButton;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\LeaveImpersonationController;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Laravel\Listeners\LogImpersonationLifecycle;
+use Simtabi\Laranail\Impersonator\Laravel\Listeners\ResetImpersonatorState;
+use Simtabi\Laranail\Impersonator\Laravel\Listeners\SendImpersonationNotifications;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\ApplyRlsContext;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\ThrottleByOperator;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Modes\FullModeEnforcer;
+use Simtabi\Laranail\Impersonator\Laravel\Modes\LimitedModeEnforcer;
+use Simtabi\Laranail\Impersonator\Laravel\Modes\ReadOnlyModeEnforcer;
+use Simtabi\Laranail\Impersonator\Laravel\Policies\ImpersonationAuditPolicy;
+use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
+use Simtabi\Laranail\Impersonator\Laravel\Support\CauserResolver;
+use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
+use Simtabi\Laranail\Impersonator\Laravel\Support\LaravelClock;
+use Simtabi\Laranail\Impersonator\Laravel\Support\MessageCatalog;
+use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
+use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
+use Simtabi\Laranail\Impersonator\Laravel\Support\ReviewerDirectory;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
+use Simtabi\Laranail\Impersonator\Laravel\Tokens\AcceptUrlBuilder;
+use Simtabi\Laranail\Impersonator\Laravel\Tokens\EloquentTokenRepository;
+use Simtabi\Laranail\Impersonator\Laravel\View\Components\ImpersonateButton;
+use Simtabi\Laranail\Impersonator\Laravel\View\Components\ImpersonationBadge;
+use Simtabi\Laranail\Impersonator\Laravel\View\Components\ImpersonationBanner;
+use Simtabi\Laranail\Impersonator\Laravel\View\Components\LeaveImpersonationButton;
+use Simtabi\Laranail\Impersonator\Laravel\View\Components\WhenImpersonating;
+use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorCheck;
+use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorService;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 
 /**
  * The bridge's entry point.
@@ -395,9 +395,9 @@ class ImpersonatorServiceProvider extends ServiceProvider
         $configured = $settings->nullableString('authorization.policy');
 
         $class = match (true) {
-            $configured !== null                                   => $configured,
+            $configured !== null => $configured,
             $app->make(ImpersonationManager::class)->detectsRbac() => RbacPolicy::class,
-            default                                                => BasePolicy::class,
+            default => BasePolicy::class,
         };
 
         if (! is_a($class, AuthorizationPolicy::class, true)) {
@@ -411,13 +411,13 @@ class ImpersonatorServiceProvider extends ServiceProvider
         // Resolved through the container so a custom policy can declare its own
         // dependencies, with these bound for the two that ship.
         $policy = $app->make($class, [
-            'gate'       => $app->make(Gate::class),
-            'audits'     => $app->make(AuditStore::class),
+            'gate' => $app->make(Gate::class),
+            'audits' => $app->make(AuditStore::class),
             'identities' => $app->make(IdentityResolver::class),
-            'modes'      => $app->make(ModeRegistry::class),
-            'state'      => $app->make(SessionState::class),
-            'settings'   => $settings,
-            'session'    => $app->make(SessionContract::class),
+            'modes' => $app->make(ModeRegistry::class),
+            'state' => $app->make(SessionState::class),
+            'settings' => $settings,
+            'session' => $app->make(SessionContract::class),
         ]);
 
         // The is_a check above proves the class implements the contract; this proves the
@@ -455,8 +455,8 @@ class ImpersonatorServiceProvider extends ServiceProvider
             // tamper-evident.
             throw new InvalidArgumentException(
                 'impersonator.audit.tamper_evident is on but impersonator.audit.hash_key is not set. '
-                . 'Set a long random key, keep it outside the database, and do not rotate it without '
-                . 're-verifying: the chain cannot be checked without the key it was written with.',
+                .'Set a long random key, keep it outside the database, and do not rotate it without '
+                .'re-verifying: the chain cannot be checked without the key it was written with.',
             );
         }
 
@@ -615,7 +615,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
 
         Blade::directive(
             'impersonationBanner',
-            static fn (): string => "<?php echo app('" . BannerPresenter::class . "')->render(); ?>",
+            static fn (): string => "<?php echo app('".BannerPresenter::class."')->render(); ?>",
         );
     }
 
@@ -638,7 +638,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
             $settings = app(Settings::class);
 
             Route::get($settings->string('routes.leave_path', 'leave'), LeaveImpersonationController::class)
-                ->name($settings->string('routes.name_prefix', 'impersonator.') . 'leave');
+                ->name($settings->string('routes.name_prefix', 'impersonator.').'leave');
         });
     }
 
@@ -667,20 +667,20 @@ class ImpersonatorServiceProvider extends ServiceProvider
 
         foreach ([
             ImpersonationRequested::class => 'handleRequested',
-            ImpersonationStarted::class   => 'handleStarted',
-            ImpersonationEnded::class     => 'handleEnded',
-            ImpersonationRejected::class  => 'handleRejected',
-            ImpersonationExtended::class  => 'handleExtended',
-            ImpersonationRevoked::class   => 'handleRevoked',
-            ImpersonationExpired::class   => 'handleExpired',
-            ModeViolationBlocked::class   => 'handleModeViolation',
-            HandoffTokenIssued::class     => 'handleTokenIssued',
-            HandoffTokenRedeemed::class   => 'handleTokenRedeemed',
-            HandoffTokenRejected::class   => 'handleTokenRejected',
-            ApprovalRequested::class      => 'handleApprovalRequested',
-            ApprovalGranted::class        => 'handleApprovalGranted',
-            ApprovalDenied::class         => 'handleApprovalDenied',
-            TargetNotified::class         => 'handleTargetNotified',
+            ImpersonationStarted::class => 'handleStarted',
+            ImpersonationEnded::class => 'handleEnded',
+            ImpersonationRejected::class => 'handleRejected',
+            ImpersonationExtended::class => 'handleExtended',
+            ImpersonationRevoked::class => 'handleRevoked',
+            ImpersonationExpired::class => 'handleExpired',
+            ModeViolationBlocked::class => 'handleModeViolation',
+            HandoffTokenIssued::class => 'handleTokenIssued',
+            HandoffTokenRedeemed::class => 'handleTokenRedeemed',
+            HandoffTokenRejected::class => 'handleTokenRejected',
+            ApprovalRequested::class => 'handleApprovalRequested',
+            ApprovalGranted::class => 'handleApprovalGranted',
+            ApprovalDenied::class => 'handleApprovalDenied',
+            TargetNotified::class => 'handleTargetNotified',
         ] as $event => $handler) {
             $events->listen($event, [LogImpersonationLifecycle::class, $handler]);
         }
@@ -838,18 +838,18 @@ class ImpersonatorServiceProvider extends ServiceProvider
             return Limit::perMinutes(
                 max(1, (int) ceil($settings->int('rate_limiting.enter.decay', 60) / 60)),
                 $settings->int('rate_limiting.enter.attempts', 5),
-            )->by('impersonator-enter:' . $key);
+            )->by('impersonator-enter:'.$key);
         });
 
         RateLimiter::for('impersonator-api', static fn (Request $request): Limit => Limit::perMinutes(
             max(1, (int) ceil($settings->int('rate_limiting.api.decay', 60) / 60)),
             $settings->int('rate_limiting.api.attempts', 30),
-        )->by('impersonator-api:' . $caller($request)));
+        )->by('impersonator-api:'.$caller($request)));
 
         RateLimiter::for('impersonator-accept', static fn (Request $request): Limit => Limit::perMinutes(
             max(1, (int) ceil($settings->int('rate_limiting.accept.decay', 60) / 60)),
             $settings->int('rate_limiting.accept.attempts', 10),
-        )->by('impersonator-accept:' . ($request->ip() ?? 'unknown')));
+        )->by('impersonator-accept:'.($request->ip() ?? 'unknown')));
     }
 
     /**
@@ -952,10 +952,10 @@ class ImpersonatorServiceProvider extends ServiceProvider
 
             return $request->expectsJson()
                 ? response()->json([
-                    'message'  => $message,
-                    'reason'   => $e->code(),
+                    'message' => $message,
+                    'reason' => $e->code(),
                     'approval' => [
-                        'id'         => $e->approvalId,
+                        'id' => $e->approvalId,
                         'expires_at' => $e->expiresAt->format(DATE_ATOM),
                     ],
                 ], 202)
@@ -968,7 +968,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
             // Four distinguishable reasons, and safe to distinguish: the approver is authenticated and
             // looking at a request they were shown, so "somebody answered first" leaks nothing.
             $message = $catalog->get(
-                'exceptions.approval_not_decidable.' . $e->reason(),
+                'exceptions.approval_not_decidable.'.$e->reason(),
                 $e->getMessage(),
             );
 
@@ -1011,13 +1011,13 @@ class ImpersonatorServiceProvider extends ServiceProvider
         $settings = $this->app->make(Settings::class);
 
         AboutCommand::add('Impersonator', fn (): array => [
-            'Enabled'      => $settings->bool('enabled', true) ? 'yes' : 'NO',
-            'Driver'       => $settings->string('driver', 'session'),
-            'Adapter'      => $settings->string('adapter', 'session'),
+            'Enabled' => $settings->bool('enabled', true) ? 'yes' : 'NO',
+            'Driver' => $settings->string('driver', 'session'),
+            'Adapter' => $settings->string('adapter', 'session'),
             'Default mode' => $settings->string('default_mode', 'full'),
             'Max duration' => ($max = $settings->positiveIntOrNull('limits.max_duration')) === null
                 ? 'unlimited'
-                : $max . ' min',
+                : $max.' min',
             'Extension' => ! $settings->bool('limits.extension.enabled', true)
                 ? 'off'
                 : sprintf(
@@ -1031,8 +1031,8 @@ class ImpersonatorServiceProvider extends ServiceProvider
                         : sprintf('%d min', $total),
                 ),
             'Approval required' => $settings->bool('approval.require', false) ? 'yes' : 'no',
-            'Tamper evidence'   => $settings->bool('audit.tamper_evident', false) ? 'on' : 'off',
-            'REST API'          => $settings->bool('api.enabled', false) ? 'ENABLED' : 'disabled',
+            'Tamper evidence' => $settings->bool('audit.tamper_evident', false) ? 'on' : 'off',
+            'REST API' => $settings->bool('api.enabled', false) ? 'ENABLED' : 'disabled',
         ]);
     }
 
@@ -1134,7 +1134,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
 
         $this->publishes([
             $this->packagePath('database/migrations/create_impersonator_tables.php.stub') => $this->app
-                ->databasePath('migrations/' . date('Y_m_d_His') . '_create_impersonator_tables.php'),
+                ->databasePath('migrations/'.date('Y_m_d_His').'_create_impersonator_tables.php'),
         ], 'impersonator-migrations');
     }
 
@@ -1145,6 +1145,6 @@ class ImpersonatorServiceProvider extends ServiceProvider
 
     protected function packagePath(string $relative): string
     {
-        return dirname(__DIR__, 3) . '/' . $relative;
+        return dirname(__DIR__, 3).'/'.$relative;
     }
 }

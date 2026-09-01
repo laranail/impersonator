@@ -188,7 +188,7 @@ final class TargetRegistry
      * **An alias already in the map is never overwritten.** Repointing one changes which class every
      * historic row resolves to, application-wide and not merely in this package's tables.
      *
-     * @param array<string, ImpersonatableType> $types
+     * @param  array<string, ImpersonatableType>  $types
      */
     private function publishMorphAliases(array $types): void
     {

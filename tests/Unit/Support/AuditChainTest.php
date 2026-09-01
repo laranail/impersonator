@@ -13,16 +13,16 @@ function chain(string $key = 'a-long-random-key'): AuditChain
 function facts(array $overrides = []): array
 {
     return [
-        'impersonator'       => 'user:1',
-        'target'             => 'user:2',
-        'mode'               => 'full',
-        'driver'             => 'session',
-        'adapter'            => 'session',
+        'impersonator' => 'user:1',
+        'target' => 'user:2',
+        'mode' => 'full',
+        'driver' => 'session',
+        'adapter' => 'session',
         'guard_impersonator' => 'web',
-        'guard_target'       => 'web',
-        'tenant_id'          => null,
-        'reason'             => 'Ticket #1',
-        'started_at'         => 1_700_000_000,
+        'guard_target' => 'web',
+        'tenant_id' => null,
+        'reason' => 'Ticket #1',
+        'started_at' => 1_700_000_000,
         // Spread, not `+`: array union keeps the left-hand value, so `+ $overrides` would silently
         // ignore every override and quietly pass the tests that depend on them.
         ...$overrides,

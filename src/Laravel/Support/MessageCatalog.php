@@ -62,7 +62,7 @@ final readonly class MessageCatalog
         }
 
         return $this->lookup(
-            'decisions.' . $decision->code,
+            'decisions.'.$decision->code,
             $this->detailOf($decision),
             $fallback,
             $decision->context,
@@ -76,17 +76,17 @@ final readonly class MessageCatalog
      * rather than from a `Decision`, and its fallback is the message the exception was constructed
      * with.
      *
-     * @param array<string, mixed> $replace
+     * @param  array<string, mixed>  $replace
      */
     public function forException(string $code, string $fallback, array $replace = []): string
     {
-        return $this->lookup('exceptions.' . $code, null, $fallback, $replace);
+        return $this->lookup('exceptions.'.$code, null, $fallback, $replace);
     }
 
     /**
      * A plain key with an English fallback, for anything that is neither.
      *
-     * @param array<string, mixed> $replace
+     * @param  array<string, mixed>  $replace
      */
     public function get(string $key, string $fallback, array $replace = []): string
     {
@@ -100,17 +100,17 @@ final readonly class MessageCatalog
      * nothing. Without the guard a missing key renders as `laranail-impersonator::decisions.target_busy` in a
      * user's browser, which is worse than the untranslated English it replaced.
      *
-     * @param array<string, mixed> $replace
+     * @param  array<string, mixed>  $replace
      */
     private function lookup(string $key, ?string $detail, string $fallback, array $replace): string
     {
-        $namespaced = 'laranail-impersonator::' . $key;
+        $namespaced = 'laranail-impersonator::'.$key;
 
         // `.default` last, so a code whose lines are a group still resolves when the refusing site set
         // no discriminator — a group lookup returns an array, which is not a usable message.
         $candidates = $detail === null
-            ? [$namespaced, $namespaced . '.default']
-            : [$namespaced . '.' . $detail, $namespaced, $namespaced . '.default'];
+            ? [$namespaced, $namespaced.'.default']
+            : [$namespaced.'.'.$detail, $namespaced, $namespaced.'.default'];
 
         $replacements = $this->replacements($replace);
         $count = $this->countOf($replace);
@@ -161,7 +161,7 @@ final readonly class MessageCatalog
      * An explicit `count` entry only. Guessing from whichever numeric context value happens to be
      * present would pick `max` as readily as `active` and choose the wrong form.
      *
-     * @param array<string, mixed> $context
+     * @param  array<string, mixed>  $context
      */
     private function countOf(array $context): ?int
     {
@@ -177,8 +177,7 @@ final readonly class MessageCatalog
      * array of role names or a nested detail bag, and `Array` appearing mid-sentence in a user-facing
      * refusal is worse than the placeholder going unreplaced.
      *
-     * @param array<string, mixed> $context
-     *
+     * @param  array<string, mixed>  $context
      * @return array<string, string>
      */
     private function replacements(array $context): array

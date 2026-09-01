@@ -122,7 +122,7 @@ final readonly class Decision
      * Short-circuiting conjunction: the first denial wins and is returned
      * intact, so the caller always learns the specific rule that refused.
      *
-     * @param iterable<callable(): self> $checks
+     * @param  iterable<callable(): self>  $checks
      */
     public static function all(iterable $checks): self
     {
@@ -147,8 +147,8 @@ final readonly class Decision
     {
         return [
             'allowed' => $this->allowed,
-            'code'    => $this->code,
-            'reason'  => $this->reason,
+            'code' => $this->code,
+            'reason' => $this->reason,
             'context' => $this->context,
         ];
     }

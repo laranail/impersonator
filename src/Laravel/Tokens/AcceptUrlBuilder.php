@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Tokens;
 
-use Throwable;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Throwable;
 
 /**
  * Builds the URL that completes a cross-domain handoff.
@@ -46,8 +46,8 @@ final readonly class AcceptUrlBuilder
 
         return match ($strategy) {
             'subdomain' => $this->subdomain($request, $token),
-            'path'      => $this->path($request, $token),
-            default     => $this->domain($token),
+            'path' => $this->path($request, $token),
+            default => $this->domain($token),
         };
     }
 
@@ -58,8 +58,8 @@ final readonly class AcceptUrlBuilder
         if ($host === null) {
             throw new ImpersonationException(
                 'Could not resolve a domain for the accept URL. Set impersonator.urls.base_domain, '
-                . 'switch impersonator.urls.strategy, or register '
-                . 'Impersonator::resolveAcceptUrlUsing() for a custom addressing scheme.',
+                .'switch impersonator.urls.strategy, or register '
+                .'Impersonator::resolveAcceptUrlUsing() for a custom addressing scheme.',
             );
         }
 
@@ -74,12 +74,12 @@ final readonly class AcceptUrlBuilder
         if ($base === null || $tenant === null) {
             throw new ImpersonationException(
                 'The subdomain strategy needs both impersonator.urls.base_domain and an '
-                . 'initialized tenant. Neither is guessable, so this fails rather than '
-                . 'building a link to the wrong host.',
+                .'initialized tenant. Neither is guessable, so this fails rather than '
+                .'building a link to the wrong host.',
             );
         }
 
-        return $this->assemble($tenant . '.' . $base, $this->acceptPath($token));
+        return $this->assemble($tenant.'.'.$base, $this->acceptPath($token));
     }
 
     private function path(ImpersonationRequest $request, string $token): string
@@ -93,7 +93,7 @@ final readonly class AcceptUrlBuilder
 
         $path = $prefix === null
             ? $this->acceptPath($token)
-            : trim($prefix, '/') . '/' . $this->acceptPath($token);
+            : trim($prefix, '/').'/'.$this->acceptPath($token);
 
         return $this->assemble($base, $path);
     }
@@ -161,9 +161,9 @@ final readonly class AcceptUrlBuilder
         // can put it mid-path — `accept/{token}/confirm` — without this needing to know.
         $path = str_contains($path, '{token}')
             ? str_replace('{token}', rawurlencode($token), $path)
-            : trim($path, '/') . '/' . rawurlencode($token);
+            : trim($path, '/').'/'.rawurlencode($token);
 
-        return trim($prefix . '/' . trim($path, '/'), '/');
+        return trim($prefix.'/'.trim($path, '/'), '/');
     }
 
     private function assemble(string $host, string $path): string
@@ -177,10 +177,10 @@ final readonly class AcceptUrlBuilder
         $authority = $host;
 
         if ($port !== null && ($scheme !== 'https' || $port !== 443) && ($scheme !== 'http' || $port !== 80)) {
-            $authority .= ':' . $port;
+            $authority .= ':'.$port;
         }
 
-        return $scheme . '://' . $authority . '/' . $path;
+        return $scheme.'://'.$authority.'/'.$path;
     }
 
     private function currentHost(): ?string

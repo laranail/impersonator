@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
 use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionTerminator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | The lifecycle across every session driver a real application uses.
@@ -54,7 +54,7 @@ beforeEach(function (): void {
 /** Point the session at a real, writable directory for the file driver. */
 function useFileSessions(): string
 {
-    $path = sys_get_temp_dir() . '/impersonator-sessions-' . bin2hex(random_bytes(6));
+    $path = sys_get_temp_dir().'/impersonator-sessions-'.bin2hex(random_bytes(6));
 
     if (! is_dir($path)) {
         mkdir($path, 0o700, true);
@@ -230,9 +230,9 @@ it('destroys another session file out of band', function (): void {
     $other = 'a-different-operators-session-id';
     session()->getHandler()->write($other, 'payload');
 
-    expect(file_exists($path . '/' . $other))->toBeTrue()
+    expect(file_exists($path.'/'.$other))->toBeTrue()
         ->and(app(SessionTerminator::class)->terminate($other))->toBeTrue()
-        ->and(file_exists($path . '/' . $other))->toBeFalse();
+        ->and(file_exists($path.'/'.$other))->toBeFalse();
 });
 
 it('marks the audit row on revocation regardless of whether the session was destroyed', function (): void {

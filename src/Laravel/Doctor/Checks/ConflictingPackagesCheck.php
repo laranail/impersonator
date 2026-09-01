@@ -44,8 +44,8 @@ final class ConflictingPackagesCheck extends Check
             : DoctorResult::warn(
                 sprintf(
                     'Also installed: %s. Two impersonation packages both register routes and session '
-                    . 'state, and leaving through one does not end an impersonation started by the '
-                    . 'other — which produces an audit trail that disagrees with itself.',
+                    .'state, and leaving through one does not end an impersonation started by the '
+                    .'other — which produces an audit trail that disagrees with itself.',
                     implode(', ', $found),
                 ),
                 ['packages' => $found],

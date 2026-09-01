@@ -5,10 +5,10 @@ declare(strict_types=1);
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
 use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
+use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 
 it('merges the package config', function (): void {
     expect(config('laranail.impersonator.driver'))->toBe('session')
@@ -63,7 +63,7 @@ it('declares the facade alias the documentation tells people to import', functio
     // (`...\Facades\Impersonator` rather than `...\Facades\ImpersonatorFacade`), so this pins the
     // published contract: the alias target must resolve, and it must be the facade.
     $composer = json_decode(
-        (string) file_get_contents(dirname(__DIR__, 2) . '/composer.json'),
+        (string) file_get_contents(dirname(__DIR__, 2).'/composer.json'),
         true,
         flags: JSON_THROW_ON_ERROR,
     );

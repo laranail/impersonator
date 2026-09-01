@@ -61,7 +61,7 @@ final readonly class LivewireAction
                 $identifiers[] = $method;
 
                 if ($component !== null) {
-                    $identifiers[] = $component . '::' . $method;
+                    $identifiers[] = $component.'::'.$method;
                 }
             }
         }
@@ -105,8 +105,7 @@ final readonly class LivewireAction
      * an application author would write in a config file. Falls back to the class when only that is
      * present, so a rule can name either.
      *
-     * @param array<array-key, mixed> $components
-     *
+     * @param  array<array-key, mixed>  $components
      * @return list<array{0: string|null, 1: list<string>}>
      */
     private static function fromV3(array $components): array

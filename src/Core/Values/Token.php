@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Values;
 
-use Stringable;
 use DateTimeImmutable;
 use SensitiveParameter;
+use Stringable;
 
 /**
  * A single-use handoff token.
@@ -36,7 +36,7 @@ final readonly class Token implements Stringable
     {
         return [
             'plaintext' => '[redacted]',
-            'hash'      => $this->hash,
+            'hash' => $this->hash,
             'expiresAt' => $this->expiresAt->format(DATE_ATOM),
         ];
     }

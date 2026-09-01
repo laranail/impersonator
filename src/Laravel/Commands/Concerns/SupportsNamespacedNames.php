@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns;
 
 use Illuminate\Console\Parser;
-use Symfony\Component\Console\Input\InputDefinition;
 use Simtabi\Laranail\Console\Tools\Commands\Concerns\SupportsNamespacedNames as CanonicalNamespacedNames;
+use Symfony\Component\Console\Input\InputDefinition;
 
 /**
  * Lets a command be named `laranail::impersonator.thing`.

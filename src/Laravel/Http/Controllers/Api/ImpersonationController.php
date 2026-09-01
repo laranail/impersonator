@@ -6,12 +6,12 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\RevokeImpersonationApiRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\StartImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\ImpersonationResource;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\StartedImpersonationResource;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\ImpersonationResource;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\StartImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\StartedImpersonationResource;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\RevokeImpersonationApiRequest;
 
 /**
  * The impersonation lifecycle over HTTP+JSON.
@@ -93,7 +93,7 @@ final readonly class ImpersonationController
         if ($outcome->denied()) {
             return new JsonResponse([
                 'message' => $outcome->grant->decision->reason,
-                'reason'  => $outcome->grant->decision->code,
+                'reason' => $outcome->grant->decision->code,
             ], 403);
         }
 
@@ -121,7 +121,7 @@ final readonly class ImpersonationController
         return ImpersonationResource::make($session)
             ->additional(['meta' => [
                 'terminated' => $session->hasEnded(),
-                'message'    => $session->hasEnded()
+                'message' => $session->hasEnded()
                     ? 'The impersonation has ended.'
                     : 'Revocation recorded. The session ends on its next request.',
             ]])

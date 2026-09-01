@@ -16,15 +16,15 @@ declare(strict_types=1);
 
 return [
     'full' => [
-        'name'  => 'Full access',
+        'name' => 'Full access',
         'short' => 'Full',
     ],
     'read_only' => [
-        'name'  => 'Read only',
+        'name' => 'Read only',
         'short' => 'Read only',
     ],
     'limited' => [
-        'name'  => 'Limited',
+        'name' => 'Limited',
         'short' => 'Limited',
     ],
 ];

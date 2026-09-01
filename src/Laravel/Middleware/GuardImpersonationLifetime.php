@@ -6,16 +6,16 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Middleware;
 
 use Closure;
 use DateTimeImmutable;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Http\Request;
 use Psr\Clock\ClockInterface;
-use Illuminate\Contracts\Session\Session;
-use Symfony\Component\HttpFoundation\Response;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Symfony\Component\HttpFoundation\Response;
 
 /**
  * Terminates an impersonation that has been revoked or has outlived `max_duration`.
@@ -72,11 +72,11 @@ final class GuardImpersonationLifetime
         $authoritative = $this->audits->find($session->auditId) ?? $session;
 
         $reason = match (true) {
-            $authoritative->isRevoked()                                    => EndReason::Revoked,
+            $authoritative->isRevoked() => EndReason::Revoked,
             $authoritative->isExpiredAt($now), $session->isExpiredAt($now) => EndReason::Expired,
-            $this->hasGoneIdle($now)                                       => EndReason::Expired,
-            $this->hasLostAuthorization($session)                          => EndReason::Revoked,
-            default                                                        => null,
+            $this->hasGoneIdle($now) => EndReason::Expired,
+            $this->hasLostAuthorization($session) => EndReason::Revoked,
+            default => null,
         };
 
         if ($reason === null) {
@@ -135,7 +135,7 @@ final class GuardImpersonationLifetime
 
     private function activityKey(): string
     {
-        return $this->settings->string('session.key', 'impersonator') . '_last_activity';
+        return $this->settings->string('session.key', 'impersonator').'_last_activity';
     }
 
     /**
@@ -178,7 +178,7 @@ final class GuardImpersonationLifetime
 
         if ($request->expectsJson()) {
             return response()->json([
-                'message'  => $message,
+                'message' => $message,
                 'ended_by' => $reason->value,
             ], 403);
         }

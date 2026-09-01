@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalVerdict;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 
 /*
 | The approval chain's arithmetic, with no container and no database.
@@ -128,7 +128,7 @@ it('offers a reviewer only the slots still open', function (): void {
 it('reads a config entry, discarding anything unusable', function (): void {
     $policy = ApprovalPolicy::fromArray([
         'quorum' => '2',
-        'roles'  => ['manager' => 1, 'auditor' => '2', 'ignored' => 0, '' => 3, 'bad' => 'x'],
+        'roles' => ['manager' => 1, 'auditor' => '2', 'ignored' => 0, '' => 3, 'bad' => 'x'],
     ]);
 
     expect($policy->quorum)->toBe(2)

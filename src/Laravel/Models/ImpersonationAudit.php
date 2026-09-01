@@ -6,19 +6,19 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Models;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Core\Values\Guards;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\Guards;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * One row per impersonation — the session-level audit record.
@@ -108,8 +108,7 @@ class ImpersonationAudit extends Model
     }
 
     /**
-     * @param Builder<self> $query
-     *
+     * @param  Builder<self>  $query
      * @return Builder<self>
      */
     public function scopeActive(Builder $query): Builder
@@ -159,14 +158,14 @@ class ImpersonationAudit extends Model
     protected function casts(): array
     {
         return [
-            'metadata'    => 'array',
-            'started_at'  => 'datetime',
-            'expires_at'  => 'datetime',
-            'ended_at'    => 'datetime',
-            'revoked_at'  => 'datetime',
-            'decided_at'  => 'datetime',
+            'metadata' => 'array',
+            'started_at' => 'datetime',
+            'expires_at' => 'datetime',
+            'ended_at' => 'datetime',
+            'revoked_at' => 'datetime',
+            'decided_at' => 'datetime',
             'extended_at' => 'datetime',
-            'extensions'  => 'integer',
+            'extensions' => 'integer',
         ];
     }
 

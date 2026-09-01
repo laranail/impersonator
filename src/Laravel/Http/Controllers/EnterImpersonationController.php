@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers;
 
 use Illuminate\Http\RedirectResponse;
-use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\EnterImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
+use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
 
 /**
  * Starts an impersonation from a POST.

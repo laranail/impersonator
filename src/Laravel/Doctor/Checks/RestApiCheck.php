@@ -32,7 +32,7 @@ final class RestApiCheck extends Check
             ? DoctorResult::pass(sprintf('Enabled behind [%s].', implode(', ', $middleware)))
             : DoctorResult::fail(sprintf(
                 'The API is enabled but its middleware [%s] contains no auth guard. That is an '
-                . 'unauthenticated remote-control surface for every account in the system.',
+                .'unauthenticated remote-control surface for every account in the system.',
                 implode(', ', $middleware),
             ));
     }

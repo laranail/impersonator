@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
 use Simtabi\Laranail\Impersonator\Core\Events\ModeViolationBlocked;
-use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\EnforceImpersonationMode;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
+use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -341,11 +341,11 @@ it('exempts a table however the driver qualifies and quotes it', function (strin
 
     $guard->disarm();
 })->with([
-    'sqlite / bare'      => ['update sessions set payload = ?'],
-    'sqlite quoted'      => ['update "sessions" set "payload" = ?'],
+    'sqlite / bare' => ['update sessions set payload = ?'],
+    'sqlite quoted' => ['update "sessions" set "payload" = ?'],
     'postgres qualified' => ['update "public"."sessions" set "payload" = ?'],
-    'mysql qualified'    => ['update `mydb`.`sessions` set `payload` = ?'],
-    'sqlsrv qualified'   => ['delete from [dbo].[sessions] where [id] = ?'],
+    'mysql qualified' => ['update `mydb`.`sessions` set `payload` = ?'],
+    'sqlsrv qualified' => ['delete from [dbo].[sessions] where [id] = ?'],
 ]);
 
 it('accepts an exempt entry written in either form', function (): void {

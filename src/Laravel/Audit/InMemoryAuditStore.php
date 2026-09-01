@@ -6,13 +6,13 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Audit;
 
 use DateTimeImmutable;
 use Illuminate\Support\Str;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
+use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 

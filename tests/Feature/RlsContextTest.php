@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Simtabi\Laranail\Impersonator\Laravel\Support\RlsContext;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Laravel\Support\RlsContext;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | PostgreSQL row-level security.

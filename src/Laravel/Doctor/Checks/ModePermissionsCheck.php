@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
-use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 
 /**
  * The trap: an operator holding `impersonator.enter` and no mode permission.
@@ -46,7 +46,7 @@ final class ModePermissionsCheck extends Check
         if (! $policy instanceof RbacPolicy) {
             return DoctorResult::pass(sprintf(
                 'The active policy is [%s], which does not check per-mode permissions, so any '
-                . 'registered mode may be used.',
+                .'registered mode may be used.',
                 $policy::class,
             ));
         }
@@ -57,8 +57,8 @@ final class ModePermissionsCheck extends Check
 
         return DoctorResult::warn(sprintf(
             'Entering needs BOTH [%s] and the per-mode permission — for the default mode that is '
-            . '[%s]. Granting only the first produces an operator who can impersonate nothing '
-            . 'while looking correctly configured. Verify your seeder grants both.',
+            .'[%s]. Granting only the first produces an operator who can impersonate nothing '
+            .'while looking correctly configured. Verify your seeder grants both.',
             $enter,
             sprintf($template, $default),
         ));

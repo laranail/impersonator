@@ -25,8 +25,8 @@ final class MasterSwitchCheck extends Check
             ? DoctorResult::pass('Impersonation is enabled.')
             : DoctorResult::warn(
                 'impersonator.enabled is false, so every enter is refused. Revocation still works, '
-                . 'which is deliberate: turning the feature off during an incident must not also '
-                . 'remove the ability to kill the sessions already running.',
+                .'which is deliberate: turning the feature off during an incident must not also '
+                .'remove the ability to kill the sessions already running.',
             );
     }
 }

@@ -29,9 +29,9 @@ final class ApprovalNotificationsCheck extends Check
             ? DoctorResult::pass('Approvers are notified when a request is raised.')
             : DoctorResult::warn(
                 'Approval is required but approver notifications are off '
-                . '(impersonator.notifications.approvals.enabled). A queue nobody is told about gets '
-                . 'checked after the incident, by which point the operator has asked a colleague to '
-                . 'work around the control.',
+                .'(impersonator.notifications.approvals.enabled). A queue nobody is told about gets '
+                .'checked after the incident, by which point the operator has asked a colleague to '
+                .'work around the control.',
             );
     }
 }

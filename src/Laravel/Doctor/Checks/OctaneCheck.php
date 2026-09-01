@@ -52,9 +52,9 @@ final class OctaneCheck extends Check
             ? DoctorResult::pass('Octane is installed and the between-request resets are registered.')
             : DoctorResult::fail(
                 'Octane is installed but the between-request reset is not registered for: '
-                . implode(', ', $missing)
-                . '. A singleton holding request state will answer for the next request, which in this '
-                . 'package means somebody else\'s impersonation.',
+                .implode(', ', $missing)
+                .'. A singleton holding request state will answer for the next request, which in this '
+                .'package means somebody else\'s impersonation.',
                 ['missing' => $missing],
             );
     }

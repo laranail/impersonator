@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
+use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | An operator authenticated on an `admin` guard entering, with the target logged

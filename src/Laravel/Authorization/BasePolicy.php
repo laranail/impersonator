@@ -4,19 +4,19 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Authorization;
 
-use Throwable;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Contracts\Session\Session;
 use Illuminate\Contracts\Auth\Access\Gate;
+use Illuminate\Contracts\Session\Session;
+use Illuminate\Database\Eloquent\Model;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Throwable;
 
 /**
  * The always-on authorization rules — the checks that apply whether or not an

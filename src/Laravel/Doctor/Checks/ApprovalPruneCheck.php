@@ -35,7 +35,7 @@ final class ApprovalPruneCheck extends Check
 
         return DoctorResult::warn(
             'Schedule laranail::impersonator.prune-approvals, or an operator whose request went '
-            . 'unanswered is never told that nobody replied.',
+            .'unanswered is never told that nobody replied.',
         );
     }
 }

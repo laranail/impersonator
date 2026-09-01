@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Models;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
 
@@ -75,9 +75,9 @@ class ImpersonationAuditEvent extends Model
     protected function casts(): array
     {
         return [
-            'payload'     => 'array',
+            'payload' => 'array',
             'occurred_at' => 'datetime',
-            'status'      => 'integer',
+            'status' => 'integer',
             'duration_ms' => 'integer',
         ];
     }
@@ -90,8 +90,7 @@ class ImpersonationAuditEvent extends Model
     }
 
     /**
-     * @param array<array-key, mixed> $payload
-     *
+     * @param  array<array-key, mixed>  $payload
      * @return array<string, mixed>
      */
     private function stringKeyed(array $payload): array

@@ -26,21 +26,21 @@ use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
 beforeEach(function (): void {
     // Configured, never connected. No PDO is constructed until a query executes, and none here does.
     config()->set('database.connections.sqlsrv_probe', [
-        'driver'   => 'sqlsrv',
-        'host'     => '127.0.0.1',
+        'driver' => 'sqlsrv',
+        'host' => '127.0.0.1',
         'database' => 'impersonator_test',
         'username' => 'sa',
         'password' => 'unused',
-        'prefix'   => '',
+        'prefix' => '',
     ]);
 
     // An explicit SQLite connection rather than the default one. The default is whatever
     // IMPERSONATOR_TEST_DB selects, so comparing against it made this file pass on SQLite and fail on
     // PostgreSQL — where `for update` is exactly what the default *should* emit.
     config()->set('database.connections.sqlite_probe', [
-        'driver'   => 'sqlite',
+        'driver' => 'sqlite',
         'database' => ':memory:',
-        'prefix'   => '',
+        'prefix' => '',
     ]);
 });
 
@@ -59,12 +59,12 @@ it('parses every dialect the package can meet, including sql server', function (
     $method = new ReflectionMethod($guard, 'tableFrom');
 
     $cases = [
-        'sqlite bare'        => 'update impersonator_audits set x = 1',
-        'sqlite quoted'      => 'update "impersonator_audits" set x = 1',
+        'sqlite bare' => 'update impersonator_audits set x = 1',
+        'sqlite quoted' => 'update "impersonator_audits" set x = 1',
         'postgres qualified' => 'update "public"."impersonator_audits" set x = 1',
-        'mysql qualified'    => 'update `app`.`impersonator_audits` set x = 1',
-        'sqlsrv qualified'   => 'update [dbo].[impersonator_audits] set x = 1',
-        'sqlsrv three-part'  => 'update [db].[dbo].[impersonator_audits] set x = 1',
+        'mysql qualified' => 'update `app`.`impersonator_audits` set x = 1',
+        'sqlsrv qualified' => 'update [dbo].[impersonator_audits] set x = 1',
+        'sqlsrv three-part' => 'update [db].[dbo].[impersonator_audits] set x = 1',
     ];
 
     foreach ($cases as $label => $sql) {

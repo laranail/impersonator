@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 function fakeDriver(string $name, bool $available = true): ImpersonationDriver
 {

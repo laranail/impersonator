@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Contracts;
 
-use Simtabi\Laranail\Impersonator\Core\Values\Token;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Simtabi\Laranail\Impersonator\Core\Values\Token;
 
 /**
  * Storage for single-use handoff tokens, used by the TokenDriver to move an
