@@ -23,7 +23,7 @@ interface TrailStore
     /**
      * Append several at once, for buffered or queued recording.
      *
-     * @param  iterable<TrailEvent>  $events
+     * @param iterable<TrailEvent> $events
      */
     public function recordMany(iterable $events): void;
 

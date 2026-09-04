@@ -7,10 +7,10 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 use DateTimeInterface;
 use Illuminate\Console\Command;
 use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
-use Simtabi\Laranail\Impersonator\Laravel\Audit\EloquentAuditStore;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\Audit\EloquentAuditStore;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 
 /**
  * Walks the audit chain and reports the first place it breaks.
@@ -34,7 +34,7 @@ class VerifyAuditCommand extends Command
         if (! $settings->bool('audit.tamper_evident', false)) {
             $this->components->warn(
                 'Tamper evidence is off (impersonator.audit.tamper_evident), so there is no chain '
-                .'to verify. Rows written while it was off carry no digest.',
+                . 'to verify. Rows written while it was off carry no digest.',
             );
 
             return self::SUCCESS;
@@ -45,8 +45,8 @@ class VerifyAuditCommand extends Command
         if ($key === null) {
             $this->components->error(
                 'impersonator.audit.hash_key is not set. Verification needs the same key the rows '
-                .'were written with, and it must live outside the database — a chain whose key is '
-                .'stored alongside the rows protects nothing.',
+                . 'were written with, and it must live outside the database — a chain whose key is '
+                . 'stored alongside the rows protects nothing.',
             );
 
             return self::FAILURE;
@@ -77,7 +77,7 @@ class VerifyAuditCommand extends Command
 
                 $this->components->error(sprintf(
                     'The audit chain breaks at row [%s] (started %s). Every row from here on is '
-                    .'suspect: one was altered, deleted, or inserted after the fact.',
+                    . 'suspect: one was altered, deleted, or inserted after the fact.',
                     is_scalar($key) ? (string) $key : 'unknown',
                     $startedAt instanceof DateTimeInterface ? $startedAt->format(DATE_ATOM) : 'unknown',
                 ));

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
@@ -47,7 +47,7 @@ class WhenImpersonating extends Component
      * is typed for verifiable application views, and these are namespaced package
      * views the analyser cannot resolve — the factory takes a plain string.
      *
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function renderView(string $name, array $data = []): View
     {

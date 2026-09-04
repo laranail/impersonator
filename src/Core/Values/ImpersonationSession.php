@@ -44,7 +44,7 @@ final readonly class ImpersonationSession
     ) {}
 
     /**
-     * @param  array<string, mixed>  $snapshot
+     * @param array<string, mixed> $snapshot
      *
      * @throws InvalidIdentity when the
      *                         cached identities are unreadable, which means the entry cannot be trusted
@@ -266,26 +266,26 @@ final readonly class ImpersonationSession
     public function toSnapshot(): array
     {
         return [
-            'v' => 1,
-            'id' => $this->auditId,
-            'impersonator' => $this->impersonator->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
+            'v'                  => 1,
+            'id'                 => $this->auditId,
+            'impersonator'       => $this->impersonator->toArray(),
+            'target'             => $this->target->toArray(),
+            'mode'               => $this->mode->name,
             'guard_impersonator' => $this->guards->impersonator,
-            'guard_target' => $this->guards->target,
-            'driver' => $this->driver,
-            'adapter' => $this->adapter,
-            'tenant_id' => $this->tenantId,
-            'session_id' => $this->sessionId,
-            'credential_hash' => $this->credentialHash,
-            'reason' => $this->reason,
-            'started_at' => $this->startedAt->getTimestamp(),
-            'ended_at' => $this->endedAt?->getTimestamp(),
-            'ended_by' => $this->endedBy?->value,
-            'expires_at' => $this->expiresAt?->getTimestamp(),
-            'revoked_at' => $this->revokedAt?->getTimestamp(),
-            'extensions' => $this->extensions,
-            'metadata' => $this->metadata,
+            'guard_target'       => $this->guards->target,
+            'driver'             => $this->driver,
+            'adapter'            => $this->adapter,
+            'tenant_id'          => $this->tenantId,
+            'session_id'         => $this->sessionId,
+            'credential_hash'    => $this->credentialHash,
+            'reason'             => $this->reason,
+            'started_at'         => $this->startedAt->getTimestamp(),
+            'ended_at'           => $this->endedAt?->getTimestamp(),
+            'ended_by'           => $this->endedBy?->value,
+            'expires_at'         => $this->expiresAt?->getTimestamp(),
+            'revoked_at'         => $this->revokedAt?->getTimestamp(),
+            'extensions'         => $this->extensions,
+            'metadata'           => $this->metadata,
         ];
     }
 
@@ -299,28 +299,29 @@ final readonly class ImpersonationSession
     public function toArray(): array
     {
         return [
-            'id' => $this->auditId,
+            'id'           => $this->auditId,
             'impersonator' => $this->impersonator->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
-            'guards' => $this->guards->toArray(),
-            'driver' => $this->driver,
-            'adapter' => $this->adapter,
-            'tenant_id' => $this->tenantId,
-            'reason' => $this->reason,
-            'started_at' => $this->startedAt->format(DATE_ATOM),
-            'ended_at' => $this->endedAt?->format(DATE_ATOM),
-            'ended_by' => $this->endedBy?->value,
-            'expires_at' => $this->expiresAt?->format(DATE_ATOM),
-            'revoked_at' => $this->revokedAt?->format(DATE_ATOM),
-            'extensions' => $this->extensions,
-            'active' => $this->isActive(),
-            'metadata' => $this->metadata,
+            'target'       => $this->target->toArray(),
+            'mode'         => $this->mode->name,
+            'guards'       => $this->guards->toArray(),
+            'driver'       => $this->driver,
+            'adapter'      => $this->adapter,
+            'tenant_id'    => $this->tenantId,
+            'reason'       => $this->reason,
+            'started_at'   => $this->startedAt->format(DATE_ATOM),
+            'ended_at'     => $this->endedAt?->format(DATE_ATOM),
+            'ended_by'     => $this->endedBy?->value,
+            'expires_at'   => $this->expiresAt?->format(DATE_ATOM),
+            'revoked_at'   => $this->revokedAt?->format(DATE_ATOM),
+            'extensions'   => $this->extensions,
+            'active'       => $this->isActive(),
+            'metadata'     => $this->metadata,
         ];
     }
 
     /**
-     * @param  array<array-key, mixed>  $data
+     * @param array<array-key, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private static function stringKeys(array $data): array

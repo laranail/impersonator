@@ -63,11 +63,11 @@ final readonly class ExtensionGrant
     public function toArray(): array
     {
         return [
-            'granted' => $this->granted(),
+            'granted'    => $this->granted(),
             'expires_at' => $this->expiresAt?->format(DATE_ATOM),
-            'seconds' => $this->seconds(),
-            'code' => $this->decision->code,
-            'reason' => $this->decision->reason,
+            'seconds'    => $this->seconds(),
+            'code'       => $this->decision->code,
+            'reason'     => $this->decision->reason,
         ];
     }
 }

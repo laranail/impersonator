@@ -33,8 +33,8 @@ use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
 final readonly class ApprovalPolicy
 {
     /**
-     * @param  int  $quorum  how many approvals are needed at minimum
-     * @param  array<string, int>  $roles  role slug => how many approvals must come from that role
+     * @param int $quorum how many approvals are needed at minimum
+     * @param array<string, int> $roles role slug => how many approvals must come from that role
      */
     public function __construct(
         public int $quorum = 1,
@@ -42,7 +42,7 @@ final readonly class ApprovalPolicy
     ) {}
 
     /**
-     * @param  array<string, mixed>  $config  a `policies.{mode}` entry
+     * @param array<string, mixed> $config a `policies.{mode}` entry
      */
     public static function fromArray(array $config): self
     {
@@ -85,7 +85,7 @@ final readonly class ApprovalPolicy
      * The single place the chain's outcome is computed, so the store, the API and a queue screen
      * cannot disagree about whether a request is satisfied.
      *
-     * @param  list<ApprovalDecision>  $decisions
+     * @param list<ApprovalDecision> $decisions
      */
     public function stateFor(array $decisions): ApprovalState
     {
@@ -112,7 +112,7 @@ final readonly class ApprovalPolicy
      * Both tests must pass: enough approvals in total, and every role slot filled. Checking only the
      * count would let three managers satisfy a policy that asked for an auditor.
      *
-     * @param  list<ApprovalDecision>  $approvals
+     * @param list<ApprovalDecision> $approvals
      */
     public function satisfiedBy(array $approvals): bool
     {
@@ -122,7 +122,8 @@ final readonly class ApprovalPolicy
     /**
      * Role slots still unfilled.
      *
-     * @param  list<ApprovalDecision>  $approvals
+     * @param list<ApprovalDecision> $approvals
+     *
      * @return array<string, int> role => how many more are needed
      */
     public function outstandingRoles(array $approvals): array
@@ -153,7 +154,7 @@ final readonly class ApprovalPolicy
     /**
      * How many more approvals are needed, ignoring roles.
      *
-     * @param  list<ApprovalDecision>  $approvals
+     * @param list<ApprovalDecision> $approvals
      */
     public function outstandingCount(array $approvals): int
     {
@@ -166,8 +167,9 @@ final readonly class ApprovalPolicy
      * Returns an empty list when the policy names no roles — every reviewer is then interchangeable
      * and a decision is recorded with a null slot.
      *
-     * @param  list<string>  $reviewerRoles  the roles this operator actually holds
-     * @param  list<ApprovalDecision>  $approvals
+     * @param list<string> $reviewerRoles the roles this operator actually holds
+     * @param list<ApprovalDecision> $approvals
+     *
      * @return list<string>
      */
     public function slotsFor(array $reviewerRoles, array $approvals): array
@@ -188,8 +190,8 @@ final readonly class ApprovalPolicy
     public function toArray(): array
     {
         return [
-            'quorum' => $this->quorum,
-            'roles' => $this->roles,
+            'quorum'   => $this->quorum,
+            'roles'    => $this->roles,
             'required' => $this->required(),
         ];
     }

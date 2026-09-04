@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Contracts\Config\Repository as Config;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidIdentity;
 
 /**
  * Translates between application users and the Core layer's Identity value.

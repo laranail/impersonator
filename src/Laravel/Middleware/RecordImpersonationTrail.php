@@ -6,14 +6,14 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Middleware;
 
 use Closure;
 use DateTimeImmutable;
-use Illuminate\Http\Request;
 use Illuminate\Support\Str;
-use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Simtabi\Laranail\Impersonator\Core\Support\Redactor;
 use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Symfony\Component\HttpFoundation\Response;
+use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /**
  * Records one trail row per impersonated request.
@@ -66,7 +66,7 @@ final readonly class RecordImpersonationTrail
         $this->trail->record(new TrailEvent(
             auditId: $session->auditId,
             method: $request->getMethod(),
-            path: '/'.ltrim($request->path(), '/'),
+            path: '/' . ltrim($request->path(), '/'),
             routeName: $request->route() === null ? null : $request->route()->getName(),
             status: $response->getStatusCode(),
             durationMs: is_float($startedAt) ? round((microtime(true) - $startedAt) * 1000, 2) : null,

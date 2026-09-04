@@ -48,7 +48,7 @@ it('migrates every documented key type', function (string $keyType, array $expec
     'numeric' => ['numeric', ['integer', 'bigint', 'int8']],
     // Each driver names these differently: PostgreSQL reports a fixed-width char as `bpchar`
     // (blank-padded) and has a native `uuid` type, while SQLite and MySQL report varchar.
-    'uuid' => ['uuid', ['varchar', 'character varying', 'uuid', 'char', 'bpchar', 'text']],
-    'ulid' => ['ulid', ['varchar', 'character varying', 'char', 'bpchar', 'text']],
+    'uuid'                         => ['uuid', ['varchar', 'character varying', 'uuid', 'char', 'bpchar', 'text']],
+    'ulid'                         => ['ulid', ['varchar', 'character varying', 'char', 'bpchar', 'text']],
     'unknown falls back to string' => ['nonsense', ['varchar', 'character varying', 'text']],
 ]);

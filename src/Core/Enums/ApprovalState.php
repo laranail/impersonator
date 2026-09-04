@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Enums;
 
 use Simtabi\Laranail\Enumerator\Attributes\Label;
 use Simtabi\Laranail\Enumerator\Concerns\HasAttributes;
-use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 use Simtabi\Laranail\Enumerator\Contracts\Translatable;
+use Simtabi\Laranail\Enumerator\Concerns\IsTranslatable;
 
 /**
  * Where a break-glass approval request stands.

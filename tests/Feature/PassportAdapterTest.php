@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
-use Laravel\Passport\Passport;
-use Laravel\Passport\PassportServiceProvider;
 use Laravel\Passport\Token;
+use Laravel\Passport\Passport;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Schema;
+use Laravel\Passport\PassportServiceProvider;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\PassportUser;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 uses()->group('passport');
 
@@ -27,12 +27,12 @@ beforeEach(function (): void {
 
     // Passport's own migrations, run from its published path so the suite exercises the real
     // schema rather than a hand-written approximation of it.
-    $this->loadMigrationsFrom(dirname(__DIR__, 2).'/vendor/laravel/passport/database/migrations');
+    $this->loadMigrationsFrom(dirname(__DIR__, 2) . '/vendor/laravel/passport/database/migrations');
     $this->artisan('migrate', ['--database' => 'testing'])->run();
 
     // Passport signs tokens with an RSA keypair, so one has to exist. Generated per run into
     // a temp directory rather than the app's storage path, so the suite leaves nothing behind.
-    $keys = sys_get_temp_dir().'/impersonator-passport-keys-'.bin2hex(random_bytes(6));
+    $keys = sys_get_temp_dir() . '/impersonator-passport-keys-' . bin2hex(random_bytes(6));
     mkdir($keys, 0o700, true);
     Passport::loadKeysFrom($keys);
     $this->artisan('passport:keys', ['--force' => true])->run();
@@ -40,9 +40,9 @@ beforeEach(function (): void {
     // Personal access tokens need a personal access client to exist. An installation without
     // one cannot issue any, which is why the adapter names this in its failure message.
     $this->artisan('passport:client', [
-        '--personal' => true,
-        '--name' => 'Impersonation tests',
-        '--provider' => 'users',
+        '--personal'       => true,
+        '--name'           => 'Impersonation tests',
+        '--provider'       => 'users',
         '--no-interaction' => true,
     ])->run();
 
@@ -90,7 +90,7 @@ it('scopes the token to a single impersonated scope', function (): void {
 it('names the token after the audit row', function (): void {
     $outcome = Impersonator::enter($this->target);
 
-    expect(Token::query()->firstOrFail()->name)->toBe('impersonation:'.$outcome->auditId());
+    expect(Token::query()->firstOrFail()->name)->toBe('impersonation:' . $outcome->auditId());
 });
 
 it('shortens the expiry without shortening every other token the app issues', function (): void {

@@ -3,10 +3,10 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\AcceptImpersonationController;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\EnterImpersonationController;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\ExtendImpersonationController;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\LeaveImpersonationController;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\AcceptImpersonationController;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\ExtendImpersonationController;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\RevokeImpersonationController;
 
 /*

@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
-use Simtabi\Laranail\Impersonator\Core\Values\Guards;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Laravel\Audit\ConcurrencyLimitReached;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 /*
 | The concurrency guarantees, tested against a database that actually locks.

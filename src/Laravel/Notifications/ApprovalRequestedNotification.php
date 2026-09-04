@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 
 /**
