@@ -43,9 +43,9 @@ return [
      * cannot be decided. Nothing is leaked by saying somebody else answered first.
      */
     'approval_not_decidable' => [
-        'unknown' => 'That approval request no longer exists.',
+        'unknown'         => 'That approval request no longer exists.',
         'already_decided' => 'That request has already been answered.',
-        'expired' => 'That request expired before it was answered.',
-        'self_approval' => 'You cannot approve your own request.',
+        'expired'         => 'That request expired before it was answered.',
+        'self_approval'   => 'You cannot approve your own request.',
     ],
 ];

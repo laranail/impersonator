@@ -68,12 +68,12 @@ return [
     'adapters' => [
 
         'sanctum' => [
-            'ability' => 'impersonated',
+            'ability'       => 'impersonated',
             'expires_after' => env('IMPERSONATOR_SANCTUM_TTL', 15),
         ],
 
         'passport' => [
-            'scope' => 'impersonated',
+            'scope'         => 'impersonated',
             'expires_after' => env('IMPERSONATOR_PASSPORT_TTL', 15),
             // A refresh token is never issued. It would let an impersonation renew itself
             // indefinitely, outliving both its audit row and the operator's authority to
@@ -101,7 +101,7 @@ return [
 
     'guards' => [
         'impersonator' => env('IMPERSONATOR_GUARD', 'web'),
-        'target' => env('IMPERSONATOR_TARGET_GUARD', 'web'),
+        'target'       => env('IMPERSONATOR_TARGET_GUARD', 'web'),
     ],
 
     /*
@@ -315,7 +315,7 @@ return [
         // A closure, an invokable class name, or null. Fails closed on anything
         // but a literal true, including a thrown exception.
         'eligibility' => null,
-        'allowlist' => [
+        'allowlist'   => [
             'user' => 'App\Models\User',
 
             // A second model, with its own guard and label:
@@ -410,8 +410,8 @@ return [
         // Refuses on an absent timestamp as well as a stale one — an install that
         // forgot the flow produces exactly the absent case.
         'step_up' => [
-            'require' => env('IMPERSONATOR_REQUIRE_STEP_UP', false),
-            'within' => env('IMPERSONATOR_STEP_UP_WITHIN', 900),
+            'require'     => env('IMPERSONATOR_REQUIRE_STEP_UP', false),
+            'within'      => env('IMPERSONATOR_STEP_UP_WITHIN', 900),
             'session_key' => 'auth.password_confirmed_at',
         ],
 
@@ -426,8 +426,8 @@ return [
             // This is what pins junior staff to read_only.
             'mode' => 'impersonator.mode.%s',
 
-            'revoke' => 'impersonator.revoke',
-            'approve' => 'impersonator.approve',
+            'revoke'     => 'impersonator.revoke',
+            'approve'    => 'impersonator.approve',
             'audit_view' => 'impersonator.audit.view',
         ],
 
@@ -443,10 +443,10 @@ return [
             // Role name to level, for the built-in hierarchy check.
             'levels' => [
                 'super-admin' => 100,
-                'admin' => 80,
-                'manager' => 60,
-                'support' => 40,
-                'user' => 10,
+                'admin'       => 80,
+                'manager'     => 60,
+                'support'     => 40,
+                'user'        => 10,
             ],
         ],
     ],
@@ -460,7 +460,7 @@ return [
     */
 
     'reason' => [
-        'require' => env('IMPERSONATOR_REQUIRE_REASON', false),
+        'require'    => env('IMPERSONATOR_REQUIRE_REASON', false),
         'min_length' => 3,
         'max_length' => 500,
     ],
@@ -535,8 +535,8 @@ return [
 
         // How the max_duration and revocation checks avoid a per-request query.
         'state_cache' => [
-            'store' => env('IMPERSONATOR_CACHE_STORE'),
-            'ttl' => 30,
+            'store'  => env('IMPERSONATOR_CACHE_STORE'),
+            'ttl'    => 30,
             'prefix' => 'impersonator:state:',
         ],
     ],
@@ -550,9 +550,9 @@ return [
     */
 
     'rate_limiting' => [
-        'enter' => ['attempts' => 5, 'decay' => 60],
+        'enter'  => ['attempts' => 5, 'decay' => 60],
         'accept' => ['attempts' => 10, 'decay' => 60],
-        'api' => ['attempts' => 30, 'decay' => 60],
+        'api'    => ['attempts' => 30, 'decay' => 60],
     ],
 
     /*
@@ -569,9 +569,9 @@ return [
     */
 
     'tokens' => [
-        'bytes' => 40,
-        'ttl' => env('IMPERSONATOR_TOKEN_TTL', 60),
-        'table' => 'impersonator_tokens',
+        'bytes'      => 40,
+        'ttl'        => env('IMPERSONATOR_TOKEN_TTL', 60),
+        'table'      => 'impersonator_tokens',
         'connection' => env('IMPERSONATOR_TOKEN_CONNECTION'),
     ],
 
@@ -625,7 +625,7 @@ return [
     */
 
     'audit' => [
-        'table' => 'impersonator_audits',
+        'table'      => 'impersonator_audits',
         'connection' => env('IMPERSONATOR_AUDIT_CONNECTION'),
 
         // Days to retain, via MassPrunable. Null keeps rows forever. Child
@@ -638,7 +638,7 @@ return [
         // recomputable by anyone holding the algorithm, which means anyone with
         // write access to the table.
         'tamper_evident' => env('IMPERSONATOR_TAMPER_EVIDENT', false),
-        'hash_key' => env('IMPERSONATOR_AUDIT_HASH_KEY'),
+        'hash_key'       => env('IMPERSONATOR_AUDIT_HASH_KEY'),
     ],
 
     /*
@@ -651,7 +651,7 @@ return [
 
     'trail' => [
         'enabled' => env('IMPERSONATOR_TRAIL_ENABLED', true),
-        'table' => 'impersonator_audit_events',
+        'table'   => 'impersonator_audit_events',
 
         // Off by default: request bodies are the likeliest place for personal
         // data to end up permanently recorded. Redaction applies when on, but
@@ -700,7 +700,7 @@ return [
     */
 
     'causer' => [
-        'strategy' => env('IMPERSONATOR_CAUSER_STRATEGY', 'impersonator'),
+        'strategy'     => env('IMPERSONATOR_CAUSER_STRATEGY', 'impersonator'),
         'property_key' => 'impersonated_target',
     ],
 
@@ -714,13 +714,13 @@ return [
     */
 
     'routes' => [
-        'register' => env('IMPERSONATOR_REGISTER_ROUTES', true),
-        'middleware' => ['web'],
-        'prefix' => 'impersonator',
+        'register'    => env('IMPERSONATOR_REGISTER_ROUTES', true),
+        'middleware'  => ['web'],
+        'prefix'      => 'impersonator',
         'name_prefix' => 'impersonator.',
         'accept_path' => 'accept/{token}',
-        'leave_path' => 'leave',
-        'enter_path' => 'enter',
+        'leave_path'  => 'leave',
+        'enter_path'  => 'enter',
         'extend_path' => 'extend',
         'revoke_path' => 'revoke/{audit}',
 
@@ -753,8 +753,8 @@ return [
     'urls' => [
         // domain | subdomain | path
         'strategy' => env('IMPERSONATOR_URL_STRATEGY', 'domain'),
-        'scheme' => env('IMPERSONATOR_URL_SCHEME', 'https'),
-        'port' => env('IMPERSONATOR_URL_PORT'),
+        'scheme'   => env('IMPERSONATOR_URL_SCHEME', 'https'),
+        'port'     => env('IMPERSONATOR_URL_PORT'),
 
         // subdomain strategy: {tenant}.example.com
         'base_domain' => env('IMPERSONATOR_BASE_DOMAIN'),
@@ -806,7 +806,7 @@ return [
         // set at runtime through Impersonator::displayNameUsing().
         'display_name' => 'name',
 
-        'show_mode' => true,
+        'show_mode'     => true,
         'show_duration' => true,
     ],
 
@@ -819,11 +819,11 @@ return [
     */
 
     'api' => [
-        'enabled' => env('IMPERSONATOR_API_ENABLED', false),
-        'prefix' => 'impersonator/api/v1',
-        'middleware' => ['api', 'auth:sanctum'],
-        'name_prefix' => 'impersonator.api.',
-        'per_page' => 25,
+        'enabled'      => env('IMPERSONATOR_API_ENABLED', false),
+        'prefix'       => 'impersonator/api/v1',
+        'middleware'   => ['api', 'auth:sanctum'],
+        'name_prefix'  => 'impersonator.api.',
+        'per_page'     => 25,
         'max_per_page' => 100,
     ],
 
@@ -849,7 +849,7 @@ return [
 
         'security_channel' => [
             'enabled' => env('IMPERSONATOR_SECURITY_ALERTS', false),
-            'mail' => [],
+            'mail'    => [],
             'webhook' => env('IMPERSONATOR_SECURITY_WEBHOOK'),
 
             // Which lifecycle events raise an alert.
@@ -868,7 +868,7 @@ return [
             // This package cannot find your approvers itself: it is duck-typed
             // against an RBAC surface rather than depending on one, so it has no way
             // to query "everybody holding impersonator.approve".
-            'mail' => [],
+            'mail'     => [],
             'resolver' => null,
 
             // Tell the requester the outcome — approved, denied, or nobody answered.
@@ -888,8 +888,8 @@ return [
     */
 
     'approval' => [
-        'require' => env('IMPERSONATOR_REQUIRE_APPROVAL', false),
-        'table' => 'impersonator_approval_requests',
+        'require'         => env('IMPERSONATOR_REQUIRE_APPROVAL', false),
+        'table'           => 'impersonator_approval_requests',
         'decisions_table' => 'impersonator_approval_decisions',
 
         // Minutes before an unapproved request expires.
@@ -958,8 +958,8 @@ return [
         // by the other — which produces an audit trail that disagrees with
         // itself. Add your own; nothing here is a hard conflict.
         'conflicting_packages' => [
-            'Lab404\Impersonate\ImpersonateServiceProvider' => 'lab404/laravel-impersonate',
-            'Octopy\Impersonate\ImpersonateServiceProvider' => 'octopyid/laravel-impersonate',
+            'Lab404\Impersonate\ImpersonateServiceProvider'                      => 'lab404/laravel-impersonate',
+            'Octopy\Impersonate\ImpersonateServiceProvider'                      => 'octopyid/laravel-impersonate',
             'Stechstudio\FilamentImpersonate\FilamentImpersonateServiceProvider' => 'stechstudio/filament-impersonate',
         ],
     ],

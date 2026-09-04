@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
+use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\GuardImpersonationLifetime;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 /*
 | The operator-side controls: step-up, idle timeout, per-request re-authorization, target eligibility.
@@ -37,8 +37,8 @@ beforeEach(function (): void {
     config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
     $this->admin = RbacUser::create([
-        'name' => 'Admin',
-        'roles' => ['admin'],
+        'name'        => 'Admin',
+        'roles'       => ['admin'],
         'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
     ]);
     $this->target = RbacUser::create(['name' => 'Customer']);

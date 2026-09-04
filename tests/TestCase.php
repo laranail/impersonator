@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Tests;
 
-use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Migrations\Migration;
 use Orchestra\Testbench\TestCase as Orchestra;
 use Simtabi\Laranail\Enumerator\Providers\EnumeratorServiceProvider;
-use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 use Simtabi\Laranail\Package\Tools\Providers\PackageToolsServiceProvider;
+use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 
 abstract class TestCase extends Orchestra
 {
@@ -66,7 +66,7 @@ abstract class TestCase extends Orchestra
         // AES-256 key by construction, so secret scanners flag it — correctly, by their rules,
         // even though it only ever encrypted an in-memory test session. Generating it here removes
         // the detector surface entirely and nothing is lost: no test asserts a fixed key.
-        $config->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
+        $config->set('app.key', 'base64:' . base64_encode(random_bytes(32)));
 
         $config->set('database.default', 'testing');
         $config->set('database.connections.testing', $this->connectionConfig());
@@ -101,32 +101,32 @@ abstract class TestCase extends Orchestra
 
         return match ($driver) {
             'pgsql' => [
-                'driver' => 'pgsql',
-                'host' => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
-                'port' => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '5432',
-                'database' => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
-                'username' => getenv('IMPERSONATOR_TEST_DB_USER') ?: get_current_user(),
-                'password' => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
-                'charset' => 'utf8',
-                'prefix' => '',
+                'driver'      => 'pgsql',
+                'host'        => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
+                'port'        => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '5432',
+                'database'    => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
+                'username'    => getenv('IMPERSONATOR_TEST_DB_USER') ?: get_current_user(),
+                'password'    => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
+                'charset'     => 'utf8',
+                'prefix'      => '',
                 'search_path' => 'public',
-                'sslmode' => 'prefer',
+                'sslmode'     => 'prefer',
             ],
             'mysql' => [
-                'driver' => 'mysql',
-                'host' => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
-                'port' => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '3306',
-                'database' => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
-                'username' => getenv('IMPERSONATOR_TEST_DB_USER') ?: 'root',
-                'password' => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
-                'charset' => 'utf8mb4',
+                'driver'    => 'mysql',
+                'host'      => getenv('IMPERSONATOR_TEST_DB_HOST') ?: '127.0.0.1',
+                'port'      => getenv('IMPERSONATOR_TEST_DB_PORT') ?: '3306',
+                'database'  => getenv('IMPERSONATOR_TEST_DB_NAME') ?: 'impersonator_test',
+                'username'  => getenv('IMPERSONATOR_TEST_DB_USER') ?: 'root',
+                'password'  => getenv('IMPERSONATOR_TEST_DB_PASSWORD') ?: '',
+                'charset'   => 'utf8mb4',
                 'collation' => 'utf8mb4_unicode_ci',
-                'prefix' => '',
+                'prefix'    => '',
             ],
             default => [
-                'driver' => 'sqlite',
+                'driver'   => 'sqlite',
                 'database' => ':memory:',
-                'prefix' => '',
+                'prefix'   => '',
             ],
         };
     }
@@ -192,6 +192,6 @@ abstract class TestCase extends Orchestra
 
     protected function packageMigration(): Migration
     {
-        return require dirname(__DIR__).'/database/migrations/create_impersonator_tables.php.stub';
+        return require dirname(__DIR__) . '/database/migrations/create_impersonator_tables.php.stub';
     }
 }

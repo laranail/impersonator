@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Requests;
 
 use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\In;
+use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\RedirectGuard;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 
 /**
  * Validation for the enter endpoint. No inline validation anywhere in the package.
@@ -55,13 +55,13 @@ class EnterImpersonationRequest extends FormRequest
                 Rule::in(array_keys($this->impersonator()->identities()->allowlist())),
             ],
             'target_id' => ['required', 'string', 'max:255'],
-            'mode' => ['sometimes', 'nullable', 'string', Rule::in(app(ModeRegistry::class)->names())],
-            'guard' => ['sometimes', 'nullable', 'string', Rule::in(array_keys($this->configuredGuards()))],
-            'reason' => [
+            'mode'      => ['sometimes', 'nullable', 'string', Rule::in(app(ModeRegistry::class)->names())],
+            'guard'     => ['sometimes', 'nullable', 'string', Rule::in(array_keys($this->configuredGuards()))],
+            'reason'    => [
                 $settings->bool('reason.require', false) ? 'required' : 'nullable',
                 'string',
-                'min:'.$settings->int('reason.min_length', 3),
-                'max:'.$settings->int('reason.max_length', 500),
+                'min:' . $settings->int('reason.min_length', 3),
+                'max:' . $settings->int('reason.max_length', 500),
             ],
             'redirect_to' => ['sometimes', 'nullable', 'string', 'max:2048', $this->safeRedirect()],
         ];
@@ -72,8 +72,8 @@ class EnterImpersonationRequest extends FormRequest
     {
         return [
             'target_type.in' => __('laranail-impersonator::validation.target_type.in'),
-            'mode.in' => __('laranail-impersonator::validation.mode.in'),
-            'guard.in' => __('laranail-impersonator::validation.guard.in'),
+            'mode.in'        => __('laranail-impersonator::validation.mode.in'),
+            'guard.in'       => __('laranail-impersonator::validation.guard.in'),
         ];
     }
 

@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Tokens;
 
+use Throwable;
 use DateTimeImmutable;
 use DateTimeInterface;
-use Illuminate\Database\ConnectionResolverInterface;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Str;
 use Psr\Clock\ClockInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Database\ConnectionResolverInterface;
 use Simtabi\Laranail\Impersonator\Core\Values\Token;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
+use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 
 /**
  * Single-use handoff tokens, in the database.
@@ -50,13 +50,13 @@ final readonly class EloquentTokenRepository implements TokenRepository
     public function issue(ImpersonationRequest $request, int $ttlSeconds): Token
     {
         $plaintext = $this->generate();
-        $expiresAt = $this->clock->now()->modify('+'.max(1, $ttlSeconds).' seconds');
+        $expiresAt = $this->clock->now()->modify('+' . max(1, $ttlSeconds) . ' seconds');
 
         $this->table()->insert([
-            'id' => strtolower((string) Str::ulid()),
+            'id'         => strtolower((string) Str::ulid()),
             'token_hash' => $this->digest($plaintext),
-            'audit_id' => null,
-            'request' => json_encode($request->toArray(), JSON_THROW_ON_ERROR),
+            'audit_id'   => null,
+            'request'    => json_encode($request->toArray(), JSON_THROW_ON_ERROR),
             'expires_at' => $expiresAt,
             'created_at' => $this->clock->now(),
             'updated_at' => $this->clock->now(),

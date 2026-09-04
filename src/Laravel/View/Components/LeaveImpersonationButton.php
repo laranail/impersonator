@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\View\Components;
 
-use Illuminate\Contracts\View\Factory as ViewFactory;
-use Illuminate\Contracts\View\View;
 use Illuminate\View\Component;
+use Illuminate\Contracts\View\View;
+use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
 
@@ -46,7 +46,7 @@ class LeaveImpersonationButton extends Component
         $this->label ??= (string) __('laranail-impersonator::components.leave');
 
         return $this->renderView('laranail-impersonator::components.leave-button', [
-            'url' => app(BannerPresenter::class)->leaveUrl(),
+            'url'   => app(BannerPresenter::class)->leaveUrl(),
             'label' => $this->label,
         ]);
     }
@@ -58,7 +58,7 @@ class LeaveImpersonationButton extends Component
      * is typed for verifiable application views, and these are namespaced package
      * views the analyser cannot resolve — the factory takes a plain string.
      *
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      */
     private function renderView(string $name, array $data = []): View
     {

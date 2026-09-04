@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
-use Simtabi\Laranail\Impersonator\Laravel\Audit\AuditExporter;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 use Symfony\Component\Console\Output\OutputInterface;
+use Simtabi\Laranail\Impersonator\Laravel\Audit\AuditExporter;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 
 /**
  * Exports one impersonation and its action trail, for a compliance request.
@@ -29,7 +29,7 @@ class ExportAuditCommand extends Command
 
         if (! in_array($format, AuditExporter::formats(), true)) {
             $this->components->error(__('laranail-impersonator::console.export_audit.unknown_format', [
-                'format' => $format,
+                'format'  => $format,
                 'formats' => implode(', ', AuditExporter::formats()),
             ]));
 
@@ -64,7 +64,7 @@ class ExportAuditCommand extends Command
 
         $this->components->info(__('laranail-impersonator::console.export_audit.exported', [
             'audit' => $audit,
-            'path' => $path,
+            'path'  => $path,
         ]));
 
         return self::SUCCESS;

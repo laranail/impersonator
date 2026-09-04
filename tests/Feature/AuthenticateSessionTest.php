@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Session\Middleware\AuthenticateSession;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 /*
 | Impersonating underneath Laravel's own `auth.session` middleware.
@@ -51,7 +51,7 @@ beforeEach(function (): void {
 
 function sentinel(): ?string
 {
-    $value = session()->get('password_hash_'.config('auth.defaults.guard'));
+    $value = session()->get('password_hash_' . config('auth.defaults.guard'));
 
     return is_string($value) ? $value : null;
 }

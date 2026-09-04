@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Adapters;
 
-use Laravel\Passport\Contracts\OAuthenticatable;
-use Laravel\Passport\Passport;
+use Throwable;
 use Laravel\Passport\Token;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
+use Laravel\Passport\Passport;
+use Laravel\Passport\Contracts\OAuthenticatable;
 use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * Impersonation for Passport-authenticated APIs.
@@ -69,7 +69,7 @@ final readonly class PassportAdapter implements AuthAdapter
         if (! $target instanceof OAuthenticatable) {
             throw new ImpersonationException(sprintf(
                 '%s cannot be impersonated with the passport adapter: it does not implement %s, '
-                .'so no access token can be issued for it.',
+                . 'so no access token can be issued for it.',
                 $target::class,
                 OAuthenticatable::class,
             ));
@@ -91,15 +91,15 @@ final readonly class PassportAdapter implements AuthAdapter
         // operator no indication that impersonation is what needs configuring.
         try {
             $issued = $target->createToken(
-                name: 'impersonation:'.$session->auditId,
+                name: 'impersonation:' . $session->auditId,
                 scopes: [$this->scope()],
             );
         } catch (Throwable $failure) {
             throw new ImpersonationException('Passport could not issue an impersonation token. It needs an encryption keypair '
-            .'(`php artisan passport:keys`), a personal access client '
-            .'(`php artisan passport:client --personal`), and a guard whose driver is '
-            .'`passport` for the target\'s provider. Underlying error: '
-            .$failure->getMessage(), $failure->getCode(), previous: $failure);
+            . '(`php artisan passport:keys`), a personal access client '
+            . '(`php artisan passport:client --personal`), and a guard whose driver is '
+            . '`passport` for the target\'s provider. Underlying error: '
+            . $failure->getMessage(), $failure->getCode(), previous: $failure);
         }
 
         // `getToken()` rather than a property: Passport 13's result object exposes the model
@@ -123,7 +123,7 @@ final readonly class PassportAdapter implements AuthAdapter
             reference: is_scalar($key = $accessToken->getKey()) ? (string) $key : null,
             expiresAt: $expiresAt->toDateTimeImmutable(),
             metadata: [
-                'scope' => $this->scope(),
+                'scope'    => $this->scope(),
                 'audit_id' => $session->auditId,
                 // Stated explicitly so it is visible in the audit metadata rather than
                 // being an unstated property of the implementation.
@@ -156,7 +156,7 @@ final readonly class PassportAdapter implements AuthAdapter
             if (is_string($reference) && $reference !== '') {
                 $query->whereKey($reference);
             } else {
-                $query->where('name', 'impersonation:'.$session->auditId);
+                $query->where('name', 'impersonation:' . $session->auditId);
             }
 
             // Marked revoked rather than deleted, so the OAuth record of the grant survives

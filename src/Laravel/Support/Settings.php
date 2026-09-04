@@ -27,7 +27,8 @@ final readonly class Settings
      * A config array narrowed to string keys, for the metadata and context arrays
      * that cross into Core value objects typed `array<string, mixed>`.
      *
-     * @param  array<array-key, mixed>  $data
+     * @param array<array-key, mixed> $data
+     *
      * @return array<string, mixed>
      */
     public static function stringKeyed(array $data): array
@@ -43,7 +44,7 @@ final readonly class Settings
 
     public function raw(string $key, mixed $default = null): mixed
     {
-        return $this->config->get('laranail.impersonator.'.$key, $default);
+        return $this->config->get('laranail.impersonator.' . $key, $default);
     }
 
     public function string(string $key, string $default): string
@@ -102,9 +103,9 @@ final readonly class Settings
 
         // Env vars again: "false" and "0" are strings and must not read as true.
         return match (true) {
-            $value === 1, $value === '1', $value === 'true' => true,
+            $value === 1, $value === '1', $value === 'true'  => true,
             $value === 0, $value === '0', $value === 'false' => false,
-            default => $default,
+            default                                          => $default,
         };
     }
 

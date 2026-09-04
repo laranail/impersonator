@@ -5,31 +5,31 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Drivers;
 
 use DateTimeImmutable;
-use Illuminate\Contracts\Events\Dispatcher;
+use Stancl\Tenancy\Tenancy;
 use Psr\Clock\ClockInterface;
+use Illuminate\Contracts\Events\Dispatcher;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenIssued;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
+use Simtabi\Laranail\Impersonator\Laravel\Tokens\AcceptUrlBuilder;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRedeemed;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRejected;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Laravel\Tokens\AcceptUrlBuilder;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRejected;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Laravel\Tokens\EloquentTokenRepository;
-use Stancl\Tenancy\Tenancy;
 
 /**
  * Impersonation across a tenant boundary, for stancl/tenancy installations.
@@ -92,8 +92,8 @@ final readonly class TenancyDriver implements ImpersonationDriver
         if ($request->tenantId === null) {
             throw new ImpersonationException(
                 'The tenancy driver needs an initialized tenant to impersonate into. Initialize '
-                .'tenancy first, or use the token driver for a cross-domain handoff that is not '
-                .'tenant-scoped.',
+                . 'tenancy first, or use the token driver for a cross-domain handoff that is not '
+                . 'tenant-scoped.',
             );
         }
 
@@ -217,7 +217,7 @@ final readonly class TenancyDriver implements ImpersonationDriver
 
         return $minutes === null
             ? null
-            : $this->clock->now()->modify('+'.$minutes.' minutes');
+            : $this->clock->now()->modify('+' . $minutes . ' minutes');
     }
 
     private function requestIp(): ?string

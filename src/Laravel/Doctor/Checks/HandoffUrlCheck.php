@@ -31,8 +31,8 @@ final class HandoffUrlCheck extends Check
         return $this->settings->nullableString('urls.base_domain') === null
             ? DoctorResult::warn(
                 'The token driver is selected but impersonator.urls.base_domain is unset, so accept '
-                .'URLs are built against the current host. For a cross-domain handoff — the reason '
-                .'to pick this driver — that is the wrong host.',
+                . 'URLs are built against the current host. For a cross-domain handoff — the reason '
+                . 'to pick this driver — that is the wrong host.',
             )
             : DoctorResult::pass('A base domain is configured for accept URLs.');
     }

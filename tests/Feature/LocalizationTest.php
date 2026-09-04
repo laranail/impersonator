@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\Guards;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
+use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Laravel\Support\MessageCatalog;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
 
 /*
 | Localisation, at the render seam.
@@ -109,12 +109,12 @@ it('keeps one message for all four token failures', function (): void {
     // The no-oracle property, at the translation layer. Four keys here would rebuild exactly what
     // Core's single PUBLIC_MESSAGE exists to prevent: telling somebody probing the accept route that
     // a token merely expired tells them the token was real.
-    $lines = require dirname(__DIR__, 2).'/resources/lang/en/exceptions.php';
+    $lines = require dirname(__DIR__, 2) . '/resources/lang/en/exceptions.php';
 
     expect($lines['token_rejected'])->toBeString();
 
     foreach (['unknown', 'expired', 'already_used', 'revoked'] as $reason) {
-        expect(catalog()->get('exceptions.token_rejected.'.$reason, 'FALLBACK'))->toBe('FALLBACK');
+        expect(catalog()->get('exceptions.token_rejected.' . $reason, 'FALLBACK'))->toBe('FALLBACK');
     }
 });
 
@@ -124,7 +124,7 @@ it('does distinguish the four approval reasons, which are safe to distinguish', 
     $messages = [];
 
     foreach (['unknown', 'already_decided', 'expired', 'self_approval'] as $reason) {
-        $messages[] = catalog()->get('exceptions.approval_not_decidable.'.$reason, 'FALLBACK');
+        $messages[] = catalog()->get('exceptions.approval_not_decidable.' . $reason, 'FALLBACK');
     }
 
     expect($messages)->not->toContain('FALLBACK')
@@ -134,14 +134,14 @@ it('does distinguish the four approval reasons, which are safe to distinguish', 
 it('has a line for every decision code the package can emit', function (): void {
     // Guards the gap between adding a code and remembering to translate it. Not a hard requirement —
     // the fallback covers it — but an untranslated code is a gap somebody chose, not one that crept in.
-    $lines = require dirname(__DIR__, 2).'/resources/lang/en/decisions.php';
+    $lines = require dirname(__DIR__, 2) . '/resources/lang/en/decisions.php';
 
     $constants = new ReflectionClass(Decision::class)->getConstants();
     $missing = [];
 
     foreach ($constants as $name => $code) {
         if (is_string($code) && ! array_key_exists($code, $lines)) {
-            $missing[] = $name.' ('.$code.')';
+            $missing[] = $name . ' (' . $code . ')';
         }
     }
 
@@ -154,8 +154,8 @@ it('resolves every shipped line through the loaded namespace', function (): void
     // silently fails — and per file rather than once, because a new file is exactly what gets added
     // without checking.
     foreach (['decisions', 'exceptions', 'modes', 'banner', 'console', 'notifications', 'validation', 'components'] as $file) {
-        expect(app('translator')->has('laranail-impersonator::'.$file.'.'.array_key_first(
-            require dirname(__DIR__, 2).'/resources/lang/en/'.$file.'.php',
+        expect(app('translator')->has('laranail-impersonator::' . $file . '.' . array_key_first(
+            require dirname(__DIR__, 2) . '/resources/lang/en/' . $file . '.php',
         )))->toBeTrue();
     }
 });
@@ -179,7 +179,7 @@ it('gives each approval outcome a whole subject rather than splicing an adjectiv
     $subjects = [];
 
     foreach (['approved', 'denied', 'expired'] as $outcome) {
-        $subjects[] = (string) __('laranail-impersonator::notifications.approval.decided.subject_'.$outcome, ['app' => 'Acme']);
+        $subjects[] = (string) __('laranail-impersonator::notifications.approval.decided.subject_' . $outcome, ['app' => 'Acme']);
     }
 
     expect(array_unique($subjects))->toHaveCount(3);
@@ -233,7 +233,7 @@ it('references no translation key that does not exist', function (): void {
     // is a Blade view, and a sweep that could not tell the two apart reported it as a missing line.
     $keys = [];
 
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/src')) as $file) {
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__DIR__, 2) . '/src')) as $file) {
         if (! $file->isFile() || $file->getExtension() !== 'php') {
             continue;
         }
@@ -258,8 +258,8 @@ it('references no translation key that does not exist', function (): void {
     $missing = [];
 
     foreach ($keys as $key => $file) {
-        if (! Lang::has('laranail-impersonator::'.$key)) {
-            $missing[] = $key.' ('.$file.')';
+        if (! Lang::has('laranail-impersonator::' . $key)) {
+            $missing[] = $key . ' (' . $file . ')';
         }
     }
 
@@ -270,19 +270,19 @@ it('ships every case of the dynamically built keys', function (): void {
     // The keys the sweep above cannot see, because the calling code concatenates a runtime value onto
     // a prefix. Enumerated by hand precisely because a static check cannot reach them.
     $cases = [
-        'notifications.target.mode.' => ['read_only', 'limited', 'default'],
+        'notifications.target.mode.'              => ['read_only', 'limited', 'default'],
         'notifications.approval.decided.subject_' => ['approved', 'denied', 'expired'],
-        'notifications.security.summary.' => ['revoked', 'full_mode_enter', 'expired', 'default'],
-        'modes.' => ['full.name', 'full.short', 'read_only.name', 'read_only.short', 'limited.name', 'limited.short'],
-        'console.doctor.' => ['heading', 'failed', 'warnings', 'clean', 'check_failed', 'wrong_type'],
+        'notifications.security.summary.'         => ['revoked', 'full_mode_enter', 'expired', 'default'],
+        'modes.'                                  => ['full.name', 'full.short', 'read_only.name', 'read_only.short', 'limited.name', 'limited.short'],
+        'console.doctor.'                         => ['heading', 'failed', 'warnings', 'clean', 'check_failed', 'wrong_type'],
     ];
 
     $missing = [];
 
     foreach ($cases as $prefix => $suffixes) {
         foreach ($suffixes as $suffix) {
-            if (! Lang::has('laranail-impersonator::'.$prefix.$suffix)) {
-                $missing[] = $prefix.$suffix;
+            if (! Lang::has('laranail-impersonator::' . $prefix . $suffix)) {
+                $missing[] = $prefix . $suffix;
             }
         }
     }

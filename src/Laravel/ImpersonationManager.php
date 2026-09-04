@@ -5,40 +5,40 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel;
 
 use Closure;
-use Illuminate\Contracts\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Factory as AuthFactory;
-use Illuminate\Contracts\Config\Repository as Config;
-use Illuminate\Contracts\Container\Container;
-use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Database\Eloquent\Model;
+use Throwable;
 use Illuminate\Http\Request;
 use Psr\Clock\ClockInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
-use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Events\Dispatcher;
+use Illuminate\Contracts\Container\Container;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Illuminate\Contracts\Auth\Factory as AuthFactory;
+use Illuminate\Contracts\Config\Repository as Config;
 use Simtabi\Laranail\Impersonator\Core\Values\Guards;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Support\ModeRegistry;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
 use Simtabi\Laranail\Impersonator\Laravel\Support\ReviewerDirectory;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * The facade root, and the point where the two orthogonal axes compose.
@@ -89,7 +89,7 @@ class ImpersonationManager
      * Register a driver. Overwrites a built-in of the same name, which is the
      * supported way to replace one wholesale.
      *
-     * @param  Closure(Container): ImpersonationDriver  $factory
+     * @param Closure(Container): ImpersonationDriver $factory
      */
     public function extend(string $name, Closure $factory): self
     {
@@ -125,7 +125,7 @@ class ImpersonationManager
      * application has permissions" — that would hand the RBAC policy a permission system it cannot
      * query, and a policy that cannot query its permissions is one that cannot enforce them.
      *
-     * @param  Closure(): mixed  $detector
+     * @param Closure(): mixed $detector
      */
     public function detectRbacUsing(Closure $detector): self
     {
@@ -175,7 +175,7 @@ class ImpersonationManager
      * thrown exception — the point of registering a rule is that the package cannot judge the
      * relationship itself, so a rule that errors is not consent.
      *
-     * @param  Closure(Model, ApprovalRequest): mixed  $rule
+     * @param Closure(Model, ApprovalRequest): mixed $rule
      */
     public function approvalEligibilityUsing(Closure $rule): self
     {
@@ -218,7 +218,7 @@ class ImpersonationManager
         if (! $driver->isAvailable()) {
             throw new ImpersonationException(sprintf(
                 'Impersonation driver [%s] is registered but not available in this installation. '
-                .'Check that its prerequisites are installed and its migrations have run.',
+                . 'Check that its prerequisites are installed and its migrations have run.',
                 $name,
             ));
         }
@@ -246,8 +246,8 @@ class ImpersonationManager
         if (! $adapter->isAvailable()) {
             throw new ImpersonationException(sprintf(
                 'Impersonation auth adapter [%s] is registered but not available in this '
-                .'installation. Either its underlying package is not installed, or the '
-                .'configured guard [%s] is not of a driver it can authenticate.',
+                . 'installation. Either its underlying package is not installed, or the '
+                . 'configured guard [%s] is not of a driver it can authenticate.',
                 $name,
                 $this->configString('laranail.impersonator.guards.target', 'web'),
             ));
@@ -353,7 +353,7 @@ class ImpersonationManager
      * this returns, while a cross-domain driver has only issued a token and a
      * URL that still has to be followed.
      *
-     * @param  array<string, mixed>  $metadata
+     * @param array<string, mixed> $metadata
      *
      * @throws ImpersonationDenied when any rule in the authorization stack refuses
      */
@@ -597,7 +597,7 @@ class ImpersonationManager
      * an unregistered mode is refused before any authorization or persistence
      * work is attempted.
      *
-     * @param  array<string, mixed>  $metadata
+     * @param array<string, mixed> $metadata
      */
     public function buildRequest(
         Authenticatable|Model $target,
@@ -614,7 +614,7 @@ class ImpersonationManager
         if ($impersonator === null) {
             throw new ImpersonationException(
                 'Cannot impersonate without an authenticated impersonator. '
-                .'Pass one explicitly when entering outside an HTTP request.',
+                . 'Pass one explicitly when entering outside an HTTP request.',
             );
         }
 
@@ -825,7 +825,7 @@ class ImpersonationManager
 
         // Prefixed and keyed on the morph-qualified identity, so two models sharing an id — a
         // `User` 7 and a `Vendor` 7 — never share a limiter bucket.
-        return 'impersonator-operator:'.$impersonator->key();
+        return 'impersonator-operator:' . $impersonator->key();
     }
 
     /**

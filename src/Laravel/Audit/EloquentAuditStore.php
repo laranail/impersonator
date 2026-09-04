@@ -6,23 +6,23 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Audit;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Illuminate\Contracts\Cache\Repository as Cache;
-use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Illuminate\Database\ConnectionInterface;
+use Illuminate\Contracts\Cache\Repository as Cache;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
-use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
-use Simtabi\Laranail\Impersonator\Core\Values\Credential;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\AuditRowMissing;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 
 /**
  * The durable audit store.
@@ -160,9 +160,9 @@ class EloquentAuditStore implements AuditStore
             }
 
             $row->forceFill([
-                'expires_at' => $grant->expiresAt,
+                'expires_at'  => $grant->expiresAt,
                 'extended_at' => $now,
-                'extensions' => $session->extensions + 1,
+                'extensions'  => $session->extensions + 1,
             ])->save();
 
             // The middleware reads the cached snapshot on every request, and that snapshot
@@ -180,7 +180,7 @@ class EloquentAuditStore implements AuditStore
         $row = $this->newQuery()->find($auditId) ?? throw AuditRowMissing::for($auditId);
 
         $row->forceFill(array_filter([
-            'session_id' => $credential->reference,
+            'session_id'      => $credential->reference,
             'credential_hash' => $credential->hash,
         ], static fn (mixed $value): bool => $value !== null))->save();
 
@@ -209,7 +209,7 @@ class EloquentAuditStore implements AuditStore
         // `false` is cached for a miss so a session that is not impersonating does
         // not query on every request either — the overwhelmingly common case.
         $snapshot = $this->cache->remember(
-            $this->cacheKey('session:'.hash('sha256', $sessionId)),
+            $this->cacheKey('session:' . hash('sha256', $sessionId)),
             $ttl,
             fn (): array|false => $this->loadActiveBySessionId($sessionId)?->toSnapshot() ?? false,
         );
@@ -235,9 +235,9 @@ class EloquentAuditStore implements AuditStore
         // Recorded, not closed. A session can only be ended from inside itself, so
         // the flag is what its next request sees.
         $row->forceFill([
-            'revoked_at' => $row->getAttribute('revoked_at') ?? now(),
+            'revoked_at'      => $row->getAttribute('revoked_at') ?? now(),
             'revoked_by_type' => $revokedBy?->type,
-            'revoked_by_id' => $revokedBy === null ? null : (string) $revokedBy->id,
+            'revoked_by_id'   => $revokedBy === null ? null : (string) $revokedBy->id,
             'revocation_note' => $note,
         ])->save();
 
@@ -309,16 +309,16 @@ class EloquentAuditStore implements AuditStore
     public function chainFacts(ImpersonationRequest $request, DateTimeImmutable $startedAt): array
     {
         return [
-            'impersonator' => $request->impersonator->key(),
-            'target' => $request->target->key(),
-            'mode' => $request->mode->name,
-            'driver' => $request->driver,
-            'adapter' => $request->adapter,
+            'impersonator'       => $request->impersonator->key(),
+            'target'             => $request->target->key(),
+            'mode'               => $request->mode->name,
+            'driver'             => $request->driver,
+            'adapter'            => $request->adapter,
             'guard_impersonator' => $request->guards->impersonator,
-            'guard_target' => $request->guards->target,
-            'tenant_id' => $request->tenantId,
-            'reason' => $request->reason,
-            'started_at' => $startedAt->getTimestamp(),
+            'guard_target'       => $request->guards->target,
+            'tenant_id'          => $request->tenantId,
+            'reason'             => $request->reason,
+            'started_at'         => $startedAt->getTimestamp(),
         ];
     }
 
@@ -342,16 +342,16 @@ class EloquentAuditStore implements AuditStore
         };
 
         return [
-            'impersonator' => $str('impersonator_type').':'.$str('impersonator_id'),
-            'target' => $str('impersonatable_type').':'.$str('impersonatable_id'),
-            'mode' => $str('mode'),
-            'driver' => $str('driver'),
-            'adapter' => $str('adapter'),
+            'impersonator'       => $str('impersonator_type') . ':' . $str('impersonator_id'),
+            'target'             => $str('impersonatable_type') . ':' . $str('impersonatable_id'),
+            'mode'               => $str('mode'),
+            'driver'             => $str('driver'),
+            'adapter'            => $str('adapter'),
             'guard_impersonator' => $str('impersonator_guard'),
-            'guard_target' => $str('target_guard'),
-            'tenant_id' => $this->nullableString($row->getAttribute('tenant_id')),
-            'reason' => $this->nullableString($row->getAttribute('reason')),
-            'started_at' => $startedAt instanceof DateTimeInterface ? $startedAt->getTimestamp() : 0,
+            'guard_target'       => $str('target_guard'),
+            'tenant_id'          => $this->nullableString($row->getAttribute('tenant_id')),
+            'reason'             => $this->nullableString($row->getAttribute('reason')),
+            'started_at'         => $startedAt instanceof DateTimeInterface ? $startedAt->getTimestamp() : 0,
         ];
     }
 
@@ -379,7 +379,8 @@ class EloquentAuditStore implements AuditStore
     }
 
     /**
-     * @param  Builder<ImpersonationAudit>  $query
+     * @param Builder<ImpersonationAudit> $query
+     *
      * @return list<ImpersonationSession>
      */
     protected function sessionsFrom(Builder $query): array
@@ -406,26 +407,26 @@ class EloquentAuditStore implements AuditStore
         $facts = $this->chainFacts($request, $startedAt->toDateTimeImmutable());
 
         $model->forceFill([
-            'impersonator_type' => $request->impersonator->type,
-            'impersonator_id' => (string) $request->impersonator->id,
+            'impersonator_type'   => $request->impersonator->type,
+            'impersonator_id'     => (string) $request->impersonator->id,
             'impersonatable_type' => $request->target->type,
-            'impersonatable_id' => (string) $request->target->id,
-            'impersonator_label' => $request->impersonator->label,
-            'target_label' => $request->target->label,
-            'driver' => $request->driver,
-            'adapter' => $request->adapter,
-            'impersonator_guard' => $request->guards->impersonator,
-            'target_guard' => $request->guards->target,
-            'mode' => $request->mode->name,
-            'tenant_id' => $request->tenantId,
-            'session_id' => $credential?->reference,
-            'credential_hash' => $credential?->hash,
-            'ip' => $request->ip,
-            'user_agent' => $request->userAgent,
-            'reason' => $request->reason,
-            'metadata' => $request->metadata,
-            'started_at' => $startedAt,
-            'expires_at' => $expiresAt,
+            'impersonatable_id'   => (string) $request->target->id,
+            'impersonator_label'  => $request->impersonator->label,
+            'target_label'        => $request->target->label,
+            'driver'              => $request->driver,
+            'adapter'             => $request->adapter,
+            'impersonator_guard'  => $request->guards->impersonator,
+            'target_guard'        => $request->guards->target,
+            'mode'                => $request->mode->name,
+            'tenant_id'           => $request->tenantId,
+            'session_id'          => $credential?->reference,
+            'credential_hash'     => $credential?->hash,
+            'ip'                  => $request->ip,
+            'user_agent'          => $request->userAgent,
+            'reason'              => $request->reason,
+            'metadata'            => $request->metadata,
+            'started_at'          => $startedAt,
+            'expires_at'          => $expiresAt,
         ] + $this->chainColumns($facts))->save();
 
         return $model;
@@ -437,7 +438,8 @@ class EloquentAuditStore implements AuditStore
      * The predecessor is read under a row lock, so two concurrent opens cannot both chain off the
      * same row and produce a fork that verification would report as tampering.
      *
-     * @param  array<string, mixed>  $facts
+     * @param array<string, mixed> $facts
+     *
      * @return array<string, string|null>
      */
     protected function chainColumns(array $facts): array
@@ -457,7 +459,7 @@ class EloquentAuditStore implements AuditStore
 
         return [
             'previous_hash' => $previousHash,
-            'hash' => $this->chain->digest($facts, $previousHash),
+            'hash'          => $this->chain->digest($facts, $previousHash),
         ];
     }
 
@@ -466,13 +468,13 @@ class EloquentAuditStore implements AuditStore
         $sessionId = $row->getAttribute('session_id');
 
         if (is_string($sessionId) && $sessionId !== '') {
-            $this->cache->forget($this->cacheKey('session:'.hash('sha256', $sessionId)));
+            $this->cache->forget($this->cacheKey('session:' . hash('sha256', $sessionId)));
         }
     }
 
     protected function cacheKey(string $suffix): string
     {
-        return $this->settings->string('limits.state_cache.prefix', 'impersonator:state:').$suffix;
+        return $this->settings->string('limits.state_cache.prefix', 'impersonator:state:') . $suffix;
     }
 
     protected function newModel(): ImpersonationAudit

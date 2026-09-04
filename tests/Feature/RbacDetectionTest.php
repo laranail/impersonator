@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\BasePolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 
 /*
 | Which policy gets selected, and by what.
@@ -120,7 +120,7 @@ it('does not reference the spatie provider at compile time', function (): void {
     // The regression that matters. A hard `use Spatie\...` import in the provider is a compile-time
     // dependency on a package this one does not require, even as a dev dependency.
     $provider = file_get_contents(
-        dirname(__DIR__, 2).'/src/Laravel/Providers/ImpersonatorServiceProvider.php',
+        dirname(__DIR__, 2) . '/src/Laravel/Providers/ImpersonatorServiceProvider.php',
     );
 
     expect($provider)->not->toContain('use Spatie\\')

@@ -30,8 +30,8 @@ interface FailureReporter
      * anomaly and a real failure must not log at the same level. These are early
      * signal; losing them means finding out only when something finally throws.
      *
-     * @param  array<string, mixed>  $context  must answer what, expected vs actual,
-     *                                         and the decision taken — redacted
+     * @param array<string, mixed> $context must answer what, expected vs actual,
+     *                                      and the decision taken — redacted
      */
     public function warn(string $message, array $context = []): void;
 }

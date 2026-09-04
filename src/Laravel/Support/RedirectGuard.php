@@ -133,7 +133,7 @@ final readonly class RedirectGuard
 
     private function configured(string $key): string
     {
-        $value = $this->config->get('laranail.impersonator.redirects.'.$key, '/');
+        $value = $this->config->get('laranail.impersonator.redirects.' . $key, '/');
 
         // The fallback itself is config, so it is validated too — otherwise a
         // misconfigured default would be the one target that bypassed the check.

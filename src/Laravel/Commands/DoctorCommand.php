@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
+use Throwable;
 use Illuminate\Console\Command;
 use Illuminate\Contracts\Container\Container;
-use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorStatus;
-use Throwable;
+use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
 
 /**
  * Checks the things that are wrong silently.
@@ -107,7 +107,8 @@ class DoctorCommand extends Command
      * trust. A check that throws anyway is reported as a failure of that check; the remaining
      * eighteen still run, which is the whole reason to diagnose rather than crash.
      *
-     * @param  class-string<Check>  $class
+     * @param class-string<Check> $class
+     *
      * @return array{0: string, 1: DoctorResult}
      */
     private function runCheck(Container $container, string $class): array
@@ -122,7 +123,7 @@ class DoctorCommand extends Command
                 return [
                     class_basename($class),
                     DoctorResult::fail(__('laranail-impersonator::console.doctor.wrong_type', [
-                        'type' => get_debug_type($check),
+                        'type'     => get_debug_type($check),
                         'expected' => Check::class,
                     ])),
                 ];
@@ -147,6 +148,6 @@ class DoctorCommand extends Command
         };
 
         $this->components->twoColumnDetail(sprintf('%s  %s', $tag, $label), '');
-        $this->line('       '.$result->message);
+        $this->line('       ' . $result->message);
     }
 }
