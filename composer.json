@@ -78,7 +78,7 @@
     "require-dev": {
         "larastan/larastan": "^3.0",
         "laravel/passport": "^13.7",
-        "laravel/pint": "^1.18",
+        "laravel/pint": "^1.30",
         "laravel/sanctum": "^4.3",
         "mockery/mockery": "^1.6",
         "orchestra/testbench": "^11.0",
