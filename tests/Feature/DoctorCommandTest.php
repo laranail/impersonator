@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Console\Kernel;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Testing\PendingCommand;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Contracts\Console\Kernel;
+use Illuminate\Database\Schema\Blueprint;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Support\FailureReport;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {

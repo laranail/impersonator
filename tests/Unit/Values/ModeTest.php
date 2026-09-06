@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
 use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
 
 it('names the three built-in modes', function (): void {
     expect(Mode::builtIn())->toBe(['read_only', 'limited', 'full'])

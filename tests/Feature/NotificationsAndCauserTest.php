@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
-use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\ImpersonationSecurityAlert;
-use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
-use Simtabi\Laranail\Impersonator\Laravel\Support\CauserResolver;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\PlainUser;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
+use Simtabi\Laranail\Impersonator\Core\Events\TargetNotified;
+use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Laravel\Support\CauserResolver;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\TargetAccountAccessed;
+use Simtabi\Laranail\Impersonator\Laravel\Notifications\ImpersonationSecurityAlert;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -75,7 +75,7 @@ it('does not name the operator to the target', function (): void {
     $payload = new TargetAccountAccessed($session)->toArray($this->target);
     $mail = new TargetAccountAccessed($session)->toMail($this->target);
 
-    $rendered = json_encode($payload).json_encode($mail->introLines);
+    $rendered = json_encode($payload) . json_encode($mail->introLines);
 
     expect($rendered)->not->toContain('Admin')
         ->and($rendered)->not->toContain('admin@example.com')

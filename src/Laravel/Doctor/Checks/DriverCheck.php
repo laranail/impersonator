@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 
+use Throwable;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
-use Throwable;
 
 final class DriverCheck extends Check
 {

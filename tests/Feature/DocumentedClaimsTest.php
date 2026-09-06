@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Support\Facades\Schema;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Support\PackageTables;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
 
 /*
 | The published documentation, checked against the code.
@@ -27,14 +27,14 @@ it('names the right number of doctor checks', function (): void {
     // in the message rather than silently comparing against zero — a count that cannot be parsed is not
     // the same as a count that disagrees, and only one of the two is fixed by editing the doctor.
     $words = [
-        'Sixteen' => 16, 'Seventeen' => 17, 'Eighteen' => 18, 'Nineteen' => 19, 'Twenty' => 20,
-        'Twenty-one' => 21, 'Twenty-two' => 22, 'Twenty-three' => 23, 'Twenty-four' => 24,
+        'Sixteen'     => 16, 'Seventeen' => 17, 'Eighteen' => 18, 'Nineteen' => 19, 'Twenty' => 20,
+        'Twenty-one'  => 21, 'Twenty-two' => 22, 'Twenty-three' => 23, 'Twenty-four' => 24,
         'Twenty-five' => 25,
     ];
 
     expect(preg_match(
         '/^(\S+) checks:/m',
-        (string) file_get_contents(dirname(__DIR__, 2).'/docs/tools/commands.md'),
+        (string) file_get_contents(dirname(__DIR__, 2) . '/docs/tools/commands.md'),
         $m,
     ))->toBe(1, 'commands.md no longer states a doctor-check count');
 
@@ -75,12 +75,12 @@ it('consults the config key for every package table', function (): void {
     foreach ($map as $key => $real) {
         expect($created)->toContain($real);
 
-        config()->set('laranail.impersonator.'.$key, 'a_table_that_is_not_there');
+        config()->set('laranail.impersonator.' . $key, 'a_table_that_is_not_there');
 
         expect(str_contains(app(TablesCheck::class)->run()->message, 'a_table_that_is_not_there'))
             ->toBeTrue("the doctor does not consult [{$key}]");
 
-        config()->set('laranail.impersonator.'.$key, $real);
+        config()->set('laranail.impersonator.' . $key, $real);
     }
 
     // The row-level-security check reads the same list, but reacts by querying `pg_class` rather than by
@@ -89,7 +89,7 @@ it('consults the config key for every package table', function (): void {
     // this drifted the first time was a second hand-maintained copy, and a copy is visible in the source.
     foreach (['TablesCheck', 'RowLevelSecurityCheck'] as $check) {
         $source = (string) file_get_contents(
-            dirname(__DIR__, 2).'/src/Laravel/Doctor/Checks/'.$check.'.php',
+            dirname(__DIR__, 2) . '/src/Laravel/Doctor/Checks/' . $check . '.php',
         );
 
         expect(str_contains($source, 'PackageTables::'))
@@ -100,7 +100,7 @@ it('consults the config key for every package table', function (): void {
 });
 
 it('lists every table the migration creates in the install docs', function (): void {
-    $docs = (string) file_get_contents(dirname(__DIR__, 2).'/docs/installation.md');
+    $docs = (string) file_get_contents(dirname(__DIR__, 2) . '/docs/installation.md');
 
     foreach (Schema::getTables() as $table) {
         $name = is_array($table) ? (string) ($table['name'] ?? '') : '';
@@ -113,8 +113,8 @@ it('lists every table the migration creates in the install docs', function (): v
 });
 
 it('names the right number of artisan commands', function (): void {
-    $commands = glob(dirname(__DIR__, 2).'/src/Laravel/Commands/*Command.php') ?: [];
-    $docs = (string) file_get_contents(dirname(__DIR__, 2).'/docs/tools/commands.md');
+    $commands = glob(dirname(__DIR__, 2) . '/src/Laravel/Commands/*Command.php') ?: [];
+    $docs = (string) file_get_contents(dirname(__DIR__, 2) . '/docs/tools/commands.md');
 
     expect($commands)->toHaveCount(7)
         ->and($docs)->toContain('Seven Artisan commands');
@@ -123,16 +123,16 @@ it('names the right number of artisan commands', function (): void {
     foreach ($commands as $file) {
         $signature = strtolower(preg_replace('/([a-z])([A-Z])/', '$1-$2', basename($file, 'Command.php')) ?? '');
 
-        expect(str_contains($docs, 'laranail::impersonator.'.$signature))
+        expect(str_contains($docs, 'laranail::impersonator.' . $signature))
             ->toBeTrue("undocumented command [{$signature}]");
     }
 });
 
 it('names the right number of events', function (): void {
-    $events = glob(dirname(__DIR__, 2).'/src/Core/Events/*.php') ?: [];
+    $events = glob(dirname(__DIR__, 2) . '/src/Core/Events/*.php') ?: [];
 
     expect($events)->toHaveCount(15)
-        ->and((string) file_get_contents(dirname(__DIR__, 2).'/docs/tools/events.md'))
+        ->and((string) file_get_contents(dirname(__DIR__, 2) . '/docs/tools/events.md'))
         ->toContain('Fifteen events');
 });
 
@@ -140,7 +140,7 @@ it('documents every middleware alias it registers', function (): void {
     // An alias nobody documents is an alias nobody uses, and one documented but not registered is a
     // broken instruction.
     $provider = (string) file_get_contents(
-        dirname(__DIR__, 2).'/src/Laravel/Providers/ImpersonatorServiceProvider.php',
+        dirname(__DIR__, 2) . '/src/Laravel/Providers/ImpersonatorServiceProvider.php',
     );
 
     preg_match_all("/aliasMiddleware\('([a-z.-]+)'/", $provider, $matches);
@@ -148,11 +148,11 @@ it('documents every middleware alias it registers', function (): void {
     $docs = '';
 
     foreach (['docs', 'config'] as $dir) {
-        foreach (glob(dirname(__DIR__, 2).'/'.$dir.'/**/*.{md,php}', GLOB_BRACE) ?: [] as $file) {
+        foreach (glob(dirname(__DIR__, 2) . '/' . $dir . '/**/*.{md,php}', GLOB_BRACE) ?: [] as $file) {
             $docs .= (string) file_get_contents($file);
         }
 
-        foreach (glob(dirname(__DIR__, 2).'/'.$dir.'/*.{md,php}', GLOB_BRACE) ?: [] as $file) {
+        foreach (glob(dirname(__DIR__, 2) . '/' . $dir . '/*.{md,php}', GLOB_BRACE) ?: [] as $file) {
             $docs .= (string) file_get_contents($file);
         }
     }
@@ -166,12 +166,12 @@ it('documents every middleware alias it registers', function (): void {
 
 it('documents every publish tag it registers', function (): void {
     $provider = (string) file_get_contents(
-        dirname(__DIR__, 2).'/src/Laravel/Providers/ImpersonatorServiceProvider.php',
+        dirname(__DIR__, 2) . '/src/Laravel/Providers/ImpersonatorServiceProvider.php',
     );
 
     preg_match_all("/'(impersonator-[a-z]+)'\)/", $provider, $matches);
 
-    $docs = (string) file_get_contents(dirname(__DIR__, 2).'/docs/installation.md');
+    $docs = (string) file_get_contents(dirname(__DIR__, 2) . '/docs/installation.md');
 
     expect(array_unique($matches[1]))->toHaveCount(4);
 
@@ -195,7 +195,7 @@ it('splices no hand-rolled plurals into user-facing text', function (): void {
 
     foreach (['src', 'resources/lang'] as $dir) {
         $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/'.$dir),
+            new RecursiveDirectoryIterator(dirname(__DIR__, 2) . '/' . $dir),
         );
 
         foreach ($files as $file) {
@@ -219,24 +219,24 @@ it('splices no hand-rolled plurals into user-facing text', function (): void {
                 ], true);
 
                 if ($isString && str_contains($text, '(s)')) {
-                    $offenders[] = $file->getFilename().':'.$line;
+                    $offenders[] = $file->getFilename() . ':' . $line;
                 }
             }
         }
     }
 
-    expect($offenders)->toBe([], 'hand-rolled plural at '.implode(', ', $offenders));
+    expect($offenders)->toBe([], 'hand-rolled plural at ' . implode(', ', $offenders));
 });
 
 it('translates the output of every command', function (): void {
     // Both gaps this catches were real: `export-audit` and `scrub-identity` were added after the
     // localisation pass and shipped entirely in English, against a documented claim that console output
     // is translated. A command with no `__()` at all is the shape that slips through review.
-    foreach (glob(dirname(__DIR__, 2).'/src/Laravel/Commands/*Command.php') ?: [] as $file) {
+    foreach (glob(dirname(__DIR__, 2) . '/src/Laravel/Commands/*Command.php') ?: [] as $file) {
         $source = (string) file_get_contents($file);
 
         expect(preg_match('/__\(|trans_choice\(/', $source))
-            ->toBe(1, 'no translated output in '.basename($file));
+            ->toBe(1, 'no translated output in ' . basename($file));
     }
 });
 
@@ -245,16 +245,16 @@ it('names every published language file in the install docs', function (): void 
     // translator reading the table is the person who finds out.
     $files = array_map(
         static fn (string $path): string => basename($path),
-        glob(dirname(__DIR__, 2).'/resources/lang/en/*.php') ?: [],
+        glob(dirname(__DIR__, 2) . '/resources/lang/en/*.php') ?: [],
     );
 
-    $docs = (string) file_get_contents(dirname(__DIR__, 2).'/docs/installation.md');
+    $docs = (string) file_get_contents(dirname(__DIR__, 2) . '/docs/installation.md');
 
     expect($files)->toHaveCount(8)
         ->and($docs)->toContain('Eight files land');
 
     foreach ($files as $file) {
-        expect(str_contains($docs, '`'.$file.'`'))
+        expect(str_contains($docs, '`' . $file . '`'))
             ->toBeTrue("installation.md does not list [{$file}]");
     }
 });
@@ -270,21 +270,21 @@ it('names the right number of adapters, drivers, modes and singletons', function
     ];
 
     foreach ($claims as [$glob, $doc, $phrase, $expected]) {
-        $files = glob(dirname(__DIR__, 2).'/'.$glob) ?: [];
+        $files = glob(dirname(__DIR__, 2) . '/' . $glob) ?: [];
 
         expect($files)->toHaveCount($expected, "wrong file count for [{$glob}]");
 
-        expect(str_contains((string) file_get_contents(dirname(__DIR__, 2).'/'.$doc), $phrase))
+        expect(str_contains((string) file_get_contents(dirname(__DIR__, 2) . '/' . $doc), $phrase))
             ->toBeTrue("[{$doc}] no longer says [{$phrase}]");
     }
 
     // The Octane reset story turns on this number — the docs explain which singletons may hold request
     // state and why the rest must not be reset, so the total is load-bearing rather than decorative.
     $provider = (string) file_get_contents(
-        dirname(__DIR__, 2).'/src/Laravel/Providers/ImpersonatorServiceProvider.php',
+        dirname(__DIR__, 2) . '/src/Laravel/Providers/ImpersonatorServiceProvider.php',
     );
 
     expect(preg_match_all('/singleton\(/', $provider))->toBe(17)
-        ->and((string) file_get_contents(dirname(__DIR__, 2).'/docs/security.md'))
+        ->and((string) file_get_contents(dirname(__DIR__, 2) . '/docs/security.md'))
         ->toContain('seventeen singletons');
 });

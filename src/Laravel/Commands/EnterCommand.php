@@ -6,13 +6,13 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
+use Symfony\Component\Console\Output\OutputInterface;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\Concerns\SupportsNamespacedNames;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Simtabi\Laranail\Impersonator\Laravel\Services\ImpersonationService;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
-use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Starts an impersonation from the CLI and prints a one-time accept URL.
@@ -72,7 +72,7 @@ class EnterCommand extends Command
             // in a moment. Saying so avoids the operator waiting for a URL that is not coming.
             $this->components->warn(
                 'This driver completes in-process, so there is no accept URL. Configure the token '
-                .'or tenancy driver to hand an operator a link they can follow.',
+                . 'or tenancy driver to hand an operator a link they can follow.',
             );
 
             return self::SUCCESS;
@@ -81,8 +81,8 @@ class EnterCommand extends Command
         $this->newLine();
         $this->components->warn(
             'The URL below is a live single-use credential. It expires shortly, but until it is '
-            .'used or expires anyone holding it can enter this account. Do not paste it into a '
-            .'ticket, a chat, or anywhere it will be stored.',
+            . 'used or expires anyone holding it can enter this account. Do not paste it into a '
+            . 'ticket, a chat, or anywhere it will be stored.',
         );
         $this->newLine();
         $this->output->writeln($outcome->acceptUrl(), OutputInterface::OUTPUT_RAW);
@@ -124,9 +124,9 @@ class EnterCommand extends Command
             if (count($aliases) !== 1) {
                 $this->components->error(__('laranail-impersonator::console.enter.ambiguous', [
                     'subject' => $label,
-                    'value' => $reference,
-                    'count' => count($aliases),
-                    'types' => implode(', ', $aliases) ?: 'none',
+                    'value'   => $reference,
+                    'count'   => count($aliases),
+                    'types'   => implode(', ', $aliases) ?: 'none',
                 ]));
 
                 return null;

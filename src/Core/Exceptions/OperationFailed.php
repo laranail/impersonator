@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Core\Exceptions;
 
-use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
 use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
 
 /**
  * A named operation failed, wrapped with its classification.
@@ -53,12 +53,12 @@ final class OperationFailed extends ImpersonationException
         $previous = $this->getPrevious();
 
         return array_filter([
-            'operation' => $this->operation,
+            'operation'   => $this->operation,
             'criticality' => $this->criticality->name,
-            'decision' => $this->criticality->decision(),
-            'expected' => $this->expected,
-            'actual' => $previous?->getMessage(),
-            'cause_type' => $previous === null ? null : $previous::class,
+            'decision'    => $this->criticality->decision(),
+            'expected'    => $this->expected,
+            'actual'      => $previous?->getMessage(),
+            'cause_type'  => $previous === null ? null : $previous::class,
             'identifiers' => $this->identifiers,
         ], static fn (mixed $value): bool => $value !== null && $value !== []);
     }

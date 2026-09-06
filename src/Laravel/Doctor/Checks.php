@@ -4,27 +4,27 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Doctor;
 
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\AdapterCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ApprovalCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ApprovalNotificationsCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ApprovalPruneCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\BootHealthCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ConflictingPackagesCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\DriverCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ExtensionCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\GateCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\DriverCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\GuardsCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\HandoffUrlCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\MasterSwitchCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\MaxDurationCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ModePermissionsCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\OctaneCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\AdapterCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\RestApiCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TargetsCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ApprovalCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ExtensionCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\BootHealthCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\HandoffUrlCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\MaxDurationCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\MasterSwitchCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ApprovalPruneCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TamperEvidenceCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ModePermissionsCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\RowLevelSecurityCheck;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\SessionTerminationCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TamperEvidenceCheck;
-use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TargetsCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ConflictingPackagesCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\ApprovalNotificationsCheck;
 
 /**
  * The diagnostic set, in report order.

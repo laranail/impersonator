@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Authorization;
 
 use Closure;
+use Throwable;
 use Illuminate\Database\Eloquent\Model;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Throwable;
 
 /**
  * The role-based layer, stacked on top of the always-on rules in BasePolicy.
@@ -284,7 +284,7 @@ class RbacPolicy extends BasePolicy
      * The highest level among the user's roles, or null when they hold none that are
      * ranked.
      *
-     * @param  array<array-key, mixed>  $levels
+     * @param array<array-key, mixed> $levels
      */
     protected function highestLevel(Model $user, array $levels): ?int
     {
@@ -314,10 +314,10 @@ class RbacPolicy extends BasePolicy
         $target = $this->resolveTarget($request);
 
         $callable = match (true) {
-            $rule instanceof Closure => $rule,
+            $rule instanceof Closure                                                    => $rule,
             is_string($rule) && class_exists($rule) && method_exists($rule, '__invoke') => new $rule,
-            is_callable($rule) => $rule,
-            default => null,
+            is_callable($rule)                                                          => $rule,
+            default                                                                     => null,
         };
 
         if ($callable === null) {

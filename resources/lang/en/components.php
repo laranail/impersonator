@@ -14,5 +14,5 @@ declare(strict_types=1);
 
 return [
     'impersonate' => 'Impersonate',
-    'leave' => 'Stop impersonating',
+    'leave'       => 'Stop impersonating',
 ];

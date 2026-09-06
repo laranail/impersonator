@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Support;
 
 use Closure;
-use Illuminate\Database\Eloquent\Model;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 use Throwable;
 use Traversable;
+use Illuminate\Database\Eloquent\Model;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 
 /**
  * What roles a reviewer holds, and whether they may decide a particular request.
@@ -39,7 +39,7 @@ final class ReviewerDirectory
      * has no business modelling. Registered at runtime because it is a closure over the host's own
      * domain.
      *
-     * @param  Closure(Model, ApprovalRequest): mixed  $rule
+     * @param Closure(Model, ApprovalRequest): mixed $rule
      */
     public function eligibilityUsing(Closure $rule): self
     {
@@ -55,7 +55,8 @@ final class ReviewerDirectory
      * reasons: `getRoleNames()` may be absent while `hasRole()` is present, and asking only about the
      * roles that matter avoids pulling a full role list to answer a question about two of them.
      *
-     * @param  list<string>  $roles
+     * @param list<string> $roles
+     *
      * @return list<string>
      */
     public function rolesFor(Model $reviewer, array $roles): array

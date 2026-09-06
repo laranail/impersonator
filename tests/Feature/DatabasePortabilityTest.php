@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
-use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
+use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 /*
 | What keeps this package portable across drivers.
@@ -46,7 +46,7 @@ it('never queries inside a json column', function (): void {
     // something that works only if the JSON1 extension is compiled in.
     $offenders = [];
 
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__DIR__, 2).'/src')) as $file) {
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__DIR__, 2) . '/src')) as $file) {
         if (! $file->isFile() || $file->getExtension() !== 'php') {
             continue;
         }
@@ -55,7 +55,7 @@ it('never queries inside a json column', function (): void {
 
         foreach (['whereJsonContains', 'whereJsonLength', 'whereJsonDoesntContain', '->jsonb', 'JSON_CONTAINS', 'JSON_EXTRACT'] as $needle) {
             if (str_contains($src, $needle)) {
-                $offenders[] = $file->getFilename().' uses '.$needle;
+                $offenders[] = $file->getFilename() . ' uses ' . $needle;
             }
         }
     }
@@ -67,10 +67,10 @@ it('round-trips json metadata on whichever driver is under test', function (): v
     // Written and read back as an array rather than compared as a string: MySQL normalises native JSON
     // (key order, whitespace), so asserting on the serialised form would pass on SQLite and fail there.
     $metadata = [
-        'ticket' => 'SUP-4182',
-        'nested' => ['depth' => 2, 'flag' => true, 'null' => null],
-        'unicode' => 'café — naïve',
-        'quotes' => 'say "hi"',
+        'ticket'    => 'SUP-4182',
+        'nested'    => ['depth' => 2, 'flag' => true, 'null' => null],
+        'unicode'   => 'café — naïve',
+        'quotes'    => 'say "hi"',
         'backslash' => 'C:\\Users\\admin',
     ];
 
@@ -111,7 +111,7 @@ it('parses a qualified table name from whatever this driver emits', function ():
 
     $parsed = $method->invoke(
         app(PersistenceGuard::class),
-        'update '.str_replace('select * from ', '', $emitted).' set "x" = 1',
+        'update ' . str_replace('select * from ', '', $emitted) . ' set "x" = 1',
     );
 
     expect($parsed)->not->toBeNull()

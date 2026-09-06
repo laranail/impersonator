@@ -46,7 +46,7 @@ final class TablesCheck extends Check
                 : DoctorResult::fail(
                     sprintf(
                         'Missing: %s. Publish and run the migration: php artisan vendor:publish '
-                        .'--tag=impersonator-migrations && php artisan migrate',
+                        . '--tag=impersonator-migrations && php artisan migrate',
                         implode(', ', $missing),
                     ),
                     ['missing' => $missing],

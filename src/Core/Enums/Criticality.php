@@ -28,7 +28,7 @@ enum Criticality
     public function decision(): string
     {
         return match ($this) {
-            self::Critical => 'crashed',
+            self::Critical   => 'crashed',
             self::Degradable => 'degraded-and-continued',
         };
     }

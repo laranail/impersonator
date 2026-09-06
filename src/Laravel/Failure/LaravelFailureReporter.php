@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Failure;
 
-use Illuminate\Contracts\Debug\ExceptionHandler;
+use Throwable;
 use Illuminate\Log\LogManager;
+use Illuminate\Contracts\Debug\ExceptionHandler;
 use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
-use Throwable;
 
 /**
  * Routes handled failures to Laravel's central exception handler, which is what

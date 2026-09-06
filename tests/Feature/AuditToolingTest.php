@@ -2,21 +2,21 @@
 
 declare(strict_types=1);
 
-use Illuminate\Contracts\Auth\Access\Gate;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Contracts\Auth\Access\Gate;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
 use Simtabi\Laranail\Impersonator\Laravel\Audit\AuditExporter;
+use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
 use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAudit;
 use Simtabi\Laranail\Impersonator\Laravel\Policies\ImpersonationAuditPolicy;
-use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\RbacUser;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Laravel\Middleware\RecordImpersonationTrail;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -84,7 +84,7 @@ it('exports as csv in two sections', function (): void {
     $csv = app(AuditExporter::class)->export($auditId, AuditExporter::CSV);
 
     expect($csv)->toContain('section,field,value')
-        ->and($csv)->toContain('impersonation,id,'.$auditId)
+        ->and($csv)->toContain('impersonation,id,' . $auditId)
         ->and($csv)->toContain('occurred_at,method,path')
         ->and($csv)->toContain('/app/page');
 });
@@ -144,10 +144,10 @@ it('exports through the command to stdout', function (): void {
 
 it('writes the export to a file when asked', function (): void {
     $auditId = Impersonator::enter($this->target)->auditId();
-    $path = sys_get_temp_dir().'/impersonator-export-'.bin2hex(random_bytes(4)).'.json';
+    $path = sys_get_temp_dir() . '/impersonator-export-' . bin2hex(random_bytes(4)) . '.json';
 
     $this->artisan('laranail::impersonator.export-audit', [
-        'audit' => $auditId,
+        'audit'    => $auditId,
         '--output' => $path,
     ])->assertSuccessful();
 
@@ -161,7 +161,7 @@ it('refuses an unknown format', function (): void {
     $auditId = Impersonator::enter($this->target)->auditId();
 
     $this->artisan('laranail::impersonator.export-audit', [
-        'audit' => $auditId,
+        'audit'    => $auditId,
         '--format' => 'xml',
     ])->assertFailed();
 });
@@ -277,8 +277,8 @@ it('enters from the console and prints an accept URL', function (): void {
     config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $this->artisan('laranail::impersonator.enter', [
-        'user' => (string) $this->target->getKey(),
-        '--as' => (string) $this->admin->getKey(),
+        'user'     => (string) $this->target->getKey(),
+        '--as'     => (string) $this->admin->getKey(),
         '--reason' => 'On-call escalation',
     ])->assertSuccessful();
 
@@ -327,7 +327,7 @@ it('requires an operator so the audit row names a real person', function (): voi
 it('refuses an ambiguous bare id when several target types are registered', function (): void {
     // Guessing which type was meant could enter the wrong account entirely.
     config()->set('laranail.impersonator.targets.allowlist', [
-        'user' => User::class,
+        'user'  => User::class,
         'staff' => RbacUser::class,
     ]);
     app(TargetRegistry::class)->flush();
@@ -343,8 +343,8 @@ it('accepts a qualified type:id', function (): void {
     config()->set('laranail.impersonator.urls.base_domain', 'app.example.com');
 
     $this->artisan('laranail::impersonator.enter', [
-        'user' => 'user:'.$this->target->getKey(),
-        '--as' => 'user:'.$this->admin->getKey(),
+        'user' => 'user:' . $this->target->getKey(),
+        '--as' => 'user:' . $this->admin->getKey(),
     ])->assertSuccessful();
 });
 

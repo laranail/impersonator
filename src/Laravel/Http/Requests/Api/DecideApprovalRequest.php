@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Simtabi\Laranail\Impersonator\Laravel\Actions\DecideApproval;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
+use Simtabi\Laranail\Impersonator\Laravel\Actions\DecideApproval;
 
 /**
  * Validation for granting or denying a break-glass request.

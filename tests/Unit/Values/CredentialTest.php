@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
 use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
 
 it('carries no secret for a session credential', function (): void {
     $credential = Credential::session('session-id-abc');

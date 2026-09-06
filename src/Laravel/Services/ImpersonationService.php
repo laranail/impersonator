@@ -4,25 +4,25 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Services;
 
-use Illuminate\Contracts\Auth\Authenticatable;
+use Throwable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
+use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\EnterImpersonation;
-use Simtabi\Laranail\Impersonator\Laravel\Actions\ExtendImpersonation;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\LeaveImpersonation;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Laravel\Actions\ExtendImpersonation;
 use Simtabi\Laranail\Impersonator\Laravel\Actions\RevokeImpersonation;
-use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
-use Throwable;
 
 /**
  * The lifecycle orchestration layer, composing the actions.
@@ -50,7 +50,7 @@ final readonly class ImpersonationService
     ) {}
 
     /**
-     * @param  array<string, mixed>  $metadata
+     * @param array<string, mixed> $metadata
      *
      * @throws ImpersonationDenied
      */

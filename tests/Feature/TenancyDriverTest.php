@@ -3,20 +3,20 @@
 declare(strict_types=1);
 
 use Illuminate\Auth\Events\Login;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Database\Schema\Blueprint;
+use Stancl\Tenancy\TenancyServiceProvider;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Tests\Fixtures\Tenant;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
 use Simtabi\Laranail\Impersonator\Laravel\Drivers\TenancyDriver;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationDenied;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\Tenant;
-use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
-use Stancl\Tenancy\TenancyServiceProvider;
 
 uses()->group('tenancy');
 

@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Middleware;
 
 use Closure;
-use Illuminate\Database\Connection;
-use Illuminate\Database\ConnectionResolverInterface;
-use Illuminate\Http\Request;
-use Simtabi\Laranail\Impersonator\Laravel\Support\RlsContext;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Symfony\Component\HttpFoundation\Response;
 use Throwable;
+use Illuminate\Http\Request;
+use Illuminate\Database\Connection;
+use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\ConnectionResolverInterface;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Laravel\Support\RlsContext;
 
 /**
  * Publishes the impersonation context to PostgreSQL, so an RLS policy can see it.

@@ -6,16 +6,16 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Models;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Concerns\HasUlids;
-use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Identity;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 
 /**
  * One row per break-glass approval — the four-eyes control.
@@ -86,7 +86,8 @@ class ImpersonationApprovalRequest extends Model
     }
 
     /**
-     * @param  Builder<self>  $query
+     * @param Builder<self> $query
+     *
      * @return Builder<self>
      */
     public function scopeAwaitingDecision(Builder $query): Builder
@@ -123,10 +124,10 @@ class ImpersonationApprovalRequest extends Model
     protected function casts(): array
     {
         return [
-            'request' => 'array',
-            'decided_at' => 'datetime',
+            'request'     => 'array',
+            'decided_at'  => 'datetime',
             'consumed_at' => 'datetime',
-            'expires_at' => 'datetime',
+            'expires_at'  => 'datetime',
         ];
     }
 
@@ -154,7 +155,8 @@ class ImpersonationApprovalRequest extends Model
     }
 
     /**
-     * @param  array<array-key, mixed>  $data
+     * @param array<array-key, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private function stringKeyed(array $data): array

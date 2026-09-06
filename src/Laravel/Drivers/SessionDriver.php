@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Drivers;
 
 use DateTimeImmutable;
-use Illuminate\Contracts\Events\Dispatcher;
 use Psr\Clock\ClockInterface;
+use Illuminate\Contracts\Events\Dispatcher;
+use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
-use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationEnded;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationStarted;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ImpersonationDriver;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * Impersonation inside a single application — nothing crosses a domain boundary,
@@ -88,7 +88,7 @@ final readonly class SessionDriver implements ImpersonationDriver
     {
         throw new ImpersonationException(
             'The session driver completes within begin() and has no handoff to redeem. '
-            .'Use the token driver for cross-domain impersonation.',
+            . 'Use the token driver for cross-domain impersonation.',
         );
     }
 
@@ -127,6 +127,6 @@ final readonly class SessionDriver implements ImpersonationDriver
             return null;
         }
 
-        return $this->clock->now()->modify('+'.$minutes.' minutes');
+        return $this->clock->now()->modify('+' . $minutes . ' minutes');
     }
 }

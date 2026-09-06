@@ -6,8 +6,8 @@ namespace Simtabi\Laranail\Impersonator\Core\Values;
 
 use DateTimeImmutable;
 use DateTimeInterface;
-use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\ApprovalState;
+use Simtabi\Laranail\Impersonator\Core\Contracts\ApprovalStore;
 
 /**
  * A break-glass approval: one operator asking a second one to authorise an impersonation.
@@ -175,18 +175,18 @@ final readonly class ApprovalRequest
     public function toArray(): array
     {
         return [
-            'id' => $this->id,
-            'requester' => $this->requester->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
-            'state' => $this->state->value,
-            'reason' => $this->reason,
-            'decided_by' => $this->decidedBy?->toArray(),
+            'id'            => $this->id,
+            'requester'     => $this->requester->toArray(),
+            'target'        => $this->target->toArray(),
+            'mode'          => $this->mode->name,
+            'state'         => $this->state->value,
+            'reason'        => $this->reason,
+            'decided_by'    => $this->decidedBy?->toArray(),
             'decision_note' => $this->decisionNote,
-            'decided_at' => $this->decidedAt?->format(DATE_ATOM),
-            'audit_id' => $this->auditId,
-            'expires_at' => $this->expiresAt->format(DATE_ATOM),
-            'created_at' => $this->createdAt?->format(DATE_ATOM),
+            'decided_at'    => $this->decidedAt?->format(DATE_ATOM),
+            'audit_id'      => $this->auditId,
+            'expires_at'    => $this->expiresAt->format(DATE_ATOM),
+            'created_at'    => $this->createdAt?->format(DATE_ATOM),
         ];
     }
 }

@@ -22,7 +22,7 @@ final class InvalidIdentity extends InvalidArgumentException
     {
         return new self(sprintf(
             'Cannot build an identity for [%s]: its key is %s, but an audit row can only '
-            .'store and later resolve an int or a string. Is the model unsaved?',
+            . 'store and later resolve an int or a string. Is the model unsaved?',
             $class,
             $givenType,
         ));

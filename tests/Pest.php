@@ -44,6 +44,6 @@ function requiresRowLocks(): void
 
     test()->markTestSkipped(
         "The [{$driver}] driver compiles lockForUpdate() to a no-op, so this test cannot prove the "
-        .'race it exists for. Run the `locking` group against PostgreSQL or MySQL.',
+        . 'race it exists for. Run the `locking` group against PostgreSQL or MySQL.',
     );
 }

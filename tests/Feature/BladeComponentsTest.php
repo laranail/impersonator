@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Schema;
-use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
-use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
+use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
+use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 beforeEach(function (): void {
     Schema::create('users', function (Blueprint $table): void {
@@ -71,7 +71,7 @@ it('renders a POST form for an allowed target', function (): void {
     expect($html)->toContain('method="POST"')
         ->toContain(route('impersonator.enter'))
         ->toContain('name="target_type" value="user"')
-        ->toContain('name="target_id" value="'.$this->target->getKey().'"')
+        ->toContain('name="target_id" value="' . $this->target->getKey() . '"')
         ->toContain('_token');
 });
 
@@ -213,8 +213,8 @@ it('renders every component under both its alias and its namespaced name', funct
     Impersonator::enter($this->target);
 
     $pairs = [
-        '<x-impersonation-banner />' => '<x-laranail-impersonator::impersonation-banner />',
-        '<x-impersonation-badge />' => '<x-laranail-impersonator::impersonation-badge />',
+        '<x-impersonation-banner />'       => '<x-laranail-impersonator::impersonation-banner />',
+        '<x-impersonation-badge />'        => '<x-laranail-impersonator::impersonation-badge />',
         '<x-impersonation-leave-button />' => '<x-laranail-impersonator::leave-impersonation-button />',
     ];
 

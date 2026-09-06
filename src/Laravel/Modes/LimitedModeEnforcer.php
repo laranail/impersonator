@@ -4,15 +4,15 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Modes;
 
-use Illuminate\Database\Eloquent\Model;
+use Throwable;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Model;
+use Simtabi\Laranail\Impersonator\Core\Values\Mode;
+use Simtabi\Laranail\Impersonator\Core\Values\Decision;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
-use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
-use Simtabi\Laranail\Impersonator\Core\Values\Mode;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
 
 /**
  * Writes allowed, except a configured deny-list — the recommended production mode.
@@ -216,11 +216,11 @@ final readonly class LimitedModeEnforcer implements ModeEnforcer
             Decision::MODE_FORBIDS_WRITE,
             'That operation is not permitted while impersonating.',
             array_filter([
-                'axis' => $axis,
+                'axis'   => $axis,
                 'method' => $action->normalizedMethod(),
-                'route' => $action->routeName,
-                'path' => $action->path,
-                'model' => $action->modelClass,
+                'route'  => $action->routeName,
+                'path'   => $action->path,
+                'model'  => $action->modelClass,
             ], static fn (mixed $value): bool => $value !== null && $value !== ''),
         );
     }

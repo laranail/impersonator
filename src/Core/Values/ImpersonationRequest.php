@@ -41,7 +41,7 @@ final readonly class ImpersonationRequest
      * has to come back intact, because the redemption re-runs the whole authorization
      * stack against it rather than trusting the decision made when the token was minted.
      *
-     * @param  array<string, mixed>  $data
+     * @param array<string, mixed> $data
      *
      * @throws InvalidIdentity when the
      *                         stored identities are unreadable, which means the token cannot be trusted
@@ -144,22 +144,23 @@ final readonly class ImpersonationRequest
     {
         return [
             'impersonator' => $this->impersonator->toArray(),
-            'target' => $this->target->toArray(),
-            'mode' => $this->mode->name,
-            'guards' => $this->guards->toArray(),
-            'driver' => $this->driver,
-            'adapter' => $this->adapter,
-            'reason' => $this->reason,
-            'redirect_to' => $this->redirectTo,
-            'tenant_id' => $this->tenantId,
-            'ip' => $this->ip,
-            'user_agent' => $this->userAgent,
-            'metadata' => $this->metadata,
+            'target'       => $this->target->toArray(),
+            'mode'         => $this->mode->name,
+            'guards'       => $this->guards->toArray(),
+            'driver'       => $this->driver,
+            'adapter'      => $this->adapter,
+            'reason'       => $this->reason,
+            'redirect_to'  => $this->redirectTo,
+            'tenant_id'    => $this->tenantId,
+            'ip'           => $this->ip,
+            'user_agent'   => $this->userAgent,
+            'metadata'     => $this->metadata,
         ];
     }
 
     /**
-     * @param  array<array-key, mixed>  $data
+     * @param array<array-key, mixed> $data
+     *
      * @return array<string, mixed>
      */
     private static function stringKeys(array $data): array

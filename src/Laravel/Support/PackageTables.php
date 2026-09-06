@@ -31,10 +31,10 @@ final class PackageTables
     public static function map(): array
     {
         return [
-            'audit.table' => 'impersonator_audits',
-            'trail.table' => 'impersonator_audit_events',
-            'tokens.table' => 'impersonator_tokens',
-            'approval.table' => 'impersonator_approval_requests',
+            'audit.table'              => 'impersonator_audits',
+            'trail.table'              => 'impersonator_audit_events',
+            'tokens.table'             => 'impersonator_tokens',
+            'approval.table'           => 'impersonator_approval_requests',
             'approval.decisions_table' => 'impersonator_approval_decisions',
         ];
     }

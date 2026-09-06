@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Notifications;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Lang;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Illuminate\Notifications\Notification;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\Messages\MailMessage;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 
 /**
  * Tells a user their account was accessed by support.
@@ -61,8 +61,8 @@ class TargetAccountAccessed extends Notification implements ShouldQueue
         // support conversation can be tied back to the trail.
         return [
             'impersonation_audit_id' => $this->session->auditId,
-            'mode' => $this->session->mode->name,
-            'started_at' => $this->session->startedAt->format(DATE_ATOM),
+            'mode'                   => $this->session->mode->name,
+            'started_at'             => $this->session->startedAt->format(DATE_ATOM),
         ];
     }
 
@@ -73,7 +73,7 @@ class TargetAccountAccessed extends Notification implements ShouldQueue
     private function modeExplanation(): string
     {
         $mode = $this->session->mode->name;
-        $key = 'laranail-impersonator::notifications.target.mode.'.$mode;
+        $key = 'laranail-impersonator::notifications.target.mode.' . $mode;
 
         return Lang::has($key)
             ? (string) __($key)

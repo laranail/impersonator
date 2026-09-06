@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Notification;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
-use Illuminate\Notifications\Notification;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
 
 /**
@@ -39,7 +39,7 @@ class ApprovalDecided extends Notification implements ShouldQueue
             // order is not universal — a template ending in the outcome cannot be translated
             // correctly into a language that puts it first, and the result reads as machine output.
             ->subject(__(
-                'laranail-impersonator::notifications.approval.decided.subject_'.$this->outcome(),
+                'laranail-impersonator::notifications.approval.decided.subject_' . $this->outcome(),
                 ['app' => is_string($appName = config('app.name')) ? $appName : 'Application'],
             ))
             ->line($this->headline())
@@ -72,9 +72,9 @@ class ApprovalDecided extends Notification implements ShouldQueue
     private function outcome(): string
     {
         return match (true) {
-            $this->expired => 'expired',
+            $this->expired             => 'expired',
             $this->request->approved() => 'approved',
-            default => 'denied',
+            default                    => 'denied',
         };
     }
 
@@ -87,9 +87,9 @@ class ApprovalDecided extends Notification implements ShouldQueue
     private function headline(): string
     {
         return match (true) {
-            $this->expired => (string) __('laranail-impersonator::notifications.approval.decided.expired'),
+            $this->expired             => (string) __('laranail-impersonator::notifications.approval.decided.expired'),
             $this->request->approved() => (string) __('laranail-impersonator::notifications.approval.decided.approved'),
-            default => (string) __('laranail-impersonator::notifications.approval.decided.denied'),
+            default                    => (string) __('laranail-impersonator::notifications.approval.decided.denied'),
         };
     }
 }

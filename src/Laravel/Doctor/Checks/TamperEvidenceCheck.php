@@ -24,7 +24,7 @@ final class TamperEvidenceCheck extends Check
         if (! $this->settings->bool('audit.tamper_evident', false)) {
             return DoctorResult::warn(
                 'The audit chain is off, so a row that is altered or deleted leaves no trace. Set '
-                .'impersonator.audit.tamper_evident and a hash_key if the trail is evidence.',
+                . 'impersonator.audit.tamper_evident and a hash_key if the trail is evidence.',
             );
         }
 
@@ -36,7 +36,7 @@ final class TamperEvidenceCheck extends Check
             // doctor is the only thing that will say so before a user does.
             return DoctorResult::fail(
                 'Enabled but impersonator.audit.hash_key is unset. Every impersonation will fail '
-                .'when the audit store is built. Set a long random key kept outside the database.',
+                . 'when the audit store is built. Set a long random key kept outside the database.',
             );
         }
 

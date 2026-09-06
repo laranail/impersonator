@@ -59,8 +59,8 @@ final class TargetsCheck extends Check
                 return DoctorResult::fail(
                     sprintf(
                         'Dropped from the allowlist because they are not installed Eloquent models: %s. '
-                        .'These were silently ignored, so an enter against them is refused as a '
-                        .'non-allowlisted target.',
+                        . 'These were silently ignored, so an enter against them is refused as a '
+                        . 'non-allowlisted target.',
                         implode(', ', $dropped),
                     ),
                     ['dropped' => $dropped],
@@ -70,7 +70,7 @@ final class TargetsCheck extends Check
             return $types === []
                 ? DoctorResult::fail(
                     'impersonator.targets.allowlist is empty, so every enter is refused as a '
-                    .'non-allowlisted target. Add at least one model.',
+                    . 'non-allowlisted target. Add at least one model.',
                 )
                 : DoctorResult::pass(sprintf(
                     '%d impersonatable %s: %s.',

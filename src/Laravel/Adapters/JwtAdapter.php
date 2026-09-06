@@ -4,18 +4,18 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Adapters;
 
+use Throwable;
+use Tymon\JWTAuth\JWTAuth;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Container\Container;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
-use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 use Simtabi\Laranail\Impersonator\Core\Values\Credential;
+use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
+use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthAdapter;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 use Simtabi\Laranail\Impersonator\Laravel\Support\IdentityResolver;
-use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
-use Throwable;
-use Tymon\JWTAuth\Contracts\JWTSubject;
-use Tymon\JWTAuth\JWTAuth;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\ImpersonationException;
 
 /**
  * Impersonation for JWT-authenticated APIs, via tymon/jwt-auth.
@@ -105,7 +105,7 @@ final readonly class JwtAdapter implements AuthAdapter
             secret: $token,
             expiresAt: now()->addMinutes($ttl)->toDateTimeImmutable(),
             metadata: [
-                'claims' => array_keys($this->claims($session)),
+                'claims'   => array_keys($this->claims($session)),
                 'audit_id' => $session->auditId,
             ],
         );
@@ -171,9 +171,9 @@ final readonly class JwtAdapter implements AuthAdapter
     private function claims(ImpersonationSession $session): array
     {
         return [
-            'imp_by' => $session->impersonator->key(),
+            'imp_by'    => $session->impersonator->key(),
             'imp_audit' => $session->auditId,
-            'imp_mode' => $session->mode->name,
+            'imp_mode'  => $session->mode->name,
         ];
     }
 

@@ -39,7 +39,7 @@ final readonly class Guards
     {
         return [
             'impersonator' => $this->impersonator,
-            'target' => $this->target,
+            'target'       => $this->target,
         ];
     }
 }

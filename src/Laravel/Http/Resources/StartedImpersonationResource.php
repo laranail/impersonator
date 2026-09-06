@@ -33,9 +33,9 @@ class StartedImpersonationResource extends JsonResource
         $credential = $this->resource->credential;
 
         return array_filter([
-            'pending' => $this->resource->pending,
+            'pending'       => $this->resource->pending,
             'impersonation' => $this->resource->session->toArray(),
-            'redirect_to' => $this->resource->redirectTo,
+            'redirect_to'   => $this->resource->redirectTo,
 
             // Present only for a handoff. The token inside is short-lived and single-use, but until
             // it is redeemed anyone holding this URL can enter the account — so a client must treat
@@ -45,7 +45,7 @@ class StartedImpersonationResource extends JsonResource
             'credential' => $credential === null || ! $credential->hasSecret() ? null : [
                 'type' => $credential->type->value,
                 // Shown once. Not stored, not recoverable, not present on any other endpoint.
-                'secret' => $credential->secret(),
+                'secret'     => $credential->secret(),
                 'expires_at' => $credential->expiresAt?->format(DATE_ATOM),
                 // Deliberately included so a client knows what the credential may do without
                 // having to decode it.

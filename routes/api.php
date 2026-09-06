@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api\ApprovalController;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api\AuditController;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api\ApprovalController;
 use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api\ImpersonationController;
 
 /*

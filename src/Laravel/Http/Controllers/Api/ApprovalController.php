@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api;
 
 use Illuminate\Http\JsonResponse;
-use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Core\Values\ApprovalRequest;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\DecideApprovalRequest;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\ListApprovalsRequest;
-use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\ApprovalResource;
+use Simtabi\Laranail\Impersonator\Core\Values\ApprovalDecision;
 use Simtabi\Laranail\Impersonator\Laravel\ImpersonationManager;
 use Simtabi\Laranail\Impersonator\Laravel\Services\ApprovalService;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Resources\ApprovalResource;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\ListApprovalsRequest;
+use Simtabi\Laranail\Impersonator\Laravel\Http\Requests\Api\DecideApprovalRequest;
 
 /**
  * The break-glass queue over HTTP+JSON.
@@ -39,7 +39,7 @@ final readonly class ApprovalController
 
         return ApprovalResource::collection($queue)
             ->additional(['meta' => [
-                'count' => count($queue),
+                'count'  => count($queue),
                 'offset' => $request->offset(),
             ]])
             ->response();
@@ -105,7 +105,7 @@ final readonly class ApprovalController
         // reasonably persist it; the chain is progress, changes under them, and is two extra queries —
         // so it belongs beside the resource rather than inside it.
         $meta = [
-            'progress' => $this->approvals->progress($request),
+            'progress'  => $this->approvals->progress($request),
             'decisions' => array_map(
                 static fn (ApprovalDecision $decision): array => $decision->toArray(),
                 $this->approvals->decisions($request->id),

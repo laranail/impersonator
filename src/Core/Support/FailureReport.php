@@ -28,7 +28,7 @@ final class FailureReport
         // original cause of a capability that has been down since boot.
         $this->degraded[$operation] ??= [
             'message' => $cause->getMessage(),
-            'type' => $cause::class,
+            'type'    => $cause::class,
         ];
     }
 

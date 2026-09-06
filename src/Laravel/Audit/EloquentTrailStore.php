@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Audit;
 
-use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
-use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
-use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
-use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
-use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
-use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAuditEvent;
 use Throwable;
+use Simtabi\Laranail\Impersonator\Core\Enums\Criticality;
+use Simtabi\Laranail\Impersonator\Core\Values\TrailEvent;
+use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
+use Simtabi\Laranail\Impersonator\Core\Contracts\FailureReporter;
+use Simtabi\Laranail\Impersonator\Core\Exceptions\OperationFailed;
+use Simtabi\Laranail\Impersonator\Laravel\Models\ImpersonationAuditEvent;
 
 /**
  * The durable action trail.
@@ -93,13 +93,13 @@ final readonly class EloquentTrailStore implements TrailStore
     private function attributes(TrailEvent $event): array
     {
         return [
-            'audit_id' => $event->auditId,
-            'method' => mb_substr(strtoupper($event->method), 0, 10),
-            'path' => $event->path,
-            'route_name' => $event->routeName,
-            'status' => $event->status,
+            'audit_id'    => $event->auditId,
+            'method'      => mb_substr(strtoupper($event->method), 0, 10),
+            'path'        => $event->path,
+            'route_name'  => $event->routeName,
+            'status'      => $event->status,
             'duration_ms' => $event->durationMs === null ? null : (int) round($event->durationMs),
-            'payload' => $event->payload,
+            'payload'     => $event->payload,
             'occurred_at' => $event->occurredAt ?? now(),
         ];
     }
@@ -118,9 +118,9 @@ final readonly class EloquentTrailStore implements TrailStore
                 previous: $failure,
                 expected: 'the action trail event to be persisted',
                 identifiers: array_filter([
-                    'audit_id' => $event?->auditId,
-                    'method' => $event?->method,
-                    'route_name' => $event?->routeName,
+                    'audit_id'    => $event?->auditId,
+                    'method'      => $event?->method,
+                    'route_name'  => $event?->routeName,
                     'lost_events' => $lostEvents,
                 ], static fn (mixed $value): bool => $value !== null),
             ),

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Simtabi\Laranail\Impersonator\Laravel\Actions;
 
-use Illuminate\Contracts\Events\Dispatcher;
 use Psr\Clock\ClockInterface;
+use Illuminate\Contracts\Events\Dispatcher;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
-use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
-use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExtended;
 use Simtabi\Laranail\Impersonator\Core\Values\ExtensionGrant;
-use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
 use Simtabi\Laranail\Impersonator\Core\Values\ExtensionPolicy;
-use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Values\ExtensionOutcome;
 use Simtabi\Laranail\Impersonator\Laravel\Support\SessionState;
+use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
+use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationExtended;
+use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 
 /**
  * Keep a live impersonation running past its original deadline.
