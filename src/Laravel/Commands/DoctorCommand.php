@@ -56,8 +56,12 @@ class DoctorCommand extends Command
 
             $this->report($label, $result);
 
-            $result->status === DoctorStatus::Fail && $failures++;
-            $result->status === DoctorStatus::Warn && $warnings++;
+            if ($result->status === DoctorStatus::Fail) {
+                $failures++;
+            }
+            if ($result->status === DoctorStatus::Warn) {
+                $warnings++;
+            }
         }
 
         $this->newLine();
