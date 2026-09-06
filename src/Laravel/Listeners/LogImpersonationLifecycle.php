@@ -302,7 +302,9 @@ final readonly class LogImpersonationLifecycle
         // A second write rather than a rerouting, so the ordinary channel stays complete. An operator
         // reading application logs during an incident should not have to know that the interesting
         // lines went somewhere else.
-        $audit && $this->auditChannel()?->log($level, $message, $context);
+        if ($audit) {
+            $this->auditChannel()?->log($level, $message, $context);
+        }
     }
 
     private function channel(): LoggerInterface
