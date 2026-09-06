@@ -10,7 +10,7 @@ While the package is pre-1.0, security fixes land on the latest `0.x` release on
 
 ## Reporting a vulnerability
 
-Report security issues privately to **opensource@simtabi.com**. Do not open a
+Report security issues privately to **security@simtabi.com**. Do not open a
 public GitHub issue for a vulnerability.
 
 Include, where you can: the affected version, a description of the issue, the
@@ -20,6 +20,11 @@ helps but is not required to report.
 You can expect an acknowledgement within three working days and an assessment
 within ten. Fixes for confirmed issues are released as a patch version, credited
 to you unless you prefer otherwise.
+
+> **Prefer GitHub private vulnerability reporting** when you can: open it from this
+> repository's Security tab. The report arrives attached to the repo with a draft advisory
+> and a CVE request path already in place. Email is the fallback for anyone who would
+> rather not use GitHub.
 
 ## Scope
 
