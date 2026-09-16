@@ -629,7 +629,11 @@ class ImpersonatorServiceProvider extends ServiceProvider
             return;
         }
 
-        Route::macro('impersonate', static function (): void {
+        // Not a static closure: Router::macro() binds the closure to the router, and a
+        // static one cannot be bound -- PHPStan reports it at level max. The body does
+        // not use `$this` either way, so dropping `static` changes nothing at runtime
+        // and removes the need to silence a true finding.
+        Route::macro('impersonate', function (): void {
             // Registered through the facade rather than the macro's bound `$this`.
             // Both reach the same router, and group state lives on the router — so
             // a call inside a Route::group() still inherits that group's prefix and
