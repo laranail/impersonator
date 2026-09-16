@@ -192,6 +192,6 @@ abstract class TestCase extends Orchestra
 
     protected function packageMigration(): Migration
     {
-        return require dirname(__DIR__) . '/database/migrations/create_impersonator_tables.php.stub';
+        return require __DIR__ . '/../database/migrations/create_impersonator_tables.php.stub';
     }
 }

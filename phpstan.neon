@@ -17,4 +17,16 @@ parameters:
         # Generic array value types in docblocks are not enforced.
         -
             identifier: missingType.iterableValue
+        # larastan 3.x reports every package view namespace this way: the namespace is
+        # registered at RUNTIME by the service provider, and PHPStan does not execute that,
+        # so it cannot resolve the literal to a file. The views all exist, and the feature
+        # tests render them.
+        - '#expects view-string, string given#'
+
+    # Required BECAUSE of the ignore above: only larastan 3.x emits that error, and
+    # `composer update` on CI resolves a newer larastan than a long-lived local vendor/
+    # has. With the default (true), the pattern would itself be an unmatched-ignore ERROR
+    # wherever the older larastan is installed -- moving the failure rather than fixing it.
+    reportUnmatchedIgnoredErrors: false
+
     treatPhpDocTypesAsCertain: false
