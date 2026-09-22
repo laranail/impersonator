@@ -1,9 +1,10 @@
 # laranail/impersonator
 
-[![Packagist Version](https://img.shields.io/packagist/v/laranail/impersonator.svg?style=flat-square)](https://packagist.org/packages/laranail/impersonator)
 [![Tests](https://img.shields.io/github/actions/workflow/status/laranail/impersonator/tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/laranail/impersonator/actions/workflows/tests.yml)
 [![Static analysis](https://img.shields.io/github/actions/workflow/status/laranail/impersonator/static-analysis.yml?branch=main&label=static%20analysis&style=flat-square)](https://github.com/laranail/impersonator/actions/workflows/static-analysis.yml)
 [![License MIT](https://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)](LICENSE)
+
+`laranail/impersonator` is not published to Packagist, so there is no registry-version badge to show — see [Install](#install).
 
 > Laravel user impersonation with pluggable drivers and auth adapters, privilege-scoped
 > impersonation modes, two-level audit trails, RBAC integration, remote revocation, break-glass
