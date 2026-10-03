@@ -39,7 +39,26 @@ Then name your user model, which is the one setting that has no sensible default
 ],
 ```
 
-## Quick start
+## Quick start guide and usage
+
+### Getting started
+
+Publishing, migrating and allowlisting your user model are covered under Install. Then:
+
+1. To enforce modes and the kill switch, put the middleware on your own routes:
+
+   ```php
+   // config/impersonator.php
+   'routes' => ['auto_append_to_groups' => ['web']],
+   ```
+
+2. Check your setup:
+
+   ```bash
+   php artisan laranail::impersonator.doctor
+   ```
+
+### Usage
 
 ```php
 use Impersonator;   // the auto-registered alias
@@ -65,19 +84,6 @@ use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Imperson
 
 Neither component needs a conditional: the button renders nothing when the operator may not
 impersonate that account, and the banner renders nothing when nobody is impersonating.
-
-To enforce modes and the kill switch, put the middleware on your own routes:
-
-```php
-// config/impersonator.php
-'routes' => ['auto_append_to_groups' => ['web']],
-```
-
-Then check your setup:
-
-```bash
-php artisan laranail::impersonator.doctor
-```
 
 ## The two axes
 
