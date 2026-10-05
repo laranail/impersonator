@@ -3,9 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\ServiceProvider;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 use Simtabi\Laranail\Impersonator\Laravel\Support\PackageTables;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks\TablesCheck;
+use Simtabi\Laranail\Impersonator\Laravel\Providers\ImpersonatorServiceProvider;
 
 /*
 | The published documentation, checked against the code.
@@ -165,18 +167,22 @@ it('documents every middleware alias it registers', function (): void {
 });
 
 it('documents every publish tag it registers', function (): void {
-    $provider = (string) file_get_contents(
-        dirname(__DIR__, 2) . '/src/Laravel/Providers/ImpersonatorServiceProvider.php',
-    );
+    // Read from the live publish registry rather than the provider source, so the guard holds
+    // whatever the registration code looks like.
+    $ours = ServiceProvider::$publishes[ImpersonatorServiceProvider::class] ?? [];
 
-    preg_match_all("/'(impersonator-[a-z]+)'\)/", $provider, $matches);
+    $tags = array_keys(array_filter(
+        ServiceProvider::$publishGroups,
+        static fn (array $paths): bool => array_intersect_key($paths, $ours) !== [],
+    ));
 
     $docs = (string) file_get_contents(dirname(__DIR__, 2) . '/docs/installation.md');
 
-    expect(array_unique($matches[1]))->toHaveCount(4);
+    // Four kinds, each under its scoped tag and its deprecated bare alias.
+    expect($tags)->toHaveCount(8);
 
-    foreach (array_unique($matches[1]) as $tag) {
-        expect(str_contains($docs, $tag))->toBeTrue("undocumented publish tag [{$tag}]");
+    foreach ($tags as $tag) {
+        expect(str_contains($docs, (string) $tag))->toBeTrue("undocumented publish tag [{$tag}]");
     }
 });
 

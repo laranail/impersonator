@@ -3,7 +3,7 @@
 Hand an operator from an admin domain into an app domain with a single-use token.
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'driver' => 'token',
 'urls'   => ['base_domain' => env('IMPERSONATOR_BASE_DOMAIN')],
 ```

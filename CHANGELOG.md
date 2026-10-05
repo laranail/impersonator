@@ -19,6 +19,8 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   These are flat registries, where a second package claiming a bare name silently replaces this one.
 - `tests/Feature/NamingConventionTest.php` guards every one against the live registries through
   package-tools' `AssertsRegisteredNames`, and proves each deprecated name still works.
+- **Vendor-scoped publish tags** `laranail::impersonator-config`, `-migrations`, `-views` and
+  `-lang`, registered over the same files as the bare tags.
 
 ### Changed
 
@@ -30,6 +32,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   the scoped prefix.
 - Requires `laranail/package-tools ^0.1.3` (`BareRouteNameAliases`, `NamespaceForms`,
   `AssertsRegisteredNames`).
+- The docs and the doctor's missing-tables hint lead with the `laranail::impersonator-*` publish tags.
 
 ### Deprecated
 
@@ -47,6 +50,9 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
   announced when a template using one is compiled.
 - The bare container alias `impersonator` (documented only: a container alias cannot announce
   itself).
+- The bare publish tags `impersonator-config`, `impersonator-migrations`, `impersonator-views` and
+  `impersonator-lang`. They publish the same files as `laranail::impersonator-*` and announce
+  themselves after publishing.
 
 Each still works, raises `E_USER_DEPRECATED` once per name where the registry allows it, and may be
 removed no earlier than the next minor after 0.1.
@@ -60,6 +66,15 @@ removed no earlier than the next minor after 0.1.
   data, and threw "Undefined variable". All five short names are now registered explicitly.
 - The `[0.1.0]` entry below carried `Changed`, `Added`, `Fixed` and `Security` three, two, three and
   three times over. Each is now one subsection, with every bullet kept.
+- **Published view and translation overrides were never read.** `impersonator-views` published to
+  `resources/views/vendor/impersonator` and `impersonator-lang` to `lang/vendor/impersonator`, but
+  Laravel reads overrides from `vendor/{namespace}` and the package renders through
+  `laranail-impersonator::`, so every published override was ignored while the packaged default kept
+  answering. Both now publish to `vendor/laranail-impersonator`, which also serves the
+  `laranail/impersonator::` form. A host that published before should move its files there.
+  `tests/Feature/PublishedOverridesTest.php` publishes, edits the copy and renders it.
+- The README, `docs/installation.md`, `docs/getting-started.md`, `docs/configuration.md` and the
+  recipes named `config/impersonator.php`; the config publishes to `config/laranail/impersonator.php`.
 
 ## [0.1.0] - 2026-08-15
 

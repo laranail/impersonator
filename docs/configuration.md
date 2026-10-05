@@ -1,8 +1,8 @@
 # Configuration
 
-Every block in `config/impersonator.php`, and what each one changes.
+Every block in `config/laranail/impersonator.php`, and what each one changes.
 
-Publish it with `php artisan vendor:publish --tag=impersonator-config`. The defaults are chosen so
+Publish it with `php artisan vendor:publish --tag=laranail::impersonator-config`. The defaults are chosen so
 that an unconfigured install is safe rather than convenient: the API is off, tamper evidence is
 off, notifications are off, approvals are not required, and nothing can be impersonated until you
 name a model.

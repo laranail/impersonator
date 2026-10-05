@@ -24,16 +24,16 @@ The `laranail/*` family resolves through git rather than Packagist, so the closu
 in your root `composer.json` first — see [Installation](docs/installation.md#install).
 
 ```bash
-php artisan vendor:publish --tag=impersonator-config
-php artisan vendor:publish --tag=impersonator-migrations
-php artisan vendor:publish --tag=impersonator-lang       # optional: reword or translate
+php artisan vendor:publish --tag=laranail::impersonator-config
+php artisan vendor:publish --tag=laranail::impersonator-migrations
+php artisan vendor:publish --tag=laranail::impersonator-lang       # optional: reword or translate
 php artisan migrate
 ```
 
 Then name your user model, which is the one setting that has no sensible default:
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'targets' => [
     'allowlist' => ['user' => App\Models\User::class],
 ],
@@ -48,7 +48,7 @@ Publishing, migrating and allowlisting your user model are covered under Install
 1. To enforce modes and the kill switch, put the middleware on your own routes:
 
    ```php
-   // config/impersonator.php
+   // config/laranail/impersonator.php
    'routes' => ['auto_append_to_groups' => ['web']],
    ```
 

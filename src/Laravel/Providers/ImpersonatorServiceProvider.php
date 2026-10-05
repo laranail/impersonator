@@ -30,6 +30,7 @@ use Illuminate\Contracts\Translation\Translator;
 use Illuminate\Contracts\Cache\Repository as Cache;
 use Illuminate\Database\ConnectionResolverInterface;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Foundation\Events\VendorTagPublished;
 use Illuminate\Contracts\Auth\Factory as AuthFactory;
 use Illuminate\Contracts\Config\Repository as Config;
 use Illuminate\Contracts\View\Factory as ViewFactory;
@@ -608,7 +609,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
      *
      * Both namespaces, which is what `loadTranslationsFrom` gives: `laranail-impersonator::decisions.x` for
      * PHP arrays and `laranail-impersonator::` JSON lines if a host adds any. Published lines in
-     * `lang/vendor/impersonator` win over these automatically — Laravel checks the application path
+     * `lang/vendor/laranail-impersonator` win over these automatically — Laravel checks the application path
      * first — so overriding one sentence does not mean forking the file.
      *
      * Only `en` ships. Every lookup goes through {@see MessageCatalog}, which falls back to the
@@ -1235,24 +1236,61 @@ class ImpersonatorServiceProvider extends ServiceProvider
         }
     }
 
+    /**
+     * Publish into the directories Laravel actually reads overrides from.
+     *
+     * Laravel reads a view override from `resources/views/vendor/{namespace}` and a translation
+     * override from `lang/vendor/{namespace}`, and the package's own calls use the
+     * `laranail-impersonator` namespace — so that is where views and lines are published. The views
+     * reach `laranail/impersonator::` as well, because {@see NamespaceForms::mirror()} copies the
+     * hyphen form's paths, the override directory included.
+     *
+     * Each tag is registered twice, scoped (`laranail::impersonator-*`) and bare
+     * (`impersonator-*`), over the same source and destination. `publishes()` takes a list of
+     * groups, so the two never collide; the bare one announces itself once it has published.
+     */
     protected function registerPublishing(): void
     {
         $this->publishes([
             $this->configPath() => $this->app->configPath('laranail/impersonator.php'),
-        ], 'impersonator-config');
+        ], $this->publishTags('config'));
 
         $this->publishes([
-            $this->packagePath('resources/views') => $this->app->resourcePath('views/vendor/impersonator'),
-        ], 'impersonator-views');
+            $this->packagePath('resources/views') => $this->app->resourcePath('views/vendor/laranail-impersonator'),
+        ], $this->publishTags('views'));
 
         $this->publishes([
-            $this->packagePath('resources/lang') => $this->app->langPath('vendor/impersonator'),
-        ], 'impersonator-lang');
+            $this->packagePath('resources/lang') => $this->app->langPath('vendor/laranail-impersonator'),
+        ], $this->publishTags('lang'));
 
         $this->publishes([
             $this->packagePath('database/migrations/create_impersonator_tables.php.stub') => $this->app
                 ->databasePath('migrations/' . date('Y_m_d_His') . '_create_impersonator_tables.php'),
-        ], 'impersonator-migrations');
+        ], $this->publishTags('migrations'));
+
+        $this->app->make(Dispatcher::class)->listen(
+            VendorTagPublished::class,
+            static function (VendorTagPublished $event): void {
+                // Declared `string`, but `vendor:publish --provider=` dispatches it with a null tag.
+                $scoped = DeprecatedNames::PUBLISH_TAGS[(string) $event->tag] ?? null;
+
+                if ($scoped !== null) {
+                    DeprecatedNames::announce('publish tag', $event->tag, $scoped);
+                }
+            },
+        );
+    }
+
+    /**
+     * The scoped tag and its deprecated bare alias, for one publishable kind.
+     *
+     * @return list<string>
+     */
+    protected function publishTags(string $kind): array
+    {
+        $bare = 'impersonator-' . $kind;
+
+        return [DeprecatedNames::PUBLISH_TAGS[$bare], $bare];
     }
 
     protected function configPath(): string

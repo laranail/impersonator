@@ -116,6 +116,11 @@ it('registers every documented publish tag', function (): void {
     $groups = ServiceProvider::$publishGroups;
 
     foreach ([
+        'laranail::impersonator-config',
+        'laranail::impersonator-migrations',
+        'laranail::impersonator-views',
+        'laranail::impersonator-lang',
+        // The deprecated bare aliases, kept until the next minor after 0.1.
         'impersonator-config',
         'impersonator-migrations',
         'impersonator-views',

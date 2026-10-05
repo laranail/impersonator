@@ -73,7 +73,7 @@ offering it — so this step is not optional. See [Impersonation modes](tools/mo
 ## Require a reason
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'reason' => ['require' => true],
 ```
 

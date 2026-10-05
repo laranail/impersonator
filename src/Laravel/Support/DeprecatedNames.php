@@ -74,6 +74,21 @@ final class DeprecatedNames
         'when-impersonating'         => 'laranail-impersonator::when-impersonating',
     ];
 
+    /**
+     * Bare `vendor:publish` tag => scoped tag.
+     *
+     * Both are registered over the same source and destination, so either publishes the same files;
+     * the bare one announces itself after it has published.
+     *
+     * @var array<string, string>
+     */
+    public const array PUBLISH_TAGS = [
+        'impersonator-config'     => 'laranail::impersonator-config',
+        'impersonator-views'      => 'laranail::impersonator-views',
+        'impersonator-lang'       => 'laranail::impersonator-lang',
+        'impersonator-migrations' => 'laranail::impersonator-migrations',
+    ];
+
     /** @var array<string, true> "kind\0name" => announced */
     private static array $announced = [];
 

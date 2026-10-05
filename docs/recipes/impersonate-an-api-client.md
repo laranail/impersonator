@@ -3,7 +3,7 @@
 Hand a mobile or SPA client a short-lived, scoped token for the target instead of a session.
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'adapter'  => 'sanctum',
 'adapters' => [
     'sanctum' => ['ability' => 'impersonated', 'expires_after' => 10],
