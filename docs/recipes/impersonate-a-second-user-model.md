@@ -3,7 +3,7 @@
 Add a `Vendor` model on its own guard, alongside `User`.
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'targets' => [
     'allowlist' => [
         'user' => App\Models\User::class,

@@ -100,17 +100,24 @@ The service provider is auto-discovered. There is nothing to register.
 ## Publish the configuration
 
 ```bash
-php artisan vendor:publish --tag=impersonator-config
+php artisan vendor:publish --tag=laranail::impersonator-config
 ```
 
-This writes `config/impersonator.php`. Publishing is not strictly required — the package ships
+This writes `config/laranail/impersonator.php`. Publishing is not strictly required — the package ships
 usable defaults — but you will want it: the target allowlist has to name your own user model
 before anything can be impersonated.
+
+> The bare tags `impersonator-config`, `impersonator-migrations`, `impersonator-views` and
+> `impersonator-lang` are deprecated aliases of the `laranail::impersonator-*` tags. They publish the
+> same files and raise a deprecation notice; they may be removed no earlier than the next minor
+> after 0.1. Before this was fixed, views and translations were published to
+> `resources/views/vendor/impersonator/` and `lang/vendor/impersonator/`, which Laravel never
+> reads. If you published there, move the files to the `laranail-impersonator` directories described below.
 
 ## Run the migration
 
 ```bash
-php artisan vendor:publish --tag=impersonator-migrations
+php artisan vendor:publish --tag=laranail::impersonator-migrations
 php artisan migrate
 ```
 
@@ -129,7 +136,7 @@ change the connection, add indexes for your own reporting, or rename a table thr
 
 ## Name your user model
 
-The one change you must make. Open `config/impersonator.php` and set the allowlist:
+The one change you must make. Open `config/laranail/impersonator.php` and set the allowlist:
 
 ```php
 'targets' => [
@@ -148,18 +155,20 @@ More than one user model is supported — see [Impersonatable targets](tools/tar
 ## Optional: publish the views
 
 ```bash
-php artisan vendor:publish --tag=impersonator-views
+php artisan vendor:publish --tag=laranail::impersonator-views
 ```
 
-Only needed if you want to restyle the banner. The Blade components work without this.
+Only needed if you want to restyle the banner. The Blade components work without this. The views
+land in `resources/views/vendor/laranail-impersonator/`, which is where Laravel reads overrides for
+the `laranail-impersonator::` namespace the package renders through.
 
 ## Optional: translate or reword the messages
 
 ```bash
-php artisan vendor:publish --tag=impersonator-lang
+php artisan vendor:publish --tag=laranail::impersonator-lang
 ```
 
-Eight files land in `lang/vendor/impersonator/en/`. English is the only locale shipped; add a sibling
+Eight files land in `lang/vendor/laranail-impersonator/en/`. English is the only locale shipped; add a sibling
 directory to translate, or edit `en` to reword. Published lines win over the package's own, so
 changing one sentence does not mean forking a file.
 

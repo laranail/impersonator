@@ -3,7 +3,7 @@
 Make `full` impersonation need a second operator, and leave `read_only` alone.
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'approval' => [
     'require'      => true,
     'ttl'          => 15,

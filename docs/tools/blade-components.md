@@ -26,7 +26,7 @@ Place it once in a layout, unconditionally. It renders nothing when nobody is im
 Restyle it by publishing the views:
 
 ```bash
-php artisan vendor:publish --tag=impersonator-views
+php artisan vendor:publish --tag=laranail::impersonator-views
 ```
 
 ## The impersonate button

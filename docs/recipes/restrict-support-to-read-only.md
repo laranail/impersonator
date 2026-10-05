@@ -23,7 +23,7 @@ Role::findByName('admin')->givePermissionTo([
 ```
 
 ```php
-// config/impersonator.php
+// config/laranail/impersonator.php
 'default_mode' => 'read_only',
 ```
 
