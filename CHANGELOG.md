@@ -7,21 +7,63 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ## [Unreleased]
 
-## [0.1.0] - 2026-08-15
+### Added
+
+- **Vendor-scoped names for every public registration.** Route names `laranail-impersonator.*` and
+  `laranail-impersonator.api.*` (the `routes.name_prefix` and `api.name_prefix` defaults); rate
+  limiters `laranail-impersonator.{enter,api,accept}`; gate abilities
+  `laranail-impersonator.{revoke,audit.view,mode}`; Blade components
+  `<x-laranail-impersonator::banner />`, `::impersonate-button`, `::leave-button`, `::badge` and
+  `::when-impersonating`; the container alias `laranail.impersonator`; and the canonical
+  `laranail/impersonator::` view and translation namespaces beside `laranail-impersonator::`.
+  These are flat registries, where a second package claiming a bare name silently replaces this one.
+- `tests/Feature/NamingConventionTest.php` guards every one against the live registries through
+  package-tools' `AssertsRegisteredNames`, and proves each deprecated name still works.
 
 ### Changed
 
-- **The config key is `laranail.impersonator`,** published to `config/laranail/impersonator.php`.
-  Every read moves with it — `config('impersonator.driver')` is now
-  `config('laranail.impersonator.driver')`. Laravel's config repository is a flat map and
-  `impersonator` is a name an application could plausibly use for its own file.
+- **The default RBAC permission names are `laranail-impersonator.enter`, `.mode.%s`, `.revoke`,
+  `.approve` and `.audit.view`.** While the defaults are in use, an operator seeded with the bare
+  `impersonator.*` names is still accepted, with a one-time deprecation notice, so no existing
+  install loses access. A configured permission name gets no fallback.
+- The package's own routes throttle on the scoped limiters, and its route-name lookups default to
+  the scoped prefix.
+- Requires `laranail/package-tools ^0.1.3` (`BareRouteNameAliases`, `NamespaceForms`,
+  `AssertsRegisteredNames`).
 
-Three things that share the word are deliberately unchanged, because none of them is a config key:
-the route names (`impersonator.enter`, `.leave`, …), which come from the configurable
-`routes.name_prefix`; the RBAC permission strings (`impersonator.approve`, `impersonator.audit.view`);
-and the telemetry operation labels (`impersonator.notify.target`). The middleware aliases, view and
-translation namespaces and Blade prefix were already vendor-scoped.
+### Deprecated
 
+- The bare route names `impersonator.*` and `impersonator.api.*` (18). They still generate URLs
+  through `URL::resolveMissingNamedRoutesUsing()`; `Route::has()` and `routeIs()` do not see them.
+  A `read_only.allowed_routes` or `limited.deny_routes` list written with them still matches.
+- The bare rate limiters `impersonator-enter`, `impersonator-api` and `impersonator-accept`, which
+  now delegate to the scoped limiters.
+- The bare gate abilities `impersonator.revoke`, `impersonator.audit.view` and `impersonator.mode`,
+  which now delegate to the scoped abilities through the gate.
+- The bare permission names `impersonator.enter`, `impersonator.mode.%s`, `impersonator.revoke`,
+  `impersonator.approve` and `impersonator.audit.view`.
+- The bare Blade tags `<x-impersonation-banner />`, `<x-impersonate-button />`,
+  `<x-impersonation-leave-button />`, `<x-impersonation-badge />` and `<x-when-impersonating>`,
+  announced when a template using one is compiled.
+- The bare container alias `impersonator` (documented only: a container alias cannot announce
+  itself).
+
+Each still works, raises `E_USER_DEPRECATED` once per name where the registry allows it, and may be
+removed no earlier than the next minor after 0.1.
+
+### Fixed
+
+- `<x-laranail-impersonator::banner />`, named in the provider's own docblock, did not resolve
+  ("Unable to locate a class or view"), and `::leave-button` and `::badge` were worse: with no
+  `LeaveButton` or `Badge` class, Blade fell back to rendering `components/leave-button.blade.php`
+  and `components/badge.blade.php` as anonymous components, without the class that supplies their
+  data, and threw "Undefined variable". All five short names are now registered explicitly.
+- The `[0.1.0]` entry below carried `Changed`, `Added`, `Fixed` and `Security` three, two, three and
+  three times over. Each is now one subsection, with every bullet kept.
+
+## [0.1.0] - 2026-08-15
+
+First release.
 
 ### Added
 
@@ -559,93 +601,6 @@ translation namespaces and Blade prefix were already vendor-scoped.
   was the only spatie-specific thing left in the package; pointing it at another permission package is
   now genuinely all that is required. An explicit `authorization.policy` still wins over both layers.
 
-### Fixed
-
-- **`enter()` threw a database error on PostgreSQL whenever a concurrency cap was configured — which
-  it is by default.** `EloquentAuditStore::open()` guarded its count-then-insert with
-  `SELECT count(*) … FOR UPDATE`, and PostgreSQL rejects that outright: *"FOR UPDATE is not allowed
-  with aggregate functions"*. So the cap did not merely fail to lock there, it raised a
-  `QueryException` on every impersonation. The same applied to the `deny_when_target_busy` check via
-  `exists()`, which compiles to the same aggregate context. Both now select locked ids and count them
-  in PHP, which holds the lock on every driver. **The package was unusable on PostgreSQL before this.**
-- **`read_only` mode blocked Laravel's own session write on PostgreSQL and MySQL**, refusing every
-  request. `PersistenceGuard::tableFrom()` stopped at the first identifier delimiter, so
-  `update "public"."sessions"` parsed as table `public`, never matched its exemption, and the guard
-  denied the framework's session persistence. It now reads the whole dotted chain, strips each
-  driver's quoting (`"pg"`, `` `mysql` ``, `[sqlsrv]`, bare), and matches an exempt entry written in
-  either the qualified or unqualified form. `deny_models` was failing the same way.
-
-### Changed
-
-- **The test suite can run against PostgreSQL and MySQL**, via `IMPERSONATOR_TEST_DB=pgsql|mysql`.
-  Both bugs above existed because the suite ran SQLite only: it emits unqualified table names, so the
-  parsing defect never surfaced, and it compiles `lockForUpdate()` to an empty string, so the
-  aggregate-with-lock combination never executed.
-- **Tests that assert atomicity now skip loudly rather than passing on a driver that cannot prove
-  them.** `SQLiteGrammar::compileLock()` returns `''`, so every claim about the concurrency cap and
-  the chain-head lock was previously green without exercising a lock at all. The new `locking` group
-  names the driver in its skip message and passes on PostgreSQL.
-
-### Security
-
-- The `APP_KEY` literal is gone from `phpunit.xml`; `tests/TestCase.php` generates one per run. It was
-  a real fixture rather than a real secret — it encrypted only in-memory test sessions, and it was the
-  only version of that file ever committed — but it was a structurally valid AES-256 key, so secret
-  scanners were right to flag it. Generating it removes the detector surface instead of suppressing
-  the alert. A scan of every blob in the object database, reachable and unreachable, found nothing
-  else; no rotation or history rewrite was required.
-
-### Fixed
-
-- **The persistence-level mode guard outlived its request.** `DB::beforeExecuting` has no removal
-  counterpart, so the listener stayed armed after the response — and closing an impersonation is an
-  `UPDATE` on the audit row. A `read_only` guard denied it, so **an operator could not leave**,
-  which is the one outcome the mode must never produce. Under Octane or a queue worker the listeners
-  also accumulated, each enforcing a stale impersonation. Now one listener is registered at boot and
-  consults a `PersistenceGuard` the middleware arms for the request and disarms in `finally`.
-- **The guard judged the package's own bookkeeping as user writes.** The audit row, the action
-  trail, handoff tokens and approvals are all written *while* an impersonation is in flight, and
-  Laravel writes its session and cache tables on ordinary reads — with `SESSION_DRIVER=database`,
-  every request. Those tables are now exempt (configurable via `modes.exempt_tables`). The queue
-  tables are deliberately **not** exempt: a job dispatched from a read-only session is a write with
-  a delay on it.
-- **`modes.limited.deny_models` never matched anything.** It holds class names, but the persistence
-  guard — the only layer that can tell which model a write touches — reports the *table*. Comparing
-  the two never matched, so a configured deny-list read as protection while enforcing nothing. Both
-  forms now resolve.
-- **Session contents crossed the impersonation boundary in both directions.** Rotating the session
-  id preserves its attributes, so the operator's cart, half-finished form or flashed data travelled
-  into the impersonated session, and the target's travelled back out on leave. Now flushed on both
-  transitions (`session.flush_on_switch`, on by default), preserving the operator's own auth key
-  when they sit on a different guard, and minting a fresh CSRF token.
-- **Leaving rotated the target's `remember_token`.** `SessionGuard::logout()` cycles it, so an
-  operator finishing a support session logged the real customer out of every device they owned and
-  invalidated a recaller cookie set weeks earlier. Leaving now forgets the guard's session key and
-  its cached user, and nothing else.
-- The published package shipped **two copies of `helpers.php`** — one inside the PSR-4 source root,
-  which was the autoloaded one — and documented the `read_only` persistence guard, the `limited`
-  deny-lists, the adapter TTL/ability/scope keys and the rate-limit decay under names that did not
-  exist in the config file.
-
-### Changed
-
-- **`modes.read_only.prevent_writes` now defaults to on.** A mode named read_only that permits a
-  write behind a GET route, a queued job, a Livewire action or a raw query is not read-only, and the
-  guarantee is the entire reason to offer the mode. The usual objection to a persistence guard —
-  that aborting mid-request can strand earlier writes — does not apply when *every* write is denied:
-  the first one aborts and there is nothing half-done behind it.
-
-### Security
-
-- `Referrer-Policy: no-referrer` and `Cache-Control: no-store` on the accept response, so a URL
-  carrying a live single-use token does not travel onward as a referrer or rest in a shared cache.
-  Documented the log-retention channel, which is the significant one — including Telescope, which
-  records the full URI of a *failed* request, precisely when the token may still be unspent.
-
-First release.
-
-### Added
-
 - Layered architecture: a pure-PHP `Core` domain layer depending only on PSR
   interfaces, and a `Laravel` bridge. Enforced by Pest architecture tests rather
   than convention.
@@ -897,7 +852,79 @@ First release.
   that does not exist. That smoke test — `composer require` from the tag, publish, migrate, run
   the doctor, perform a real impersonation — is now a documented pre-release step.
 
+### Changed
+
+- **The config key is `laranail.impersonator`,** published to `config/laranail/impersonator.php`.
+  Every read moves with it — `config('impersonator.driver')` is now
+  `config('laranail.impersonator.driver')`. Laravel's config repository is a flat map and
+  `impersonator` is a name an application could plausibly use for its own file.
+
+Three things that share the word are deliberately unchanged, because none of them is a config key:
+the route names (`impersonator.enter`, `.leave`, …), which come from the configurable
+`routes.name_prefix`; the RBAC permission strings (`impersonator.approve`, `impersonator.audit.view`);
+and the telemetry operation labels (`impersonator.notify.target`). The middleware aliases, view and
+translation namespaces and Blade prefix were already vendor-scoped.
+
+- **The test suite can run against PostgreSQL and MySQL**, via `IMPERSONATOR_TEST_DB=pgsql|mysql`.
+  Both bugs above existed because the suite ran SQLite only: it emits unqualified table names, so the
+  parsing defect never surfaced, and it compiles `lockForUpdate()` to an empty string, so the
+  aggregate-with-lock combination never executed.
+- **Tests that assert atomicity now skip loudly rather than passing on a driver that cannot prove
+  them.** `SQLiteGrammar::compileLock()` returns `''`, so every claim about the concurrency cap and
+  the chain-head lock was previously green without exercising a lock at all. The new `locking` group
+  names the driver in its skip message and passes on PostgreSQL.
+
+- **`modes.read_only.prevent_writes` now defaults to on.** A mode named read_only that permits a
+  write behind a GET route, a queued job, a Livewire action or a raw query is not read-only, and the
+  guarantee is the entire reason to offer the mode. The usual objection to a persistence guard —
+  that aborting mid-request can strand earlier writes — does not apply when *every* write is denied:
+  the first one aborts and there is nothing half-done behind it.
+
 ### Fixed
+
+- **`enter()` threw a database error on PostgreSQL whenever a concurrency cap was configured — which
+  it is by default.** `EloquentAuditStore::open()` guarded its count-then-insert with
+  `SELECT count(*) … FOR UPDATE`, and PostgreSQL rejects that outright: *"FOR UPDATE is not allowed
+  with aggregate functions"*. So the cap did not merely fail to lock there, it raised a
+  `QueryException` on every impersonation. The same applied to the `deny_when_target_busy` check via
+  `exists()`, which compiles to the same aggregate context. Both now select locked ids and count them
+  in PHP, which holds the lock on every driver. **The package was unusable on PostgreSQL before this.**
+- **`read_only` mode blocked Laravel's own session write on PostgreSQL and MySQL**, refusing every
+  request. `PersistenceGuard::tableFrom()` stopped at the first identifier delimiter, so
+  `update "public"."sessions"` parsed as table `public`, never matched its exemption, and the guard
+  denied the framework's session persistence. It now reads the whole dotted chain, strips each
+  driver's quoting (`"pg"`, `` `mysql` ``, `[sqlsrv]`, bare), and matches an exempt entry written in
+  either the qualified or unqualified form. `deny_models` was failing the same way.
+
+- **The persistence-level mode guard outlived its request.** `DB::beforeExecuting` has no removal
+  counterpart, so the listener stayed armed after the response — and closing an impersonation is an
+  `UPDATE` on the audit row. A `read_only` guard denied it, so **an operator could not leave**,
+  which is the one outcome the mode must never produce. Under Octane or a queue worker the listeners
+  also accumulated, each enforcing a stale impersonation. Now one listener is registered at boot and
+  consults a `PersistenceGuard` the middleware arms for the request and disarms in `finally`.
+- **The guard judged the package's own bookkeeping as user writes.** The audit row, the action
+  trail, handoff tokens and approvals are all written *while* an impersonation is in flight, and
+  Laravel writes its session and cache tables on ordinary reads — with `SESSION_DRIVER=database`,
+  every request. Those tables are now exempt (configurable via `modes.exempt_tables`). The queue
+  tables are deliberately **not** exempt: a job dispatched from a read-only session is a write with
+  a delay on it.
+- **`modes.limited.deny_models` never matched anything.** It holds class names, but the persistence
+  guard — the only layer that can tell which model a write touches — reports the *table*. Comparing
+  the two never matched, so a configured deny-list read as protection while enforcing nothing. Both
+  forms now resolve.
+- **Session contents crossed the impersonation boundary in both directions.** Rotating the session
+  id preserves its attributes, so the operator's cart, half-finished form or flashed data travelled
+  into the impersonated session, and the target's travelled back out on leave. Now flushed on both
+  transitions (`session.flush_on_switch`, on by default), preserving the operator's own auth key
+  when they sit on a different guard, and minting a fresh CSRF token.
+- **Leaving rotated the target's `remember_token`.** `SessionGuard::logout()` cycles it, so an
+  operator finishing a support session logged the real customer out of every device they owned and
+  invalidated a recaller cookie set weeks earlier. Leaving now forgets the guard's session key and
+  its cached user, and nothing else.
+- The published package shipped **two copies of `helpers.php`** — one inside the PSR-4 source root,
+  which was the autoloaded one — and documented the `read_only` persistence guard, the `limited`
+  deny-lists, the adapter TTL/ability/scope keys and the rate-limit decay under names that did not
+  exist in the config file.
 
 - `LeaveImpersonation` re-reads the audit row after closing it, so a caller learns *how* it ended.
   It previously returned the snapshot taken before the close, which meant an API response reported
@@ -907,6 +934,18 @@ First release.
   which is a bug signal; an id typed by a client is an ordinary not-found.
 
 ### Security
+
+- The `APP_KEY` literal is gone from `phpunit.xml`; `tests/TestCase.php` generates one per run. It was
+  a real fixture rather than a real secret — it encrypted only in-memory test sessions, and it was the
+  only version of that file ever committed — but it was a structurally valid AES-256 key, so secret
+  scanners were right to flag it. Generating it removes the detector surface instead of suppressing
+  the alert. A scan of every blob in the object database, reachable and unreachable, found nothing
+  else; no rotation or history rewrite was required.
+
+- `Referrer-Policy: no-referrer` and `Cache-Control: no-store` on the accept response, so a URL
+  carrying a live single-use token does not travel onward as a referrer or rest in a shared cache.
+  Documented the log-retention channel, which is the significant one — including Telescope, which
+  records the full URI of a *failed* request, precisely when the token may still be unspent.
 
 - Every GitHub Action is pinned to a full commit SHA with a trailing version comment, every job
   sets `timeout-minutes`, and checkout runs with `persist-credentials: false` since no job pushes

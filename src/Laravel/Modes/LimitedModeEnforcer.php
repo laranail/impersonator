@@ -12,6 +12,7 @@ use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
+use Simtabi\Laranail\Impersonator\Laravel\Support\DeprecatedNames;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 
 /**
@@ -124,7 +125,15 @@ final readonly class LimitedModeEnforcer implements ModeEnforcer
             return false;
         }
 
-        return array_any($this->settings->stringList('modes.limited.deny_routes'), fn (string $pattern) => Str::is($pattern, $action->routeName));
+        // The bare spelling too, so a deny-list written before 0.1 was scoped (`impersonator.revoke`)
+        // still denies the scoped route. A deny-list that silently stopped matching would widen
+        // what an impersonated session may do, which is the one direction this must never drift.
+        $names = array_filter([$action->routeName, DeprecatedNames::legacyRouteName($action->routeName)]);
+
+        return array_any(
+            $this->settings->stringList('modes.limited.deny_routes'),
+            static fn (string $pattern): bool => array_any($names, static fn (string $name): bool => Str::is($pattern, $name)),
+        );
     }
 
     private function deniedByPath(AttemptedAction $action): bool

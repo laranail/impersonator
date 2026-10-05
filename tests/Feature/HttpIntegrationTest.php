@@ -27,8 +27,8 @@ beforeEach(function (): void {
 });
 
 it('registers the leave route', function (): void {
-    expect(Route::has('impersonator.leave'))->toBeTrue()
-        ->and(route('impersonator.leave'))->toEndWith('/impersonator/leave');
+    expect(Route::has('laranail-impersonator.leave'))->toBeTrue()
+        ->and(route('laranail-impersonator.leave'))->toEndWith('/impersonator/leave');
 });
 
 it('ends the impersonation through the leave route', function (): void {
@@ -36,7 +36,7 @@ it('ends the impersonation through the leave route', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    $this->get(route('impersonator.leave'))->assertRedirect('/');
+    $this->get(route('laranail-impersonator.leave'))->assertRedirect('/');
 
     expect(Impersonator::isImpersonating())->toBeFalse();
 });
@@ -46,7 +46,7 @@ it('refuses the leave route when nothing is being impersonated', function (): vo
     $this->startSession();
     Auth::guard('web')->setUser($this->admin);
 
-    $this->get(route('impersonator.leave'))->assertForbidden();
+    $this->get(route('laranail-impersonator.leave'))->assertForbidden();
 });
 
 it('redirects after leaving to the configured destination', function (): void {
@@ -55,7 +55,7 @@ it('redirects after leaving to the configured destination', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    $this->get(route('impersonator.leave'))->assertRedirect('/admin/users');
+    $this->get(route('laranail-impersonator.leave'))->assertRedirect('/admin/users');
 });
 
 it('does not register routes when route registration is disabled', function (): void {
@@ -116,7 +116,7 @@ it('renders the banner with the target, the operator and the mode', function ():
     expect($html)->toContain('impersonator-banner')
         ->and($html)->toContain('Admin')
         ->and($html)->toContain('data-impersonator-mode="full"')
-        ->and($html)->toContain(route('impersonator.leave'));
+        ->and($html)->toContain(route('laranail-impersonator.leave'));
 });
 
 it('escapes the target display name', function (): void {

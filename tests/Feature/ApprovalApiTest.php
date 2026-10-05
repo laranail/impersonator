@@ -39,12 +39,12 @@ beforeEach(function (): void {
 
     $this->operator = RbacUser::create([
         'name'        => 'Operator',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
 
     $this->approver = RbacUser::create([
         'name'        => 'Approver',
-        'permissions' => ['impersonator.approve'],
+        'permissions' => ['laranail-impersonator.approve'],
     ]);
 
     $this->target = RbacUser::create(['name' => 'Customer']);
@@ -221,7 +221,7 @@ it('refuses a self-approval with a 409', function (): void {
 
     // Give the requester the approve permission too, so only the four-eyes rule is refusing.
     $this->operator->update(['permissions' => [
-        'impersonator.enter', 'impersonator.mode.full', 'impersonator.approve',
+        'laranail-impersonator.enter', 'laranail-impersonator.mode.full', 'laranail-impersonator.approve',
     ]]);
 
     $this->postJson(approvalUrl("approvals/{$id}/grant"))
@@ -249,7 +249,7 @@ it('refuses to decide without the approve permission', function (): void {
 
     $colleague = RbacUser::create([
         'name'        => 'Colleague',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
     Auth::guard('web')->setUser($colleague);
 

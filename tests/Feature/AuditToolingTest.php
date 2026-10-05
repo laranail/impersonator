@@ -365,7 +365,7 @@ it('gates audit reads through the same policy the API uses', function (): void {
         RbacPolicy::class,
     );
 
-    $viewer = RbacUser::create(['name' => 'Viewer', 'permissions' => ['impersonator.audit.view']]);
+    $viewer = RbacUser::create(['name' => 'Viewer', 'permissions' => ['laranail-impersonator.audit.view']]);
     $nobody = RbacUser::create(['name' => 'Nobody', 'permissions' => []]);
 
     $policy = app(ImpersonationAuditPolicy::class);
@@ -389,8 +389,8 @@ it('gates revocation separately from reading', function (): void {
         RbacPolicy::class,
     );
 
-    $reader = RbacUser::create(['name' => 'Reader', 'permissions' => ['impersonator.audit.view']]);
-    $ender = RbacUser::create(['name' => 'Ender', 'permissions' => ['impersonator.revoke']]);
+    $reader = RbacUser::create(['name' => 'Reader', 'permissions' => ['laranail-impersonator.audit.view']]);
+    $ender = RbacUser::create(['name' => 'Ender', 'permissions' => ['laranail-impersonator.revoke']]);
 
     $policy = app(ImpersonationAuditPolicy::class);
     $audit = new ImpersonationAudit;

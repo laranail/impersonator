@@ -80,7 +80,7 @@ it('keeps the leave route reachable in read_only mode', function (): void {
     // mode at all.
     impersonateAs($this->admin, $this->target, 'read_only');
 
-    $this->get(route('impersonator.leave'))->assertRedirect();
+    $this->get(route('laranail-impersonator.leave'))->assertRedirect();
     expect(Impersonator::isImpersonating())->toBeFalse();
 });
 

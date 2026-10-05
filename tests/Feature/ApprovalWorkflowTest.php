@@ -50,14 +50,14 @@ beforeEach(function (): void {
 
     $this->operator = RbacUser::create([
         'name'        => 'Operator',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full', 'impersonator.mode.read_only'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full', 'laranail-impersonator.mode.read_only'],
     ]);
 
     // The approver holds `approve` and deliberately *not* `enter`: authorising access and
     // using it are separate roles, and the test suite should not be able to confuse them.
     $this->approver = RbacUser::create([
         'name'        => 'Approver',
-        'permissions' => ['impersonator.approve'],
+        'permissions' => ['laranail-impersonator.approve'],
     ]);
 
     $this->target = RbacUser::create(['name' => 'Customer']);
@@ -239,7 +239,7 @@ it('refuses to let the requester approve their own request', function (): void {
     // Give the requester the approve permission too, so the only thing refusing is the
     // requester-is-not-the-approver rule.
     $this->operator->update(['permissions' => [
-        'impersonator.enter', 'impersonator.mode.full', 'impersonator.approve',
+        'laranail-impersonator.enter', 'laranail-impersonator.mode.full', 'laranail-impersonator.approve',
     ]]);
 
     $thrown = null;
@@ -268,7 +268,7 @@ it('requires the approve permission, which entering does not confer', function (
     // approving, any two support staff could clear each other's requests.
     $colleague = RbacUser::create([
         'name'        => 'Colleague',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
 
     expect(fn (): ApprovalRequest => approvals()->grant($approvalId, $colleague))->toThrow(ImpersonationDenied::class)
@@ -328,7 +328,7 @@ it('cannot be spent by a different operator', function (): void {
 
     $colleague = RbacUser::create([
         'name'        => 'Colleague',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
     Auth::guard('web')->setUser($colleague);
 

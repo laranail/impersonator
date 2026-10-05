@@ -145,7 +145,7 @@ it('emits redeemed and started together on a successful handoff', function (): v
 it('works through the accept route', function (): void {
     [, $token] = issueToken($this->target);
 
-    $this->get(route('impersonator.accept', ['token' => $token]))->assertRedirect('/');
+    $this->get(route('laranail-impersonator.accept', ['token' => $token]))->assertRedirect('/');
 
     expect(Impersonator::isImpersonating())->toBeTrue();
 });
@@ -282,16 +282,16 @@ it('throttles the accept route', function (): void {
     config()->set('laranail.impersonator.rate_limiting.accept.attempts', 3);
 
     for ($i = 0; $i < 3; $i++) {
-        $this->get(route('impersonator.accept', ['token' => str_repeat('a', 40)]));
+        $this->get(route('laranail-impersonator.accept', ['token' => str_repeat('a', 40)]));
     }
 
-    $this->get(route('impersonator.accept', ['token' => str_repeat('a', 40)]))
+    $this->get(route('laranail-impersonator.accept', ['token' => str_repeat('a', 40)]))
         ->assertStatus(429);
 });
 
 it('rejects a route token that is too short to be one', function (): void {
     // Bounded before any hashing or database work happens.
-    $this->get(route('impersonator.accept', ['token' => 'short']))->assertStatus(302);
+    $this->get(route('laranail-impersonator.accept', ['token' => 'short']))->assertStatus(302);
 });
 
 // ── pruning ─────────────────────────────────────────────────────────────────
@@ -331,7 +331,7 @@ it('keeps the token in the accept URL from leaking any further', function (): vo
     // worth anything; these headers bound how many places it reaches.
     [, $token] = issueToken($this->target);
 
-    $response = $this->get(route('impersonator.accept', ['token' => $token]))->assertRedirect('/');
+    $response = $this->get(route('laranail-impersonator.accept', ['token' => $token]))->assertRedirect('/');
 
     // `no-referrer`, not `same-origin`: the redirect target can be a different host than the one
     // that minted the link, and `same-origin` would still hand it the full URL.

@@ -185,11 +185,11 @@ it('extends over HTTP and refuses with the decision code', function (): void {
 
     Impersonator::enter($this->target);
 
-    $this->postJson(route('impersonator.extend'))
+    $this->postJson(route('laranail-impersonator.extend'))
         ->assertOk()
         ->assertJson(['granted' => true, 'seconds' => 600, 'extensions' => 1]);
 
-    $this->postJson(route('impersonator.extend'))
+    $this->postJson(route('laranail-impersonator.extend'))
         ->assertStatus(403)
         ->assertJson(['reason' => Decision::EXTENSION_LIMIT]);
 });
@@ -200,7 +200,7 @@ it('is reachable from a read-only impersonation', function (): void {
     // for one piece of work.
     Impersonator::enter($this->target, 'read_only');
 
-    $this->postJson(route('impersonator.extend'))->assertOk();
+    $this->postJson(route('laranail-impersonator.extend'))->assertOk();
 
     expect(Impersonator::current()?->extensions)->toBe(1);
 });

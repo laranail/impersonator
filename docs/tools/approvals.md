@@ -143,7 +143,7 @@ suspicious, and binding to those would produce refusals whose cause is invisible
 Enforced against the row, not left to the UI. A flow where one pair of eyes can be both pairs is a
 delay, not a control.
 
-Deciding also requires `impersonator.approve`, and holding `impersonator.enter` does **not** confer
+Deciding also requires `laranail-impersonator.approve`, and holding `laranail-impersonator.enter` does **not** confer
 it — otherwise any two support staff could clear each other's requests.
 
 ## Authorization runs first
@@ -207,7 +207,7 @@ that somebody asked for access to an account is exactly what an auditor came to 
 ```
 
 The package cannot find your approvers itself — it is duck-typed against an RBAC surface rather
-than depending on one, so it has no way to query "everybody holding `impersonator.approve`". Supply
+than depending on one, so it has no way to query "everybody holding `laranail-impersonator.approve`". Supply
 a resolver, or list plain addresses.
 
 The requester is filtered out of the resolver's result even if returned, and the notification

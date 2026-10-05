@@ -76,14 +76,19 @@ use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Imperson
 ```
 
 ```blade
-<x-impersonate-button :user="$customer" />
+<x-laranail-impersonator::impersonate-button :user="$customer" />
 
 {{-- once, in your layout --}}
-<x-impersonation-banner />
+<x-laranail-impersonator::banner />
 ```
 
 Neither component needs a conditional: the button renders nothing when the operator may not
 impersonate that account, and the banner renders nothing when nobody is impersonating.
+
+Every public name is vendor-scoped: `laranail-impersonator.*` routes, rate limiters, gate abilities
+and permissions, `<x-laranail-impersonator::…>` components. The bare names used before 0.1
+(`impersonator.leave`, `<x-impersonation-banner />`, …) still work as deprecated aliases — see
+[Architecture](docs/architecture.md#public-names).
 
 ## The two axes
 

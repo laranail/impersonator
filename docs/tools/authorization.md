@@ -79,24 +79,32 @@ policy never names spatie, only the detection default does.
 
 | Permission | Grants |
 |---|---|
-| `impersonator.enter` | Impersonating at all |
-| `impersonator.mode.%s` | Using a specific mode |
-| `impersonator.revoke` | Ending somebody else's impersonation |
-| `impersonator.approve` | Deciding a break-glass request |
-| `impersonator.audit.view` | Reading the audit trail |
+| `laranail-impersonator.enter` | Impersonating at all |
+| `laranail-impersonator.mode.%s` | Using a specific mode |
+| `laranail-impersonator.revoke` | Ending somebody else's impersonation |
+| `laranail-impersonator.approve` | Deciding a break-glass request |
+| `laranail-impersonator.audit.view` | Reading the audit trail |
 
 They are genuinely separate. An auditor who may read every impersonation cannot end one. An
 operator who may end one does not thereby gain the trail. And **`enter` does not imply
 `approve`** — if it did, any two support staff could clear each other's break-glass requests,
 which is a rubber stamp with extra steps.
 
+These are the shipped defaults, set under `authorization.permissions`. Before 0.1 was scoped they
+were `impersonator.enter`, `impersonator.mode.%s`, `impersonator.revoke`, `impersonator.approve` and
+`impersonator.audit.view`. **An operator seeded with those bare names is still accepted**, while the
+defaults are in use: the first check that passes on a bare name raises an `E_USER_DEPRECATED` notice,
+once per name, naming the scoped replacement. Seed the scoped names; the bare ones are accepted no
+later than the next minor after 0.1. A permission name you configure yourself is used exactly as
+written, with no fallback, so configuring one never widens who passes.
+
 ### Entering needs two permissions
 
-`impersonator.enter` **and** the permission for the requested mode. Both. This is what pins junior
+`laranail-impersonator.enter` **and** the permission for the requested mode. Both. This is what pins junior
 staff to `read_only`.
 
 The failure mode is worth stating because it is the most common misconfiguration: an operator
-granted only `impersonator.enter` can impersonate nothing, and the refusal names the *mode*, which
+granted only `laranail-impersonator.enter` can impersonate nothing, and the refusal names the *mode*, which
 sends them asking for the wrong permission. The doctor warns about it.
 
 ### Protected roles
@@ -145,13 +153,34 @@ $decision->reason;    // human-readable
 ```
 
 This is what the Blade components use to decide whether to render, which is why
-`<x-impersonate-button>` needs no `@can` wrapper.
+`<x-laranail-impersonator::impersonate-button>` needs no `@can` wrapper.
 
 ## Gates and the audit policy
 
-The package registers gates for the audit surface, and an `ImpersonationAuditPolicy` covering
-`viewAny`, `view`, `export` and `revoke` — all delegating to `AuthorizationPolicy` so there is one
-source of truth.
+The package registers three gate abilities and an `ImpersonationAuditPolicy` covering `viewAny`,
+`view`, `export` and `revoke` — all delegating to `AuthorizationPolicy` so there is one source of
+truth.
+
+| Ability | Arguments | Deprecated bare alias |
+|---|---|---|
+| `laranail-impersonator.revoke` | the audit id | `impersonator.revoke` |
+| `laranail-impersonator.audit.view` | none | `impersonator.audit.view` |
+| `laranail-impersonator.mode` | the mode name | `impersonator.mode` |
+
+```php
+Gate::allows('laranail-impersonator.revoke', [$auditId]);
+@can('laranail-impersonator.audit.view') … @endcan
+```
+
+A host policy, controller or template that still checks a bare ability keeps working: the bare
+ability delegates to the scoped one through the gate, so `Gate::before` hooks and an application's
+own definition of the scoped ability apply exactly as they would to a direct check. Its first use
+raises an `E_USER_DEPRECATED` notice naming the replacement, and it may be removed no earlier than
+the next minor after 0.1. An application that defines a bare ability itself keeps its own; the
+package defines only the abilities that are not already defined.
+
+Ability names live in one flat map, which is why they carry the vendor: a second package defining
+`impersonator.revoke` would otherwise silently replace this one.
 
 The `impersonate` ability is deliberately **not** defined by the package. It is the application's
 override point; defining it here would create a cycle, since the policy consults it.

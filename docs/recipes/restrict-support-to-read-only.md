@@ -6,19 +6,19 @@ Requires spatie/laravel-permission; the RBAC layer activates itself when it is i
 
 ```php
 // A seeder
-Permission::create(['name' => 'impersonator.enter']);
-Permission::create(['name' => 'impersonator.mode.read_only']);
-Permission::create(['name' => 'impersonator.mode.full']);
+Permission::create(['name' => 'laranail-impersonator.enter']);
+Permission::create(['name' => 'laranail-impersonator.mode.read_only']);
+Permission::create(['name' => 'laranail-impersonator.mode.full']);
 
 Role::findByName('support')->givePermissionTo([
-    'impersonator.enter',
-    'impersonator.mode.read_only',
+    'laranail-impersonator.enter',
+    'laranail-impersonator.mode.read_only',
 ]);
 
 Role::findByName('admin')->givePermissionTo([
-    'impersonator.enter',
-    'impersonator.mode.read_only',
-    'impersonator.mode.full',
+    'laranail-impersonator.enter',
+    'laranail-impersonator.mode.read_only',
+    'laranail-impersonator.mode.full',
 ]);
 ```
 
@@ -35,7 +35,7 @@ enforcing:
 'routes' => ['auto_append_to_groups' => ['web']],
 ```
 
-Grant both permissions, not just `impersonator.enter`. An operator holding only the first can
+Grant both permissions, not just `laranail-impersonator.enter`. An operator holding only the first can
 impersonate nothing at all, and the refusal names the *mode* — which sends them asking for the wrong
 permission. Run the doctor to confirm.
 

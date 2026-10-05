@@ -50,8 +50,8 @@ it('does not register the api routes by default', function (): void {
     // something an operator switches on deliberately rather than something they acquire by
     // upgrading a package.
     expect(config('laranail.impersonator.api.enabled'))->toBeFalse()
-        ->and(Route::has('impersonator.api.impersonations.store'))->toBeFalse()
-        ->and(Route::has('impersonator.api.audits.index'))->toBeFalse();
+        ->and(Route::has('laranail-impersonator.api.impersonations.store'))->toBeFalse()
+        ->and(Route::has('laranail-impersonator.api.audits.index'))->toBeFalse();
 });
 
 it('declares the facade alias the documentation tells people to import', function (): void {

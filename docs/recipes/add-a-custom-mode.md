@@ -47,7 +47,7 @@ The registry pairs a mode with its enforcer, so a mode cannot be registered with
 that is selectable but not enforced is worse than not offering it.
 
 With spatie/laravel-permission installed this also implies a new permission,
-`impersonator.mode.billing_only`, which operators need alongside `impersonator.enter`.
+`laranail-impersonator.mode.billing_only`, which operators need alongside `laranail-impersonator.enter`.
 
 Reference: [Impersonation modes](../tools/modes.md).
 

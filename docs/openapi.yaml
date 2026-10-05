@@ -6,7 +6,7 @@ info:
   description: |
     User impersonation for Laravel: start, inspect and end impersonations, and read the audit trail.
 
-    **This API is disabled by default.** Set `impersonator.api.enabled` to true to expose it. It is a
+    **This API is disabled by default.** Set `laranail.impersonator.api.enabled` to true to expose it. It is a
     remote-control surface for every account in the system, so it is something an operator switches
     on deliberately rather than something acquired by upgrading a package.
 
@@ -26,7 +26,7 @@ info:
 
 servers:
   - url: https://your-app.example.com/impersonator/api/v1
-    description: Default prefix; configurable via `impersonator.api.prefix`.
+    description: Default prefix; configurable via `laranail.impersonator.api.prefix`.
 
 security:
   - sanctum: []
@@ -45,7 +45,7 @@ paths:
       tags: [Impersonations]
       summary: Start an impersonation
       description: |
-        Requires the `impersonator.enter` permission **and** the permission for the requested mode —
+        Requires the `laranail-impersonator.enter` permission **and** the permission for the requested mode —
         both, not either. Every impersonation carries a mode, and each mode is gated separately.
 
         The response has two shapes. `pending: true` means a single-use token was issued and **nobody
@@ -167,7 +167,7 @@ paths:
       tags: [Impersonations]
       summary: End somebody else's impersonation
       description: |
-        Requires the `impersonator.revoke` permission.
+        Requires the `laranail-impersonator.revoke` permission.
 
         `meta.terminated` distinguishes the two outcomes, and the difference is operational. For a
         token credential the revocation takes effect immediately. For a session it is *recorded*, and
@@ -212,7 +212,7 @@ paths:
       tags: [Audits]
       summary: List impersonations
       description: |
-        Requires the `impersonator.audit.view` permission. Newest first.
+        Requires the `laranail-impersonator.audit.view` permission. Newest first.
 
         Unknown filter values are a 422 rather than an empty page: a silently empty result reads as
         "no impersonations happened", which is the worst possible answer to an audit query.
@@ -253,7 +253,7 @@ paths:
           in: query
           schema: { type: integer, minimum: 1 }
           description: |
-            Bounded by `impersonator.api.max_per_page` (100 by default). Asking for more is a 422
+            Bounded by `laranail.impersonator.api.max_per_page` (100 by default). Asking for more is a 422
             rather than a silent downgrade, so a client paging through a long trail cannot conclude
             it read everything from a page smaller than the one it requested.
       responses:
@@ -344,7 +344,7 @@ paths:
       tags: [Approvals]
       summary: Requests awaiting a decision
       description: |
-        Requires the `impersonator.approve` permission — not the audit permission. They answer
+        Requires the `laranail-impersonator.approve` permission — not the audit permission. They answer
         different questions ("may you decide these" versus "may you read what happened"), and an
         auditor who can read every impersonation has no reason to see live requests.
 
@@ -430,9 +430,9 @@ paths:
       tags: [Approvals]
       summary: Approve a request
       description: |
-        Requires the `impersonator.approve` permission, and the approver must not be the requester —
+        Requires the `laranail-impersonator.approve` permission, and the approver must not be the requester —
         a flow where one pair of eyes can be both pairs is a delay, not a control. Holding
-        `impersonator.enter` does **not** confer approving; otherwise any two support staff could
+        `laranail-impersonator.enter` does **not** confer approving; otherwise any two support staff could
         clear each other's requests.
 
         Granting does not start the impersonation. It authorises the *requester* to enter once, from
@@ -505,7 +505,7 @@ components:
       type: http
       scheme: bearer
       description: |
-        The default stack is `auth:sanctum`, configurable via `impersonator.api.middleware`.
+        The default stack is `auth:sanctum`, configurable via `laranail.impersonator.api.middleware`.
 
   parameters:
     audit:

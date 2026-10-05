@@ -76,7 +76,7 @@ guard.
 'modes' => [
     'read_only' => [
         'allowed_methods' => ['GET', 'HEAD', 'OPTIONS'],
-        'allowed_routes'  => ['impersonator.leave', 'logout'],
+        'allowed_routes'  => ['laranail-impersonator.leave', 'logout'],
         'prevent_writes'  => true,
     ],
     'limited' => [
@@ -163,11 +163,11 @@ not the primary control.
     'rbac' => ['detect' => ['Spatie\\Permission\\PermissionServiceProvider']],
 
     'permissions' => [
-        'enter'      => 'impersonator.enter',
-        'mode'       => 'impersonator.mode.%s',
-        'revoke'     => 'impersonator.revoke',
-        'approve'    => 'impersonator.approve',
-        'audit_view' => 'impersonator.audit.view',
+        'enter'      => 'laranail-impersonator.enter',
+        'mode'       => 'laranail-impersonator.mode.%s',
+        'revoke'     => 'laranail-impersonator.revoke',
+        'approve'    => 'laranail-impersonator.approve',
+        'audit_view' => 'laranail-impersonator.audit.view',
     ],
 
     'roles' => [
@@ -183,6 +183,11 @@ undefined ability denies everything in Laravel, so treating "not defined" as "de
 every install that never opted in.
 
 Entering requires **both** `enter` and the per-mode permission.
+
+While these are the shipped defaults, an operator seeded with the bare names used before 0.1
+(`impersonator.enter`, `impersonator.mode.full`, …) is still accepted, with a one-time deprecation
+notice. A name you configure is used exactly as written. See
+[Authorization](tools/authorization.md#the-four-permissions).
 
 `rbac.detect` is how you point the auto-selection at a permission package other than spatie's — the
 policy itself is duck-typed against `hasPermissionTo()` / `hasRole()`, so the class list is the only
@@ -329,8 +334,8 @@ reason when they do not — an operator needs to know before the session ends un
 
 | Route | Method | Notes |
 |---|---|---|
-| `impersonator.extend` | POST | The caller's own session; refuses with 403 and a `reason` code |
-| `impersonator.api.impersonations.extend` | POST | `POST impersonations/current/extend` |
+| `laranail-impersonator.extend` | POST | The caller's own session; refuses with 403 and a `reason` code |
+| `laranail-impersonator.api.impersonations.extend` | POST | `POST impersonations/current/extend` |
 
 Neither takes an audit id. An operator may extend the session they are in and no other — prolonging
 somebody else's access to an account on their behalf is not a thing to expose.
@@ -352,6 +357,12 @@ allowance rather than two. See [The security model](security.md#timed-impersonat
 is one authorised person enumerating accounts, and they do it from a single address. `accept` is
 keyed by IP instead, because the caller redeeming a handoff has no session on that host yet — the
 token is the credential.
+
+The limiters are named `laranail-impersonator.enter`, `laranail-impersonator.api` and
+`laranail-impersonator.accept`. The bare `impersonator-enter`, `impersonator-api` and
+`impersonator-accept` used before 0.1 are still registered as deprecated aliases: each resolves the
+scoped limiter at call time and raises an `E_USER_DEPRECATED` notice on first use. They may be
+removed no earlier than the next minor after 0.1.
 
 ### Your own limits, while impersonating
 
@@ -462,11 +473,29 @@ actually acted. See [The audit trail](tools/audit-trail.md).
 'routes' => [
     'enabled'               => true,
     'prefix'                => 'impersonator',
+    'name_prefix'           => 'laranail-impersonator.',
     'middleware'            => ['web'],
     'enforcement'           => [/* the mode + lifetime middleware */],
     'auto_append_to_groups' => [],
 ],
 ```
+
+Route names are `laranail-impersonator.enter`, `.leave`, `.extend`, `.revoke` and `.accept`, and
+the API's are `laranail-impersonator.api.*` (`api.name_prefix`). Route names share one flat
+registry, so a bare name could collide with another package's or the application's own.
+
+The bare `impersonator.*` names used before 0.1 still generate URLs: `route('impersonator.leave')`
+resolves to the scoped route through `URL::resolveMissingNamedRoutesUsing()`, raising an
+`E_USER_DEPRECATED` notice once per name. Laravel consults that hook only for a name it does not
+hold, so an application route of the same name always wins, and it survives `route:cache`. Two
+things it cannot cover: `Route::has('impersonator.leave')` and `request()->routeIs('impersonator.*')`
+read the route collection directly and answer false for the bare name, so ask for the scoped one.
+To keep the bare names as the real names instead, set `name_prefix` back to `impersonator.`. The
+bare aliases may be removed no earlier than the next minor after 0.1.
+
+A `modes.read_only.allowed_routes` or `modes.limited.deny_routes` list written with the bare names
+still matches the scoped routes, so an older published config neither locks an operator in nor
+quietly stops denying a route.
 
 `auto_append_to_groups` is how the enforcement middleware reaches *your* routes. Registering it
 only on the package's own routes would enforce nothing, because the requests that need
@@ -507,6 +536,7 @@ impersonation entry point is a credential-phishing primitive.
     'enabled'      => env('IMPERSONATOR_API_ENABLED', false),
     'prefix'       => 'impersonator/api/v1',
     'middleware'   => ['api', 'auth:sanctum'],
+    'name_prefix'  => 'laranail-impersonator.api.',
     'per_page'     => 25,
     'max_per_page' => 100,
 ],
