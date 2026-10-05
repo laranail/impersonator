@@ -29,7 +29,7 @@ beforeEach(function (): void {
 
 function postEnter(array $payload = []): TestResponse
 {
-    return test()->post(route('impersonator.enter'), $payload);
+    return test()->post(route('laranail-impersonator.enter'), $payload);
 }
 
 it('enters through the endpoint', function (): void {
@@ -175,7 +175,7 @@ it('revokes through the endpoint', function (): void {
     postEnter(['target_type' => 'user', 'target_id' => (string) $this->target->getKey()]);
     $auditId = Impersonator::current()->auditId;
 
-    $this->from('/admin')->post(route('impersonator.revoke', ['audit' => $auditId]))
+    $this->from('/admin')->post(route('laranail-impersonator.revoke', ['audit' => $auditId]))
         ->assertRedirect('/admin');
 
     expect(app(AuditStore::class)->find($auditId)->isRevoked())->toBeTrue();

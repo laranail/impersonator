@@ -184,9 +184,12 @@ return [
             // would be worse than no mode at all.
             'allowed_methods' => ['GET', 'HEAD', 'OPTIONS'],
 
+            // The bare `impersonator.leave` / `impersonator.extend` written before 0.1 was
+            // scoped still match the scoped routes, so an older published config keeps its
+            // escape hatch.
             'allowed_routes' => [
-                'impersonator.leave',
-                'impersonator.extend',
+                'laranail-impersonator.leave',
+                'laranail-impersonator.extend',
                 'logout',
             ],
 
@@ -419,16 +422,22 @@ return [
         // a third account, or the audit trail stops describing who acted.
         'allow_nested' => false,
 
+        // Permission names, vendor-scoped so they cannot collide with another package's
+        // in a shared permission table. While these are the shipped defaults, an operator
+        // holding the bare name used before 0.1 (`impersonator.enter`,
+        // `impersonator.mode.full`, …) is still accepted, with a deprecation notice, so an
+        // existing seeder keeps working. A name you configure here is used exactly as
+        // written, with no fallback.
         'permissions' => [
-            'enter' => 'impersonator.enter',
+            'enter' => 'laranail-impersonator.enter',
 
-            // Interpolated per mode: impersonator.mode.read_only, and so on.
+            // Interpolated per mode: laranail-impersonator.mode.read_only, and so on.
             // This is what pins junior staff to read_only.
-            'mode' => 'impersonator.mode.%s',
+            'mode' => 'laranail-impersonator.mode.%s',
 
-            'revoke'     => 'impersonator.revoke',
-            'approve'    => 'impersonator.approve',
-            'audit_view' => 'impersonator.audit.view',
+            'revoke'     => 'laranail-impersonator.revoke',
+            'approve'    => 'laranail-impersonator.approve',
+            'audit_view' => 'laranail-impersonator.audit.view',
         ],
 
         'roles' => [
@@ -547,6 +556,9 @@ return [
     |--------------------------------------------------------------------------
     | `enter` is keyed by impersonator, so one operator cannot enumerate
     | accounts. `accept` is keyed by IP and throttles token redemption.
+    |
+    | The limiters are named `laranail-impersonator.{enter,api,accept}`. The bare
+    | `impersonator-{enter,api,accept}` names still work, as deprecated aliases.
     */
 
     'rate_limiting' => [
@@ -711,13 +723,18 @@ return [
     | The accept and leave routes. When the token driver runs behind a tenancy
     | package, `middleware` must include that package's identification
     | middleware or these routes resolve centrally and do nothing.
+    |
+    | Route names are `laranail-impersonator.*`. The bare `impersonator.*` names
+    | used before 0.1 still generate URLs, as deprecated aliases that announce
+    | themselves once; set `name_prefix` back to `impersonator.` to keep them as
+    | the real names instead.
     */
 
     'routes' => [
         'register'    => env('IMPERSONATOR_REGISTER_ROUTES', true),
         'middleware'  => ['web'],
         'prefix'      => 'impersonator',
-        'name_prefix' => 'impersonator.',
+        'name_prefix' => 'laranail-impersonator.',
         'accept_path' => 'accept/{token}',
         'leave_path'  => 'leave',
         'enter_path'  => 'enter',
@@ -822,7 +839,7 @@ return [
         'enabled'      => env('IMPERSONATOR_API_ENABLED', false),
         'prefix'       => 'impersonator/api/v1',
         'middleware'   => ['api', 'auth:sanctum'],
-        'name_prefix'  => 'impersonator.api.',
+        'name_prefix'  => 'laranail-impersonator.api.',
         'per_page'     => 25,
         'max_per_page' => 100,
     ],

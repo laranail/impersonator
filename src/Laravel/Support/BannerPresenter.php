@@ -99,7 +99,7 @@ final readonly class BannerPresenter
      */
     public function extendUrl(): string
     {
-        $name = $this->settings->string('routes.name_prefix', 'impersonator.') . 'extend';
+        $name = $this->settings->string('routes.name_prefix', 'laranail-impersonator.') . 'extend';
 
         if ($this->router->has($name)) {
             return $this->url->route($name);
@@ -122,7 +122,7 @@ final readonly class BannerPresenter
      */
     public function leaveUrl(): string
     {
-        $name = $this->settings->string('routes.name_prefix', 'impersonator.') . 'leave';
+        $name = $this->settings->string('routes.name_prefix', 'laranail-impersonator.') . 'leave';
 
         if ($this->router->has($name)) {
             return $this->url->route($name);

@@ -10,6 +10,7 @@ use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Simtabi\Laranail\Impersonator\Core\Contracts\ModeEnforcer;
 use Simtabi\Laranail\Impersonator\Core\Values\AttemptedAction;
+use Simtabi\Laranail\Impersonator\Laravel\Support\DeprecatedNames;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationSession;
 
 /**
@@ -96,8 +97,17 @@ final readonly class ReadOnlyModeEnforcer implements ModeEnforcer
     {
         $allowed = $this->settings->stringList('modes.read_only.allowed_routes');
 
+        // A config written before 0.1 was scoped lists the bare `impersonator.leave`; the route is
+        // now `laranail-impersonator.leave`. Matching the bare spelling too keeps that operator's
+        // way out open -- a stale allowlist must never lock anyone inside an account.
+        $legacy = $action->routeName === null ? null : DeprecatedNames::legacyRouteName($action->routeName);
+
         foreach ($allowed as $pattern) {
             if ($action->routeName !== null && Str::is($pattern, $action->routeName)) {
+                return true;
+            }
+
+            if ($legacy !== null && Str::is($pattern, $legacy)) {
                 return true;
             }
 

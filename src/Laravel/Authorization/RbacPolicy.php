@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Simtabi\Laranail\Impersonator\Core\Values\Mode;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
 use Simtabi\Laranail\Impersonator\Core\Values\Identity;
+use Simtabi\Laranail\Impersonator\Laravel\Support\DeprecatedNames;
 use Simtabi\Laranail\Impersonator\Core\Values\ImpersonationRequest;
 
 /**
@@ -74,12 +75,12 @@ class RbacPolicy extends BasePolicy
             return $enter;
         }
 
-        $template = $this->settings->string('authorization.permissions.mode', 'impersonator.mode.%s');
-        $permission = Mode::of($mode)->permission($template);
+        [$template, $legacyTemplate] = $this->permissionNames('mode');
 
-        return $this->requirePermission(
+        return $this->requireScopedPermission(
             $impersonator,
-            $permission,
+            Mode::of($mode)->permission($template),
+            $legacyTemplate === null ? null : Mode::of($mode)->permission($legacyTemplate),
             Decision::MISSING_MODE_PERMISSION,
             sprintf('You are not permitted to use the [%s] impersonation mode.', $mode),
         );
@@ -87,9 +88,12 @@ class RbacPolicy extends BasePolicy
 
     public function authorizeRevoke(Identity $impersonator, string $auditId): Decision
     {
-        return $this->requirePermission(
+        [$permission, $legacy] = $this->permissionNames('revoke');
+
+        return $this->requireScopedPermission(
             $impersonator,
-            $this->settings->string('authorization.permissions.revoke', 'impersonator.revoke'),
+            $permission,
+            $legacy,
             Decision::MISSING_PERMISSION,
             'You are not permitted to revoke impersonations.',
         );
@@ -105,9 +109,12 @@ class RbacPolicy extends BasePolicy
      */
     public function authorizeApproval(Identity $approver): Decision
     {
-        return $this->requirePermission(
+        [$permission, $legacy] = $this->permissionNames('approve');
+
+        return $this->requireScopedPermission(
             $approver,
-            $this->settings->string('authorization.permissions.approve', 'impersonator.approve'),
+            $permission,
+            $legacy,
             Decision::MISSING_PERMISSION,
             'You are not permitted to approve impersonation requests.',
         );
@@ -115,9 +122,12 @@ class RbacPolicy extends BasePolicy
 
     public function authorizeAuditAccess(Identity $impersonator): Decision
     {
-        return $this->requirePermission(
+        [$permission, $legacy] = $this->permissionNames('audit_view');
+
+        return $this->requireScopedPermission(
             $impersonator,
-            $this->settings->string('authorization.permissions.audit_view', 'impersonator.audit.view'),
+            $permission,
+            $legacy,
             Decision::MISSING_PERMISSION,
             'You are not permitted to view the impersonation audit trail.',
         );
@@ -127,9 +137,12 @@ class RbacPolicy extends BasePolicy
 
     protected function checkEnterPermission(Identity $impersonator): Decision
     {
-        return $this->requirePermission(
+        [$permission, $legacy] = $this->permissionNames('enter');
+
+        return $this->requireScopedPermission(
             $impersonator,
-            $this->settings->string('authorization.permissions.enter', 'impersonator.enter'),
+            $permission,
+            $legacy,
             Decision::MISSING_PERMISSION,
             'You are not permitted to impersonate.',
         );
@@ -246,6 +259,56 @@ class RbacPolicy extends BasePolicy
         return $this->userHasPermission($user, $permission)
             ? Decision::allow()
             : Decision::deny($code, $reason, ['permission' => $permission]);
+    }
+
+    /**
+     * The configured permission name for an `authorization.permissions.*` key, and the bare name it
+     * replaced when the configured one is the shipped default.
+     *
+     * Only the default gets a fallback: an application that named its own permission gets exactly
+     * that name, so configuring one never quietly widens who passes.
+     *
+     * @return array{string, string|null}
+     */
+    protected function permissionNames(string $key): array
+    {
+        [$default, $legacy] = DeprecatedNames::PERMISSIONS[$key];
+
+        $configured = $this->settings->string('authorization.permissions.' . $key, $default);
+
+        return [$configured, $configured === $default ? $legacy : null];
+    }
+
+    /**
+     * {@see requirePermission()}, also accepting the bare permission name used before 0.1.
+     *
+     * An operator seeded with `impersonator.enter` keeps working after the default became
+     * `laranail-impersonator.enter`; the first such check announces the bare name once. The set of
+     * operators who pass is the old set plus holders of the new name, never smaller. The bare names
+     * are accepted no later than the next minor after 0.1.
+     */
+    protected function requireScopedPermission(
+        Identity $identity,
+        string $permission,
+        ?string $legacy,
+        string $code,
+        string $reason,
+    ): Decision {
+        $decision = $this->requirePermission($identity, $permission, $code, $reason);
+
+        if ($decision->allowed || $legacy === null || $legacy === $permission) {
+            return $decision;
+        }
+
+        $user = $this->identities->resolveActor($identity);
+
+        if ($user !== null && $this->userHasPermission($user, $legacy)) {
+            DeprecatedNames::announce('permission', $legacy, $permission);
+
+            return Decision::allow();
+        }
+
+        return $decision;
     }
 
     /**

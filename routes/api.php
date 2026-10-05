@@ -23,10 +23,10 @@ use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\Api\ImpersonationCont
 
 Route::middleware(config('laranail.impersonator.api.middleware', ['api', 'auth:sanctum']))
     ->prefix(config('laranail.impersonator.api.prefix', 'impersonator/api/v1'))
-    ->name(config('laranail.impersonator.api.name_prefix', 'impersonator.api.'))
+    ->name(config('laranail.impersonator.api.name_prefix', 'laranail-impersonator.api.'))
     ->group(function (): void {
         Route::post('impersonations', [ImpersonationController::class, 'store'])
-            ->middleware('throttle:impersonator-api')
+            ->middleware('throttle:laranail-impersonator.api')
             ->name('impersonations.store');
 
         Route::get('impersonations/current', [ImpersonationController::class, 'current'])
@@ -39,11 +39,11 @@ Route::middleware(config('laranail.impersonator.api.middleware', ['api', 'auth:s
         // may only buy time on the session they are in. Extending somebody else's would be a
         // way to prolong access on their behalf without their knowledge.
         Route::post('impersonations/current/extend', [ImpersonationController::class, 'extend'])
-            ->middleware('throttle:impersonator-api')
+            ->middleware('throttle:laranail-impersonator.api')
             ->name('impersonations.extend');
 
         Route::post('impersonations/{audit}/revoke', [ImpersonationController::class, 'revoke'])
-            ->middleware('throttle:impersonator-api')
+            ->middleware('throttle:laranail-impersonator.api')
             ->name('impersonations.revoke');
 
         Route::get('audits', [AuditController::class, 'index'])->name('audits.index');
@@ -62,10 +62,10 @@ Route::middleware(config('laranail.impersonator.api.middleware', ['api', 'auth:s
         Route::get('approvals/{approval}', [ApprovalController::class, 'show'])->name('approvals.show');
 
         Route::post('approvals/{approval}/grant', [ApprovalController::class, 'grant'])
-            ->middleware('throttle:impersonator-api')
+            ->middleware('throttle:laranail-impersonator.api')
             ->name('approvals.grant');
 
         Route::post('approvals/{approval}/deny', [ApprovalController::class, 'deny'])
-            ->middleware('throttle:impersonator-api')
+            ->middleware('throttle:laranail-impersonator.api')
             ->name('approvals.deny');
     });

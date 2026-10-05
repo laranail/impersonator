@@ -158,6 +158,37 @@ the digest. The chain proves *tampering happened*, not who did it, and it cannot
 is the honest claim, and it is why `verify-audit` reports the first row where the chain breaks
 and treats everything after it as suspect.
 
+## Public names
+
+Route names, rate limiters, gate abilities, Blade components, container aliases and view and
+translation namespaces all live in flat maps keyed by the name, so a second package claiming one does
+not collide loudly: it silently replaces the first. Every name the package registers therefore
+carries the vendor and the slug.
+
+| Surface | Name | Deprecated bare alias |
+|---|---|---|
+| Routes | `laranail-impersonator.{enter,leave,extend,revoke,accept}`, `laranail-impersonator.api.*` | `impersonator.*`, `impersonator.api.*` |
+| Rate limiters | `laranail-impersonator.{enter,api,accept}` | `impersonator-{enter,api,accept}` |
+| Gate abilities | `laranail-impersonator.{revoke,audit.view,mode}` | `impersonator.{revoke,audit.view,mode}` |
+| RBAC permissions (defaults) | `laranail-impersonator.{enter,mode.%s,revoke,approve,audit.view}` | `impersonator.{enter,mode.%s,revoke,approve,audit.view}` |
+| Blade components | `<x-laranail-impersonator::banner />`, `::impersonate-button`, `::leave-button`, `::badge`, `::when-impersonating` | `<x-impersonation-banner />` and the other four bare tags |
+| Container alias | `laranail.impersonator` | `impersonator` |
+| Views and translations | `laranail/impersonator::` and `laranail-impersonator::` | none |
+| Middleware | `laranail-impersonator.{lifetime,mode,trail,throttle,rls}` | none |
+| Commands | `laranail::impersonator.*` | none |
+
+Each bare alias keeps working and forwards to its replacement. Where the registry allows it, the
+first use raises an `E_USER_DEPRECATED` notice, once per name per process, which Laravel writes to
+its `deprecations` log channel: a route through `URL::resolveMissingNamedRoutesUsing()`, a limiter
+and a gate ability by delegating, a permission by being checked after the scoped one, and a Blade tag
+when its template is compiled. A container alias cannot announce itself, so `app('impersonator')` is
+deprecated by documentation only. The bare aliases may be removed no earlier than the next minor
+after 0.1.
+
+The guard is `tests/Feature/NamingConventionTest.php`, which reads the live registries through
+package-tools' `AssertsRegisteredNames` rather than grepping the provider, and lists each bare alias
+explicitly, so a new bare name fails and a stale entry fails too.
+
 ## What this does not do
 
 Worth stating plainly, because these are the questions the design answers with "no":

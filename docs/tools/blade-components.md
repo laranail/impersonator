@@ -9,7 +9,7 @@ impersonate button shown to somebody who cannot use it.
 ## The banner
 
 ```blade
-<x-impersonation-banner />
+<x-laranail-impersonator::banner />
 ```
 
 Place it once in a layout, unconditionally. It renders nothing when nobody is impersonating.
@@ -32,9 +32,9 @@ php artisan vendor:publish --tag=impersonator-views
 ## The impersonate button
 
 ```blade
-<x-impersonate-button :user="$customer" />
+<x-laranail-impersonator::impersonate-button :user="$customer" />
 
-<x-impersonate-button :user="$customer" mode="read_only" reason="Ticket #4182" />
+<x-laranail-impersonator::impersonate-button :user="$customer" mode="read_only" reason="Ticket #4182" />
 ```
 
 Renders nothing when the current operator may not impersonate that account — it asks the
@@ -48,7 +48,7 @@ otherwise the control needed to *supply* the reason would be hidden by the requi
 ## The leave button
 
 ```blade
-<x-impersonation-leave-button />
+<x-laranail-impersonator::leave-button />
 ```
 
 Renders only while impersonating. Leaving needs no permission, so this always works — including for
@@ -57,7 +57,7 @@ an operator whose access was revoked mid-session.
 ## The mode badge
 
 ```blade
-<x-impersonation-badge />
+<x-laranail-impersonator::badge />
 ```
 
 The active mode, or nothing.
@@ -65,28 +65,32 @@ The active mode, or nothing.
 ## Conditional content
 
 ```blade
-<x-when-impersonating>
+<x-laranail-impersonator::when-impersonating>
     <p>You are viewing this account as support.</p>
-</x-when-impersonating>
+</x-laranail-impersonator::when-impersonating>
 ```
 
-## Namespaced aliases
+## Names and deprecated aliases
 
-Every component is also available namespaced, for teams that prefer it or already own the short
-names. The namespaced form resolves by **class name**, so it is not always the same string as the
-alias:
+Every component is registered under the package's Blade prefix, `laranail-impersonator`. Three
+spellings resolve to each one:
 
-| Alias | Namespaced |
-|---|---|
-| `<x-impersonation-banner />` | `<x-laranail-impersonator::impersonation-banner />` |
-| `<x-impersonate-button />` | `<x-laranail-impersonator::impersonate-button />` |
-| `<x-impersonation-leave-button />` | `<x-laranail-impersonator::leave-impersonation-button />` |
-| `<x-impersonation-badge />` | `<x-laranail-impersonator::impersonation-badge />` |
-| `<x-when-impersonating>` | `<x-laranail-impersonator::when-impersonating>` |
+| Scoped (use this) | Class-derived | Deprecated bare tag |
+|---|---|---|
+| `<x-laranail-impersonator::banner />` | `<x-laranail-impersonator::impersonation-banner />` | `<x-impersonation-banner />` |
+| `<x-laranail-impersonator::impersonate-button />` | `<x-laranail-impersonator::impersonate-button />` | `<x-impersonate-button />` |
+| `<x-laranail-impersonator::leave-button />` | `<x-laranail-impersonator::leave-impersonation-button />` | `<x-impersonation-leave-button />` |
+| `<x-laranail-impersonator::badge />` | `<x-laranail-impersonator::impersonation-badge />` | `<x-impersonation-badge />` |
+| `<x-laranail-impersonator::when-impersonating>` | `<x-laranail-impersonator::when-impersonating>` | `<x-when-impersonating>` |
 
-Note the leave button: its class is `LeaveImpersonationButton`, so the namespaced tag reads
-`leave-impersonation-button` while the alias reads `impersonation-leave-button`. The alias is the
-one to prefer.
+The class-derived form resolves by **class name**, so it is not always the scoped string: the leave
+button's class is `LeaveImpersonationButton`, so that tag reads `leave-impersonation-button`.
+
+The bare tags are the names shipped before 0.1 was scoped. They still render exactly the same
+component, but they are deprecated aliases: a template using one raises an `E_USER_DEPRECATED`
+notice once, when Blade compiles it, and they may stop resolving no earlier than the next minor
+after 0.1. A bare tag is a name in Blade's flat alias map, so another package or the application
+registering `impersonation-banner` would silently replace this one.
 
 ## Blade directives
 
@@ -116,7 +120,7 @@ Four directives, registered through `Blade::if` — which means each also gets a
 ```
 
 `@canImpersonate` runs the same policy the action runs, so a hidden button and a 403 can never
-disagree. `@impersonationBanner` is the directive form of `<x-impersonation-banner />`, for layouts
+disagree. `@impersonationBanner` is the directive form of `<x-laranail-impersonator::banner />`, for layouts
 that are not using components.
 
 ## The route macro

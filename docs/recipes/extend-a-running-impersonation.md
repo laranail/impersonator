@@ -61,7 +61,7 @@ If you add a route under a `read_only` impersonation, allowlist it by name, the 
 is:
 
 ```php
-'modes' => ['read_only' => ['allowed_routes' => ['impersonator.leave', 'impersonator.extend', 'support.extend']]],
+'modes' => ['read_only' => ['allowed_routes' => ['laranail-impersonator.leave', 'laranail-impersonator.extend', 'support.extend']]],
 ```
 
 ## What you cannot do

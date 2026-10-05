@@ -35,11 +35,11 @@ it('renders the banner component only while impersonating', function (): void {
     // a conditional — and a forgotten conditional is a banner that silently fails.
     Auth::guard('web')->setUser($this->admin);
 
-    expect(trim(Blade::render('<x-impersonation-banner />')))->toBe('');
+    expect(trim(Blade::render('<x-laranail-impersonator::banner />')))->toBe('');
 
     Impersonator::enter($this->target);
 
-    expect(Blade::render('<x-impersonation-banner />'))->toContain('impersonator-banner');
+    expect(Blade::render('<x-laranail-impersonator::banner />'))->toContain('impersonator-banner');
 });
 
 it('lets a banner attribute override config per placement', function (): void {
@@ -47,7 +47,7 @@ it('lets a banner attribute override config per placement', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    expect(Blade::render('<x-impersonation-banner position="top" theme="light" />'))
+    expect(Blade::render('<x-laranail-impersonator::banner position="top" theme="light" />'))
         ->toContain('top: 0')
         ->toContain('data-impersonator-theme="light"');
 });
@@ -66,10 +66,10 @@ it('renders a POST form for an allowed target', function (): void {
     // trigger.
     Auth::guard('web')->setUser($this->admin);
 
-    $html = Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->target]);
+    $html = Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" />', ['user' => $this->target]);
 
     expect($html)->toContain('method="POST"')
-        ->toContain(route('impersonator.enter'))
+        ->toContain(route('laranail-impersonator.enter'))
         ->toContain('name="target_type" value="user"')
         ->toContain('name="target_id" value="' . $this->target->getKey() . '"')
         ->toContain('_token');
@@ -79,12 +79,12 @@ it('renders nothing when the policy would refuse', function (): void {
     // Same policy the endpoint runs, so a visible button and a 403 cannot disagree.
     Auth::guard('web')->setUser($this->admin);
 
-    expect(trim(Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->admin])))
+    expect(trim(Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" />', ['user' => $this->admin])))
         ->toBe('');
 });
 
 it('renders nothing without a user', function (): void {
-    expect(trim(Blade::render('<x-impersonate-button />')))->toBe('');
+    expect(trim(Blade::render('<x-laranail-impersonator::impersonate-button />')))->toBe('');
 });
 
 it('prompts for a reason when one is required', function (): void {
@@ -92,7 +92,7 @@ it('prompts for a reason when one is required', function (): void {
     config()->set('laranail.impersonator.reason.require', true);
     Auth::guard('web')->setUser($this->admin);
 
-    expect(Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->target]))
+    expect(Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" />', ['user' => $this->target]))
         ->toContain('name="reason"')
         ->toContain('required');
 });
@@ -100,7 +100,7 @@ it('prompts for a reason when one is required', function (): void {
 it('forwards its attribute bag so host styles apply', function (): void {
     Auth::guard('web')->setUser($this->admin);
 
-    expect(Blade::render('<x-impersonate-button :user="$user" class="btn btn-sm" />', ['user' => $this->target]))
+    expect(Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" class="btn btn-sm" />', ['user' => $this->target]))
         ->toContain('btn btn-sm');
 });
 
@@ -108,7 +108,7 @@ it('escapes the display name in a confirmation prompt', function (): void {
     Auth::guard('web')->setUser($this->admin);
     $xss = User::create(['name' => '"><script>alert(1)</script>']);
 
-    $html = Blade::render('<x-impersonate-button :user="$user" confirm />', ['user' => $xss]);
+    $html = Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" confirm />', ['user' => $xss]);
 
     expect($html)->not->toContain('<script>alert(1)</script>');
 });
@@ -118,12 +118,12 @@ it('escapes the display name in a confirmation prompt', function (): void {
 it('renders the leave button only while impersonating', function (): void {
     Auth::guard('web')->setUser($this->admin);
 
-    expect(trim(Blade::render('<x-impersonation-leave-button />')))->toBe('');
+    expect(trim(Blade::render('<x-laranail-impersonator::leave-button />')))->toBe('');
 
     Impersonator::enter($this->target);
 
-    expect(Blade::render('<x-impersonation-leave-button />'))
-        ->toContain(route('impersonator.leave'))
+    expect(Blade::render('<x-laranail-impersonator::leave-button />'))
+        ->toContain(route('laranail-impersonator.leave'))
         ->toContain('Stop impersonating');
 });
 
@@ -131,7 +131,7 @@ it('renders the mode badge while impersonating', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target, mode: 'read_only');
 
-    expect(Blade::render('<x-impersonation-badge />'))
+    expect(Blade::render('<x-laranail-impersonator::badge />'))
         // The raw mode stays available as a data attribute, for styling and for a host's own scripting.
         ->toContain('data-impersonator-mode="read_only"')
         // The visible text is a translated label, not the config key with its underscore removed.
@@ -148,10 +148,10 @@ it('resolves component labels at render time and lets a tag override them', func
 
     app('translator')->addLines(['components.leave' => 'Quitter'], 'en', 'laranail-impersonator');
 
-    expect(Blade::render('<x-impersonation-leave-button />'))->toContain('Quitter')
-        ->and(Blade::render('<x-impersonation-leave-button label="Back to admin" />'))
+    expect(Blade::render('<x-laranail-impersonator::leave-button />'))->toContain('Quitter')
+        ->and(Blade::render('<x-laranail-impersonator::leave-button label="Back to admin" />'))
         ->toContain('Back to admin')
-        ->and(Blade::render('<x-impersonation-leave-button label="Back to admin" />'))
+        ->and(Blade::render('<x-laranail-impersonator::leave-button label="Back to admin" />'))
         ->not->toContain('Quitter');
 });
 
@@ -167,13 +167,13 @@ it('escapes the target name in the badge', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    expect(Blade::render('<x-impersonation-badge show-target />'))->toContain('Customer &amp; Co');
+    expect(Blade::render('<x-laranail-impersonator::badge show-target />'))->toContain('Customer &amp; Co');
 });
 
 it('renders a guarded slot only while impersonating', function (): void {
     Auth::guard('web')->setUser($this->admin);
 
-    $template = '<x-when-impersonating>INSIDE</x-when-impersonating>';
+    $template = '<x-laranail-impersonator::when-impersonating>INSIDE</x-laranail-impersonator::when-impersonating>';
 
     expect(Blade::render($template))->not->toContain('INSIDE');
 
@@ -186,54 +186,68 @@ it('scopes a guarded slot to a mode', function (): void {
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target, mode: 'read_only');
 
-    expect(Blade::render('<x-when-impersonating mode="read_only">RO</x-when-impersonating>'))
+    expect(Blade::render('<x-laranail-impersonator::when-impersonating mode="read_only">RO</x-laranail-impersonator::when-impersonating>'))
         ->toContain('RO');
 
-    expect(Blade::render('<x-when-impersonating mode="full">FULL</x-when-impersonating>'))
+    expect(Blade::render('<x-laranail-impersonator::when-impersonating mode="full">FULL</x-laranail-impersonator::when-impersonating>'))
         ->not->toContain('FULL');
 });
 
 it('inverts a guarded slot with unless', function (): void {
     Auth::guard('web')->setUser($this->admin);
 
-    expect(Blade::render('<x-when-impersonating unless>NORMAL</x-when-impersonating>'))
+    expect(Blade::render('<x-laranail-impersonator::when-impersonating unless>NORMAL</x-laranail-impersonator::when-impersonating>'))
         ->toContain('NORMAL');
 
     Impersonator::enter($this->target);
 
-    expect(Blade::render('<x-when-impersonating unless>NORMAL</x-when-impersonating>'))
+    expect(Blade::render('<x-laranail-impersonator::when-impersonating unless>NORMAL</x-laranail-impersonator::when-impersonating>'))
         ->not->toContain('NORMAL');
 });
 
-it('renders every component under both its alias and its namespaced name', function (): void {
-    // The namespaced form resolves by *class* name, so it is not always the same string as the
-    // alias — `LeaveImpersonationButton` is registered as `impersonation-leave-button`. This pins
-    // the table in docs/tools/blade-components.md, which is otherwise easy to get wrong.
+it('renders every component under its scoped, class-derived and deprecated bare names', function (): void {
+    // The class-derived form resolves by *class* name, so it is not always the same string as the
+    // scoped alias -- `LeaveImpersonationButton` is `leave-button` scoped. The bare tag is the
+    // deprecated pre-0.1 spelling and must still render the same thing. This pins the table in
+    // docs/tools/blade-components.md, which is otherwise easy to get wrong.
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
 
-    $pairs = [
-        '<x-impersonation-banner />'       => '<x-laranail-impersonator::impersonation-banner />',
-        '<x-impersonation-badge />'        => '<x-laranail-impersonator::impersonation-badge />',
-        '<x-impersonation-leave-button />' => '<x-laranail-impersonator::leave-impersonation-button />',
+    $spellings = [
+        '<x-laranail-impersonator::banner />' => [
+            '<x-laranail-impersonator::impersonation-banner />',
+            '<x-impersonation-banner />',
+        ],
+        '<x-laranail-impersonator::badge />' => [
+            '<x-laranail-impersonator::impersonation-badge />',
+            '<x-impersonation-badge />',
+        ],
+        '<x-laranail-impersonator::leave-button />' => [
+            '<x-laranail-impersonator::leave-impersonation-button />',
+            '<x-impersonation-leave-button />',
+        ],
     ];
 
-    foreach ($pairs as $alias => $namespaced) {
-        expect(Blade::render($alias))->not->toBe('')
-            ->and(Blade::render($namespaced))->toBe(Blade::render($alias));
+    foreach ($spellings as $scoped => $others) {
+        expect(Blade::render($scoped))->not->toBe('');
+
+        foreach ($others as $other) {
+            expect(Blade::render($other))->toBe(Blade::render($scoped));
+        }
     }
 
-    expect(Blade::render('<x-laranail-impersonator::when-impersonating>YES</x-laranail-impersonator::when-impersonating>'))
+    expect(Blade::render('<x-when-impersonating>YES</x-when-impersonating>'))->toContain('YES')
+        ->and(Blade::render('<x-laranail-impersonator::when-impersonating>YES</x-laranail-impersonator::when-impersonating>'))
         ->toContain('YES');
 });
 
-it('renders the impersonate button under both names', function (): void {
+it('renders the impersonate button under its scoped and deprecated bare names', function (): void {
     // Rendered while not impersonating, since the button hides itself inside an impersonation.
     Auth::guard('web')->setUser($this->admin);
 
-    $alias = Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->target]);
-    $namespaced = Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" />', ['user' => $this->target]);
+    $scoped = Blade::render('<x-laranail-impersonator::impersonate-button :user="$user" />', ['user' => $this->target]);
+    $bare = Blade::render('<x-impersonate-button :user="$user" />', ['user' => $this->target]);
 
-    expect($alias)->not->toBe('')
-        ->and($namespaced)->toBe($alias);
+    expect($scoped)->not->toBe('')
+        ->and($bare)->toBe($scoped);
 });

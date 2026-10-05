@@ -226,8 +226,8 @@ it('names the enter-plus-mode permission trap when the rbac policy is active', f
     $run = doctorRun();
 
     expect($run['output'])->toContain('needs BOTH')
-        ->and($run['output'])->toContain('impersonator.enter')
-        ->and($run['output'])->toContain('impersonator.mode.full')
+        ->and($run['output'])->toContain('laranail-impersonator.enter')
+        ->and($run['output'])->toContain('laranail-impersonator.mode.full')
         // A warning, not a failure: it may well be configured correctly.
         ->and($run['exit'])->toBe(0);
 });

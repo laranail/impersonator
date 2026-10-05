@@ -69,7 +69,7 @@ Two layers, both on by default:
         // The escape hatch that keeps an operator from being trapped. Matched on the
         // route name *and* the path, so an application that renamed its logout route
         // does not thereby lock people in.
-        'allowed_routes' => ['impersonator.leave', 'logout'],
+        'allowed_routes' => ['laranail-impersonator.leave', 'logout'],
 
         // The persistence-layer net. On by default.
         'prevent_writes' => true,
@@ -249,19 +249,19 @@ Impersonator::registerMode(new BillingOnlyEnforcer);
 The registry pairs each mode with its enforcer, so a mode cannot be registered without one.
 
 With spatie/laravel-permission installed, a new mode also implies a new permission —
-`impersonator.mode.billing_only` by default. See [Authorization](authorization.md).
+`laranail-impersonator.mode.billing_only` by default. See [Authorization](authorization.md).
 
 ## Per-mode permissions
 
 ```php
 'authorization' => [
-    'permissions' => ['mode' => 'impersonator.mode.%s'],
+    'permissions' => ['mode' => 'laranail-impersonator.mode.%s'],
 ],
 ```
 
 This is what pins junior support staff to `read_only` while a senior operator may choose `full`.
 
-Entering requires **both** `impersonator.enter` and the mode's permission. Granting only the
+Entering requires **both** `laranail-impersonator.enter` and the mode's permission. Granting only the
 first produces an operator who can impersonate nothing at all while appearing fully configured,
 and the error names the *mode* — which sends them asking for the wrong permission. It is the most
 common way an install is quietly broken, and the doctor warns about it explicitly.
@@ -269,7 +269,7 @@ common way an install is quietly broken, and the doctor warns about it explicitl
 ## Showing the mode
 
 ```blade
-<x-impersonation-badge />       {{-- renders the mode, or nothing --}}
+<x-laranail-impersonator::badge />       {{-- renders the mode, or nothing --}}
 ```
 
 ```php

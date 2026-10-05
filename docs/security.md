@@ -114,7 +114,7 @@ Always active, with or without an RBAC package:
 
 With spatie/laravel-permission installed, additionally:
 
-- `impersonator.enter` **and** the per-mode permission. Both, not either.
+- `laranail-impersonator.enter` **and** the per-mode permission. Both, not either.
 - Protected roles can never be impersonated, by anyone — it is a property of the target, not a
   comparison, so no amount of privilege gets past it.
 - A hierarchy rule: the operator's highest role level must strictly exceed the target's, so peers
@@ -254,7 +254,7 @@ account. That is worse than an accounting error:
   customer's limit, and the request log shows the customer doing it to themselves.
 
 The package's own three limiters resolve the operator first and fall back to the authenticated user,
-so `impersonator-enter` and `impersonator-api` cannot be spent against a target. (`impersonator-accept`
+so `laranail-impersonator.enter` and `laranail-impersonator.api` cannot be spent against a target. (`laranail-impersonator.accept`
 stays keyed on the IP — the caller redeeming a handoff has no session yet.)
 
 **Your application's limits are not covered by that**, because the package does not replace the
@@ -299,7 +299,7 @@ leaking through makes the feature both useless and dangerous.
 
 ## Remote revocation
 
-An administrator holding `impersonator.revoke` can end any impersonation.
+An administrator holding `laranail-impersonator.revoke` can end any impersonation.
 
 For a token credential the invalidation is immediate. For a session it depends on the store:
 with `database`, `redis` or `file` the session is destroyed out of band through

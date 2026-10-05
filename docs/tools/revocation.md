@@ -6,7 +6,7 @@ The kill switch: end an impersonation you do not own.
 Impersonator::revoke($auditId, note: 'Escalated to security');
 ```
 
-Requires `impersonator.revoke` — its own permission, because revoking is a de-escalation and
+Requires `laranail-impersonator.revoke` — its own permission, because revoking is a de-escalation and
 warrants separate authorisation from entering.
 
 ## Immediate, or recorded?

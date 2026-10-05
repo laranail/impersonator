@@ -47,17 +47,17 @@ beforeEach(function (): void {
     $this->requester = RbacUser::create([
         'name'        => 'Requester',
         'roles'       => ['manager', 'auditor'],
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full', 'impersonator.approve'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full', 'laranail-impersonator.approve'],
     ]);
     $this->manager = RbacUser::create([
         'name'        => 'Manager',
         'roles'       => ['manager'],
-        'permissions' => ['impersonator.approve'],
+        'permissions' => ['laranail-impersonator.approve'],
     ]);
     $this->auditor = RbacUser::create([
         'name'        => 'Auditor',
         'roles'       => ['auditor'],
-        'permissions' => ['impersonator.approve'],
+        'permissions' => ['laranail-impersonator.approve'],
     ]);
     $this->target = RbacUser::create(['name' => 'Customer']);
 
@@ -190,7 +190,7 @@ it('lets one reviewer fill only one role slot', function (): void {
     $both = RbacUser::create([
         'name'        => 'Both',
         'roles'       => ['manager', 'auditor'],
-        'permissions' => ['impersonator.approve'],
+        'permissions' => ['laranail-impersonator.approve'],
     ]);
 
     $id = openChainRequest($this->target);

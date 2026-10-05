@@ -39,7 +39,7 @@ beforeEach(function (): void {
     $this->admin = RbacUser::create([
         'name'        => 'Admin',
         'roles'       => ['admin'],
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
     $this->target = RbacUser::create(['name' => 'Customer']);
 

@@ -6,11 +6,12 @@ namespace Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Check;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorResult;
+use Simtabi\Laranail\Impersonator\Laravel\Support\DeprecatedNames;
 use Simtabi\Laranail\Impersonator\Laravel\Authorization\RbacPolicy;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuthorizationPolicy;
 
 /**
- * The trap: an operator holding `impersonator.enter` and no mode permission.
+ * The trap: an operator holding `laranail-impersonator.enter` and no mode permission.
  *
  * Both are required, so such an operator can impersonate nothing at all while appearing fully
  * configured. The error they get names the *mode*, which sends them asking for the wrong permission —
@@ -51,16 +52,20 @@ final class ModePermissionsCheck extends Check
             ));
         }
 
-        $template = $this->settings->string('authorization.permissions.mode', 'impersonator.mode.%s');
-        $enter = $this->settings->string('authorization.permissions.enter', 'impersonator.enter');
+        $template = $this->settings->string('authorization.permissions.mode', DeprecatedNames::PERMISSIONS['mode'][0]);
+        $enter = $this->settings->string('authorization.permissions.enter', DeprecatedNames::PERMISSIONS['enter'][0]);
         $default = $this->settings->string('default_mode', 'full');
 
         return DoctorResult::warn(sprintf(
             'Entering needs BOTH [%s] and the per-mode permission — for the default mode that is '
             . '[%s]. Granting only the first produces an operator who can impersonate nothing '
-            . 'while looking correctly configured. Verify your seeder grants both.',
+            . 'while looking correctly configured. Verify your seeder grants both.%s',
             $enter,
             sprintf($template, $default),
+            $template === DeprecatedNames::PERMISSIONS['mode'][0]
+                ? ' The bare names used before 0.1 (impersonator.enter, impersonator.mode.*) are still '
+                    . 'accepted as deprecated aliases; seed the laranail-impersonator.* names instead.'
+                : '',
         ));
     }
 }

@@ -36,6 +36,7 @@ use Illuminate\Contracts\View\Factory as ViewFactory;
 use Simtabi\Laranail\Impersonator\Laravel\Doctor\Checks;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Simtabi\Laranail\Impersonator\Core\Support\AuditChain;
+use Simtabi\Laranail\Package\Tools\Support\NamespaceForms;
 use Simtabi\Laranail\Impersonator\Laravel\Support\Settings;
 use Illuminate\Contracts\Session\Session as SessionContract;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
@@ -72,6 +73,7 @@ use Simtabi\Laranail\Impersonator\Laravel\Support\MessageCatalog;
 use Simtabi\Laranail\Impersonator\Laravel\Support\TargetRegistry;
 use Simtabi\Laranail\Package\Tools\Services\Doctor\DoctorService;
 use Simtabi\Laranail\Impersonator\Laravel\Support\BannerPresenter;
+use Simtabi\Laranail\Impersonator\Laravel\Support\DeprecatedNames;
 use Simtabi\Laranail\Impersonator\Laravel\Tokens\AcceptUrlBuilder;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRedeemed;
 use Simtabi\Laranail\Impersonator\Core\Events\HandoffTokenRejected;
@@ -108,6 +110,7 @@ use Simtabi\Laranail\Impersonator\Laravel\Adapters\SessionGuardAdapter;
 use Simtabi\Laranail\Impersonator\Laravel\Audit\ConcurrencyLimitReached;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\ScrubIdentityCommand;
 use Simtabi\Laranail\Impersonator\Laravel\Middleware\ThrottleByOperator;
+use Simtabi\Laranail\Package\Tools\Support\Routing\BareRouteNameAliases;
 use Simtabi\Laranail\Impersonator\Laravel\Approval\EloquentApprovalStore;
 use Simtabi\Laranail\Impersonator\Laravel\Commands\PruneApprovalsCommand;
 use Simtabi\Laranail\Impersonator\Laravel\Failure\LaravelFailureReporter;
@@ -475,7 +478,14 @@ class ImpersonatorServiceProvider extends ServiceProvider
             ),
         );
 
-        $this->app->alias(ImpersonationManager::class, 'impersonator');
+        $this->app->alias(ImpersonationManager::class, DeprecatedNames::CONTAINER_ALIAS);
+
+        // @deprecated The bare alias is kept so `app('impersonator')` written before 0.1 was scoped still
+        // resolves. A container alias cannot announce itself, so its deprecation is documented
+        // rather than raised. Removable no earlier than the next minor after 0.1.
+        foreach (array_keys(DeprecatedNames::CONTAINER_ALIASES) as $alias) {
+            $this->app->alias(ImpersonationManager::class, $alias);
+        }
     }
 
     /**
@@ -567,6 +577,30 @@ class ImpersonatorServiceProvider extends ServiceProvider
         if ($settings->bool('api.enabled', false)) {
             $this->loadRoutesFrom($this->packagePath('routes/api.php'));
         }
+
+        $this->registerDeprecatedRouteNames();
+    }
+
+    /**
+     * Keep the bare `impersonator.*` route names resolving to the scoped `laranail-impersonator.*`.
+     *
+     * Hooked through `URL::resolveMissingNamedRoutesUsing()`, which Laravel consults only for a name
+     * it does not hold: an application that kept `impersonator.` as its configured prefix, or owns a
+     * route of that name, resolves it normally and never reaches this. Each bare name announces
+     * itself once. `Route::has()` does not go through the hook, so the package's own guards ask for
+     * the configured (scoped) name. The bare names may stop resolving no earlier than the next minor
+     * after 0.1.
+     */
+    protected function registerDeprecatedRouteNames(): void
+    {
+        $aliases = BareRouteNameAliases::install(
+            router: $this->app->make(Router::class),
+            url: $this->app->make('url'),
+            package: 'laranail/impersonator',
+            prefixes: [DeprecatedNames::LEGACY_ROUTE_PREFIX => DeprecatedNames::ROUTE_PREFIX],
+        );
+
+        $this->app->instance(DeprecatedNames::CONTAINER_ALIAS . '.route-aliases', $aliases);
     }
 
     /**
@@ -584,11 +618,20 @@ class ImpersonatorServiceProvider extends ServiceProvider
     protected function registerTranslations(): void
     {
         $this->loadTranslationsFrom($this->packagePath('resources/lang'), 'laranail-impersonator');
+
+        // Also answer to the canonical composer-name form, `laranail/impersonator::`.
+        NamespaceForms::mirror($this->app, 'laranail/impersonator');
     }
 
+    /**
+     * Both forms: `laranail-impersonator::` and the canonical `laranail/impersonator::`, over the
+     * same paths, so either spelling finds the same file and a published override.
+     */
     protected function registerViews(): void
     {
         $this->loadViewsFrom($this->packagePath('resources/views'), 'laranail-impersonator');
+
+        NamespaceForms::mirror($this->app, 'laranail/impersonator');
     }
 
     /**
@@ -642,7 +685,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
             $settings = app(Settings::class);
 
             Route::get($settings->string('routes.leave_path', 'leave'), LeaveImpersonationController::class)
-                ->name($settings->string('routes.name_prefix', 'impersonator.') . 'leave');
+                ->name($settings->string('routes.name_prefix', DeprecatedNames::ROUTE_PREFIX) . 'leave');
         });
     }
 
@@ -709,20 +752,58 @@ class ImpersonatorServiceProvider extends ServiceProvider
      *
      * Registered by class rather than as an anonymous namespace so each component can
      * decide to render nothing — which is the property that lets a host application
-     * place `<x-impersonation-banner />` once in a layout and never wrap it in a
+     * place `<x-laranail-impersonator::banner />` once in a layout and never wrap it in a
      * conditional. A forgotten conditional is a banner that silently fails to appear.
+     *
+     * Three spellings resolve to each component:
+     *
+     *  - `<x-laranail-impersonator::banner />`, the documented scoped name;
+     *  - `<x-laranail-impersonator::impersonation-banner />`, the class-derived name the component
+     *    namespace has always resolved;
+     *  - `<x-impersonation-banner />`, the bare tag shipped before 0.1 was scoped. Deprecated: a
+     *    template using it announces itself once, when it is compiled. Removable no earlier than the
+     *    next minor after 0.1.
      */
     protected function registerBladeComponents(): void
     {
-        Blade::component('impersonation-banner', ImpersonationBanner::class);
-        Blade::component('impersonate-button', ImpersonateButton::class);
-        Blade::component('impersonation-leave-button', LeaveImpersonationButton::class);
-        Blade::component('impersonation-badge', ImpersonationBadge::class);
-        Blade::component('when-impersonating', WhenImpersonating::class);
+        $classes = [
+            'impersonation-banner'       => ImpersonationBanner::class,
+            'impersonate-button'         => ImpersonateButton::class,
+            'impersonation-leave-button' => LeaveImpersonationButton::class,
+            'impersonation-badge'        => ImpersonationBadge::class,
+            'when-impersonating'         => WhenImpersonating::class,
+        ];
 
-        // Also exposed under a namespace, so `<x-laranail-impersonator::banner />` works for
-        // teams that prefer namespaced components or already own these short names.
+        foreach (DeprecatedNames::BLADE_COMPONENTS as $bare => $scoped) {
+            Blade::component($classes[$bare], $scoped);
+
+            // @deprecated Bare tag kept working; use the scoped one. Removable no earlier than the
+            // next minor after 0.1.
+            Blade::component($classes[$bare], $bare);
+        }
+
         Blade::componentNamespace('Simtabi\\Laranail\\Impersonator\\Laravel\\View\\Components', 'laranail-impersonator');
+
+        // A Blade alias cannot announce itself when rendered, so the bare tags are announced when a
+        // template using them is compiled -- once per compile, and compiled views are cached.
+        $pattern = '/<x-(' . implode('|', array_map(
+            static fn (string $tag): string => preg_quote($tag, '/'),
+            array_keys(DeprecatedNames::BLADE_COMPONENTS),
+        )) . ')(?=[\s\/>])/';
+
+        Blade::prepareStringsForCompilationUsing(static function (string $value) use ($pattern): string {
+            if (str_contains($value, '<x-') && preg_match_all($pattern, $value, $matches) > 0) {
+                foreach (array_unique($matches[1]) as $bare) {
+                    DeprecatedNames::announce(
+                        'Blade component',
+                        '<x-' . $bare . '>',
+                        '<x-' . DeprecatedNames::BLADE_COMPONENTS[$bare] . '>',
+                    );
+                }
+            }
+
+            return $value;
+        });
     }
 
     /**
@@ -775,15 +856,15 @@ class ImpersonatorServiceProvider extends ServiceProvider
         $this->app->make(Settings::class);
 
         $abilities = [
-            'impersonator.revoke' => static fn (Authenticatable|Model $user, string $auditId): bool => app(
+            'laranail-impersonator.revoke' => static fn (Authenticatable|Model $user, string $auditId): bool => app(
                 AuthorizationPolicy::class,
             )->authorizeRevoke(app(IdentityResolver::class)->fromUser($user), $auditId)->allowed,
 
-            'impersonator.audit.view' => static fn (Authenticatable|Model $user): bool => app(
+            'laranail-impersonator.audit.view' => static fn (Authenticatable|Model $user): bool => app(
                 AuthorizationPolicy::class,
             )->authorizeAuditAccess(app(IdentityResolver::class)->fromUser($user))->allowed,
 
-            'impersonator.mode' => static fn (Authenticatable|Model $user, string $mode): bool => app(
+            'laranail-impersonator.mode' => static fn (Authenticatable|Model $user, string $mode): bool => app(
                 AuthorizationPolicy::class,
             )->authorizeMode(app(IdentityResolver::class)->fromUser($user), $mode)->allowed,
         ];
@@ -792,6 +873,23 @@ class ImpersonatorServiceProvider extends ServiceProvider
             if (! $gate->has($ability)) {
                 $gate->define($ability, $callback);
             }
+        }
+
+        // @deprecated The bare abilities a host policy may still check. Each delegates to its scoped
+        // ability -- through the gate, so `before` hooks and an application's own definition of the
+        // scoped ability apply exactly as they would to a direct check -- and announces itself once.
+        // An application that defined a bare ability itself keeps its own. Removable no earlier than
+        // the next minor after 0.1.
+        foreach (DeprecatedNames::GATE_ABILITIES as $bare => $scoped) {
+            if ($gate->has($bare)) {
+                continue;
+            }
+
+            $gate->define($bare, static function (Authenticatable|Model $user, mixed ...$arguments) use ($bare, $scoped): bool {
+                DeprecatedNames::announce('gate ability', $bare, $scoped);
+
+                return app(Gate::class)->forUser($user)->allows($scoped, $arguments);
+            });
         }
 
         // The audit model's policy, so `$user->can('view', $audit)` and Blade's `@can` cover an
@@ -836,7 +934,7 @@ class ImpersonatorServiceProvider extends ServiceProvider
             return is_scalar($identifier) ? (string) $identifier : ($request->ip() ?? 'unknown');
         };
 
-        RateLimiter::for('impersonator-enter', static function (Request $request) use ($settings, $caller): Limit {
+        RateLimiter::for('laranail-impersonator.enter', static function (Request $request) use ($settings, $caller): Limit {
             $key = $caller($request);
 
             return Limit::perMinutes(
@@ -845,15 +943,30 @@ class ImpersonatorServiceProvider extends ServiceProvider
             )->by('impersonator-enter:' . $key);
         });
 
-        RateLimiter::for('impersonator-api', static fn (Request $request): Limit => Limit::perMinutes(
+        RateLimiter::for('laranail-impersonator.api', static fn (Request $request): Limit => Limit::perMinutes(
             max(1, (int) ceil($settings->int('rate_limiting.api.decay', 60) / 60)),
             $settings->int('rate_limiting.api.attempts', 30),
         )->by('impersonator-api:' . $caller($request)));
 
-        RateLimiter::for('impersonator-accept', static fn (Request $request): Limit => Limit::perMinutes(
+        RateLimiter::for('laranail-impersonator.accept', static fn (Request $request): Limit => Limit::perMinutes(
             max(1, (int) ceil($settings->int('rate_limiting.accept.decay', 60) / 60)),
             $settings->int('rate_limiting.accept.attempts', 10),
         )->by('impersonator-accept:' . ($request->ip() ?? 'unknown')));
+
+        // @deprecated The bare limiter names, for a host route that throttles on
+        // `throttle:impersonator-enter`. Each resolves the scoped limiter at call time, so a host
+        // that redefines the scoped one is honoured, and announces itself once. The `by()` keys
+        // above are unchanged, so the buckets are the ones the limiters always used. Removable no
+        // earlier than the next minor after 0.1.
+        foreach (DeprecatedNames::RATE_LIMITERS as $bare => $scoped) {
+            RateLimiter::for($bare, static function (Request $request) use ($bare, $scoped): mixed {
+                DeprecatedNames::announce('rate limiter', $bare, $scoped);
+
+                $limiter = RateLimiter::limiter($scoped);
+
+                return $limiter === null ? Limit::none() : $limiter($request);
+            });
+        }
     }
 
     /**

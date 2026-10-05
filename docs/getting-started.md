@@ -29,10 +29,10 @@ event fired for the target, so listeners that send "new sign-in" emails or updat
 ## Add a button
 
 ```blade
-<x-impersonate-button :user="$customer" />
+<x-laranail-impersonator::impersonate-button :user="$customer" />
 
 {{-- In your layout, once: --}}
-<x-impersonation-banner />
+<x-laranail-impersonator::banner />
 ```
 
 The button renders nothing when the current operator may not impersonate that account, so it
@@ -108,14 +108,17 @@ automatically:
 
 | Permission | Grants |
 |---|---|
-| `impersonator.enter` | Impersonating at all |
-| `impersonator.mode.read_only` | Using `read_only` |
-| `impersonator.mode.full` | Using `full` |
-| `impersonator.revoke` | Ending somebody else's impersonation |
-| `impersonator.approve` | Deciding a break-glass request |
-| `impersonator.audit.view` | Reading the trail |
+| `laranail-impersonator.enter` | Impersonating at all |
+| `laranail-impersonator.mode.read_only` | Using `read_only` |
+| `laranail-impersonator.mode.full` | Using `full` |
+| `laranail-impersonator.revoke` | Ending somebody else's impersonation |
+| `laranail-impersonator.approve` | Deciding a break-glass request |
+| `laranail-impersonator.audit.view` | Reading the trail |
 
-Note that entering needs **both** `impersonator.enter` and the permission for the mode. Granting
+An operator seeded with the bare names used before 0.1 (`impersonator.enter`, …) is still accepted,
+with a one-time deprecation notice; seed the names above.
+
+Note that entering needs **both** `laranail-impersonator.enter` and the permission for the mode. Granting
 only the first produces an operator who can impersonate nothing while looking correctly
 configured — the doctor warns about exactly this. See [Authorization](tools/authorization.md).
 

@@ -74,7 +74,7 @@ Approvers have to be told a request is waiting. A queue nobody is notified about
 the incident is over, by which point the operator has asked a colleague to work around the control.
 
 The package cannot find your approvers itself — it duck-types an RBAC surface rather than depending
-on one, so it cannot query "everybody holding `impersonator.approve`". Supply a resolver returning
+on one, so it cannot query "everybody holding `laranail-impersonator.approve`". Supply a resolver returning
 notifiables, or list plain addresses, or both.
 
 The requester is filtered out of the resolver's result even if it returns them: they cannot decide

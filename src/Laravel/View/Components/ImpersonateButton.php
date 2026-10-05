@@ -98,7 +98,7 @@ class ImpersonateButton extends Component
      */
     private function action(Settings $settings): string
     {
-        $name = $settings->string('routes.name_prefix', 'impersonator.') . 'enter';
+        $name = $settings->string('routes.name_prefix', 'laranail-impersonator.') . 'enter';
 
         if (app('router')->has($name)) {
             return route($name);

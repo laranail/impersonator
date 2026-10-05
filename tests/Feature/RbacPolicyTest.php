@@ -36,7 +36,7 @@ beforeEach(function (): void {
     // deliberately not enough — see the defence-in-depth test below.
     $this->admin = RbacUser::create([
         'name'        => 'Admin',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
     $this->target = RbacUser::create(['name' => 'Customer']);
 });
@@ -76,7 +76,7 @@ it('honours a renamed enter permission', function (): void {
     config()->set('laranail.impersonator.authorization.permissions.enter', 'acme.support.impersonate');
     $operator = RbacUser::create([
         'name'        => 'Op',
-        'permissions' => ['acme.support.impersonate', 'impersonator.mode.full'],
+        'permissions' => ['acme.support.impersonate', 'laranail-impersonator.mode.full'],
     ]);
 
     expect(decide($operator, $this->target)->allowed)->toBeTrue()
@@ -97,7 +97,7 @@ it('gates each mode behind its own permission', function (): void {
     // The rule that pins junior staff to read_only.
     $junior = RbacUser::create([
         'name'        => 'Junior',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.read_only'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.read_only'],
     ]);
 
     expect(decide($junior, $this->target, 'read_only')->allowed)->toBeTrue()
@@ -109,10 +109,10 @@ it('allows a senior operator every mode they hold', function (): void {
     $senior = RbacUser::create([
         'name'        => 'Senior',
         'permissions' => [
-            'impersonator.enter',
-            'impersonator.mode.read_only',
-            'impersonator.mode.limited',
-            'impersonator.mode.full',
+            'laranail-impersonator.enter',
+            'laranail-impersonator.mode.read_only',
+            'laranail-impersonator.mode.limited',
+            'laranail-impersonator.mode.full',
         ],
     ]);
 
@@ -125,7 +125,7 @@ it('honours a custom mode permission template', function (): void {
     config()->set('laranail.impersonator.authorization.permissions.mode', 'acme.imp.%s');
     $operator = RbacUser::create([
         'name'        => 'Op',
-        'permissions' => ['impersonator.enter', 'acme.imp.full'],
+        'permissions' => ['laranail-impersonator.enter', 'acme.imp.full'],
     ]);
 
     expect(decide($operator, $this->target, 'full')->allowed)->toBeTrue();
@@ -134,7 +134,7 @@ it('honours a custom mode permission template', function (): void {
 it('reports mode availability without impersonating, for a UI', function (): void {
     $junior = RbacUser::create([
         'name'        => 'Junior',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.read_only'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.read_only'],
     ]);
 
     $manager = app(ImpersonationManager::class);
@@ -157,7 +157,7 @@ it('protects a role regardless of how privileged the impersonator is', function 
     config()->set('laranail.impersonator.authorization.roles.protected', ['super-admin']);
     $god = RbacUser::create([
         'name'        => 'God',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
         'roles'       => ['super-admin'],
     ]);
     $founder = RbacUser::create(['name' => 'Founder', 'roles' => ['super-admin']]);
@@ -179,12 +179,12 @@ it('requires the impersonator to outrank the target', function (): void {
 
     $admin = RbacUser::create([
         'name'        => 'Admin',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
         'roles'       => ['admin'],
     ]);
     $support = RbacUser::create([
         'name'        => 'Support',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
         'roles'       => ['support'],
     ]);
 
@@ -195,7 +195,7 @@ it('requires the impersonator to outrank the target', function (): void {
 it('refuses a sideways impersonation between peers', function (): void {
     config()->set('laranail.impersonator.authorization.roles.levels', ['support' => 40]);
 
-    $perms = ['impersonator.enter', 'impersonator.mode.full'];
+    $perms = ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'];
     $a = RbacUser::create(['name' => 'A', 'permissions' => $perms, 'roles' => ['support']]);
     $b = RbacUser::create(['name' => 'B', 'permissions' => $perms, 'roles' => ['support']]);
 
@@ -216,7 +216,7 @@ it('uses a configured closure in preference to the built-in comparison', functio
 
     $a = RbacUser::create([
         'name'        => 'A',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
         'roles'       => ['support'],
     ]);
     $b = RbacUser::create(['name' => 'B', 'roles' => ['support']]);
@@ -252,7 +252,7 @@ it('gates revocation behind its own permission', function (): void {
     $policy = app(AuthorizationPolicy::class);
     $identities = app(ImpersonationManager::class)->identities();
 
-    $revoker = RbacUser::create(['name' => 'Revoker', 'permissions' => ['impersonator.revoke']]);
+    $revoker = RbacUser::create(['name' => 'Revoker', 'permissions' => ['laranail-impersonator.revoke']]);
 
     expect($policy->authorizeRevoke($identities->fromUser($revoker), 'any')->allowed)->toBeTrue()
         ->and($policy->authorizeRevoke($identities->fromUser($this->admin), 'any')->code)
@@ -263,7 +263,7 @@ it('gates audit access behind its own permission', function (): void {
     $policy = app(AuthorizationPolicy::class);
     $identities = app(ImpersonationManager::class)->identities();
 
-    $viewer = RbacUser::create(['name' => 'Viewer', 'permissions' => ['impersonator.audit.view']]);
+    $viewer = RbacUser::create(['name' => 'Viewer', 'permissions' => ['laranail-impersonator.audit.view']]);
 
     expect($policy->authorizeAuditAccess($identities->fromUser($viewer))->allowed)->toBeTrue()
         ->and($policy->authorizeAuditAccess($identities->fromUser($this->admin))->code)
@@ -275,7 +275,7 @@ it('gates audit access behind its own permission', function (): void {
 it('still refuses self-impersonation with every permission held', function (): void {
     $god = RbacUser::create([
         'name'        => 'God',
-        'permissions' => ['impersonator.enter', 'impersonator.mode.full'],
+        'permissions' => ['laranail-impersonator.enter', 'laranail-impersonator.mode.full'],
     ]);
 
     expect(decide($god, $god)->code)->toBe(Decision::SELF_IMPERSONATION);
@@ -299,8 +299,8 @@ it('requires the enter permission and the mode permission, not either one', func
     // alone gives an operator nothing, because every impersonation carries a mode and
     // each mode is gated separately. The doctor command warns when the enter permission
     // exists but no mode permission does.
-    $enterOnly = RbacUser::create(['name' => 'Enter only', 'permissions' => ['impersonator.enter']]);
-    $modeOnly = RbacUser::create(['name' => 'Mode only', 'permissions' => ['impersonator.mode.full']]);
+    $enterOnly = RbacUser::create(['name' => 'Enter only', 'permissions' => ['laranail-impersonator.enter']]);
+    $modeOnly = RbacUser::create(['name' => 'Mode only', 'permissions' => ['laranail-impersonator.mode.full']]);
 
     expect(decide($enterOnly, $this->target)->code)->toBe(Decision::MISSING_MODE_PERMISSION)
         ->and(decide($modeOnly, $this->target)->code)->toBe(Decision::MISSING_PERMISSION)

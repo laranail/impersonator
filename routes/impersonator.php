@@ -22,10 +22,10 @@ use Simtabi\Laranail\Impersonator\Laravel\Http\Controllers\RevokeImpersonationCo
 
 Route::middleware(config('laranail.impersonator.routes.middleware', ['web']))
     ->prefix(config('laranail.impersonator.routes.prefix', 'impersonator'))
-    ->name(config('laranail.impersonator.routes.name_prefix', 'impersonator.'))
+    ->name(config('laranail.impersonator.routes.name_prefix', 'laranail-impersonator.'))
     ->group(function (): void {
         Route::post(config('laranail.impersonator.routes.enter_path', 'enter'), EnterImpersonationController::class)
-            ->middleware('throttle:impersonator-enter')
+            ->middleware('throttle:laranail-impersonator.enter')
             ->name('enter');
 
         Route::get(config('laranail.impersonator.routes.leave_path', 'leave'), LeaveImpersonationController::class)
@@ -36,7 +36,7 @@ Route::middleware(config('laranail.impersonator.routes.middleware', ['web']))
         // keyed per operator — because extending is the same kind of privileged act as
         // entering, and an unbounded extend endpoint is a way to hammer the audit table.
         Route::post(config('laranail.impersonator.routes.extend_path', 'extend'), ExtendImpersonationController::class)
-            ->middleware('throttle:impersonator-enter')
+            ->middleware('throttle:laranail-impersonator.enter')
             ->name('extend');
 
         Route::post(config('laranail.impersonator.routes.revoke_path', 'revoke/{audit}'), RevokeImpersonationController::class)
@@ -46,6 +46,6 @@ Route::middleware(config('laranail.impersonator.routes.middleware', ['web']))
         // handoff exists precisely because the caller's session does not reach this host.
         // The token is the credential, so this is throttled by IP.
         Route::get(config('laranail.impersonator.routes.accept_path', 'accept/{token}'), AcceptImpersonationController::class)
-            ->middleware('throttle:impersonator-accept')
+            ->middleware('throttle:laranail-impersonator.accept')
             ->name('accept');
     });
