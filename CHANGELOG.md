@@ -24,6 +24,7 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- `laravel/framework ^13.0` is now declared in `require`. `src/` uses `AboutCommand`, `VendorTagPublished`, `FormRequest` from `Illuminate\Foundation`, which no `illuminate/*` component ships, so the dependency only arrived through the host application.
 - **The default RBAC permission names are `laranail-impersonator.enter`, `.mode.%s`, `.revoke`,
   `.approve` and `.audit.view`.** While the defaults are in use, an operator seeded with the bare
   `impersonator.*` names is still accepted, with a one-time deprecation notice, so no existing
