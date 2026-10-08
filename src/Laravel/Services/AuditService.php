@@ -148,7 +148,7 @@ final readonly class AuditService
         // filter on a model that has since been removed from the allowlist still finds its history.
         $resolved = $this->identities->typeFor($type);
 
-        $query->where($columnPrefix . '_type', $resolved === null ? $type : $resolved->alias)
+        $query->where($columnPrefix . '_type', $resolved?->alias ?? $type)
             ->where($columnPrefix . '_id', $id);
     }
 
