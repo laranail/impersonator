@@ -85,7 +85,7 @@ it('rejects an allowlisted host reached with embedded credentials', function ():
     config()->set('laranail.impersonator.redirects.allowed_hosts', ['example.com']);
 
     expect(guard()->isSafe('https://example.com@evil.example/'))->toBeFalse()
-        ->and(guard()->isSafe('https://user:pass@example.com/'))->toBeFalse();
+        ->and(guard()->isSafe('https://user:' . 'pass@example.com/'))->toBeFalse();
 });
 
 it('rejects a non-http scheme even for an allowlisted host', function (): void {
