@@ -21,3 +21,4 @@ secret:
   ignored_paths:
     - vendor/**
     - .phpunit.cache/**
+    - "tests/Fixtures/**/*"
