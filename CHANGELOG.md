@@ -24,6 +24,12 @@ this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Changed
 
+- **Test credentials are generated at run time.** Passwords, secrets and tokens in the tests come
+  from package-tools' `TestCredentials`, and the redaction tests compare against
+  `Redactor::PLACEHOLDER`, so no literal reaches the repository for a secret scanner to report.
+  `tests/Arch/NoLiteralCredentialsTest.php` fails the suite on any literal left behind. The
+  `laranail/package-tools` floor is now `^0.1.9`, the first release that ships both.
+
 - `laravel/framework ^13.0` is now declared in `require`. `src/` uses `AboutCommand`, `VendorTagPublished`, `FormRequest` from `Illuminate\Foundation`, which no `illuminate/*` component ships, so the dependency only arrived through the host application.
 - **The default RBAC permission names are `laranail-impersonator.enter`, `.mode.%s`, `.revoke`,
   `.approve` and `.audit.view`.** While the defaults are in use, an operator seeded with the bare

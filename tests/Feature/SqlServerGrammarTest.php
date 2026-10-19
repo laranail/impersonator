@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\DB;
+use Simtabi\Laranail\Package\Tools\Testing\TestCredentials;
 use Simtabi\Laranail\Impersonator\Laravel\Support\PersistenceGuard;
 
 /*
@@ -30,7 +31,7 @@ beforeEach(function (): void {
         'host'     => '127.0.0.1',
         'database' => 'impersonator_test',
         'username' => 'sa',
-        'password' => 'unused',
+        'password' => TestCredentials::password('probe'),
         'prefix'   => '',
     ]);
 

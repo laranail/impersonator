@@ -10,6 +10,7 @@ use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
 use Simtabi\Laranail\Impersonator\Core\Values\Decision;
+use Simtabi\Laranail\Package\Tools\Testing\TestCredentials;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Enums\CredentialType;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\InvalidMode;
@@ -459,11 +460,11 @@ it('never rotates the target remember token when leaving', function (): void {
     config()->set('laranail.impersonator.guards.target', 'secondary');
     config()->set('auth.guards.secondary', ['driver' => 'session', 'provider' => 'users']);
 
-    $this->target->forceFill(['remember_token' => 'customer-token-set-weeks-ago'])->save();
+    $this->target->forceFill(['remember_token' => TestCredentials::secret('remember')])->save();
 
     Auth::guard('web')->setUser($this->admin);
     Impersonator::enter($this->target);
     Impersonator::leave();
 
-    expect($this->target->fresh()->remember_token)->toBe('customer-token-set-weeks-ago');
+    expect($this->target->fresh()->remember_token)->toBe(TestCredentials::secret('remember'));
 });

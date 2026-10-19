@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Package\Tools\Testing\TestCredentials;
 use Simtabi\Laranail\Impersonator\Laravel\Facades\ImpersonatorFacade as Impersonator;
 
 /*
@@ -38,8 +39,8 @@ beforeEach(function (): void {
     config()->set('laranail.impersonator.limits.max_active_per_impersonator', 5);
     config()->set('laranail.impersonator.limits.state_cache.ttl', 0);
 
-    $this->admin = User::create(['name' => 'Admin', 'password' => bcrypt('operator-secret')]);
-    $this->target = User::create(['name' => 'Customer', 'password' => bcrypt('customer-secret')]);
+    $this->admin = User::create(['name' => 'Admin', 'password' => bcrypt(TestCredentials::password('operator'))]);
+    $this->target = User::create(['name' => 'Customer', 'password' => bcrypt(TestCredentials::password('customer'))]);
 
     // A host route behind the real middleware, which is the only way this is observable.
     Route::middleware(['web', AuthenticateSession::class])
