@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
+use Simtabi\Laranail\Package\Tools\Testing\TestCredentials;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Exceptions\TokenRejected;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TokenRepository;
@@ -291,7 +292,7 @@ it('throttles the accept route', function (): void {
 
 it('rejects a route token that is too short to be one', function (): void {
     // Bounded before any hashing or database work happens.
-    $this->get(route('laranail-impersonator.accept', ['token' => 'short']))->assertStatus(302);
+    $this->get(route('laranail-impersonator.accept', ['token' => TestCredentials::secret('short', 2)]))->assertStatus(302);
 });
 
 // ── pruning ─────────────────────────────────────────────────────────────────

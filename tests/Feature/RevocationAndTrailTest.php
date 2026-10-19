@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Simtabi\Laranail\Impersonator\Tests\Fixtures\User;
 use Simtabi\Laranail\Impersonator\Core\Enums\EndReason;
+use Simtabi\Laranail\Package\Tools\Testing\TestCredentials;
 use Simtabi\Laranail\Impersonator\Core\Contracts\AuditStore;
 use Simtabi\Laranail\Impersonator\Core\Contracts\TrailStore;
 use Simtabi\Laranail\Impersonator\Core\Events\ImpersonationRevoked;
@@ -198,7 +199,7 @@ it('redacts a recorded payload', function (): void {
 
     $this->post('/app/save', [
         'email'    => 'ada@example.com',
-        'password' => 'hunter2',
+        'password' => TestCredentials::password('payload'),
         'nested'   => ['api_token' => 'abc'],
     ]);
 
@@ -207,7 +208,7 @@ it('redacts a recorded payload', function (): void {
     expect($payload['email'])->toBe('ada@example.com')
         ->and($payload['password'])->toBe('[redacted]')
         ->and($payload['nested']['api_token'])->toBe('[redacted]')
-        ->and(json_encode($payload))->not->toContain('hunter2');
+        ->and(json_encode($payload))->not->toContain(TestCredentials::password('payload'));
 });
 
 it('skips ignored paths at any sample rate', function (): void {

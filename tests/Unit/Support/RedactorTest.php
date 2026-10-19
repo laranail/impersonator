@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Simtabi\Laranail\Impersonator\Core\Support\Redactor;
+use Simtabi\Laranail\Package\Tools\Testing\TestCredentials;
 
 function redactor(): Redactor
 {
@@ -10,14 +11,16 @@ function redactor(): Redactor
 }
 
 it('redacts a matching key', function (): void {
-    expect(redactor()->scrub(['password' => 'hunter2']))
-        ->toBe(['password' => '[redacted]']);
+    expect(Redactor::PLACEHOLDER)->toBe('[redacted]');
+
+    expect(redactor()->scrub(['password' => TestCredentials::password('redactor')]))
+        ->toBe(['password' => Redactor::PLACEHOLDER]);
 });
 
 it('matches as a case-insensitive substring', function (string $key): void {
     // The configured list must not have to enumerate every spelling an application
     // might use for the same secret.
-    expect(redactor()->scrub([$key => 'hunter2'])[$key])->toBe('[redacted]');
+    expect(redactor()->scrub([$key => TestCredentials::password('redactor')])[$key])->toBe(Redactor::PLACEHOLDER);
 })->with([
     'password_confirmation',
     'PASSWORD',
@@ -35,18 +38,18 @@ it('redacts recursively', function (): void {
     $scrubbed = redactor()->scrub([
         'user' => [
             'name'        => 'Ada',
-            'credentials' => ['password' => 'hunter2', 'token' => 'abc'],
+            'credentials' => ['password' => TestCredentials::password('redactor'), 'token' => 'abc'],
         ],
     ]);
 
     expect($scrubbed['user']['name'])->toBe('Ada')
-        ->and($scrubbed['user']['credentials']['password'])->toBe('[redacted]')
-        ->and($scrubbed['user']['credentials']['token'])->toBe('[redacted]');
+        ->and($scrubbed['user']['credentials']['password'])->toBe(Redactor::PLACEHOLDER)
+        ->and($scrubbed['user']['credentials']['token'])->toBe(Redactor::PLACEHOLDER);
 });
 
 it('replaces a sensitive subtree wholesale', function (): void {
     // A sensitive key holding an array is still a sensitive key.
-    expect(redactor()->scrub(['secret' => ['a' => 1, 'b' => 2]])['secret'])->toBe('[redacted]');
+    expect(redactor()->scrub(['secret' => ['a' => 1, 'b' => 2]])['secret'])->toBe(Redactor::PLACEHOLDER);
 });
 
 it('keeps the key rather than removing it', function (): void {
@@ -79,13 +82,13 @@ it('bounds recursion so a deep structure cannot overflow the stack', function ()
 });
 
 it('redacts nothing when configured with no keys', function (): void {
-    expect(Redactor::for([])->scrub(['password' => 'hunter2']))
-        ->toBe(['password' => 'hunter2']);
+    expect(Redactor::for([])->scrub(['password' => TestCredentials::password('redactor')]))
+        ->toBe(['password' => TestCredentials::password('redactor')]);
 });
 
 it('ignores blank entries in the configured list', function (): void {
     expect(Redactor::for(['', '   ', 'password'])->scrub(['email' => 'a@b.c', 'password' => 'x']))
-        ->toBe(['email' => 'a@b.c', 'password' => '[redacted]']);
+        ->toBe(['email' => 'a@b.c', 'password' => Redactor::PLACEHOLDER]);
 });
 
 it('normalises integer keys to strings', function (): void {
