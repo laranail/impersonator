@@ -43,7 +43,7 @@
         "laranail/console": "^0.1",
         "laranail/db-tools": "^0.1",
         "laranail/enumerator": "^0.1",
-        "laranail/package-tools": "^0.1.10",
+        "laranail/package-tools": "^0.1.15",
         "psr/clock": "^1.0",
         "psr/event-dispatcher": "^1.0",
         "psr/log": "^3.0"
@@ -128,7 +128,8 @@
         "phpstan": "vendor/bin/phpstan analyse --no-progress",
         "rector": "vendor/bin/rector process --dry-run",
         "rector-fix": "vendor/bin/rector process",
-        "format": "@pint-fix"
+        "format": "@pint-fix",
+        "test-db": "laranail-test-db"
     },
     "extra": {
         "branch-alias": {
@@ -140,6 +141,24 @@
             ],
             "aliases": {
                 "Impersonator": "Simtabi\\Laranail\\Impersonator\\Laravel\\Facades\\ImpersonatorFacade"
+            }
+        },
+        "laranail": {
+            "test-db": {
+                "connections": [
+                    "pgsql",
+                    "mysql"
+                ],
+                "group": null,
+                "project": "imperson",
+                "env": {
+                    "IMPERSONATOR_TEST_DB": "{connection}",
+                    "IMPERSONATOR_TEST_DB_HOST": "{host}",
+                    "IMPERSONATOR_TEST_DB_PORT": "{port}",
+                    "IMPERSONATOR_TEST_DB_NAME": "{database}",
+                    "IMPERSONATOR_TEST_DB_USER": "{user}",
+                    "IMPERSONATOR_TEST_DB_PASSWORD": "{password}"
+                }
             }
         }
     },

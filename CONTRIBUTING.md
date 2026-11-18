@@ -46,6 +46,11 @@ Tests ship with the change, not afterwards.
   that way: a Core test that needs a container is telling you the Core class has
   a dependency it should not have.
 - `tests/Feature` boots Testbench.
+- `composer test-db` runs the whole suite on PostgreSQL and MySQL through
+  `vendor/bin/laranail-test-db`: dbpantry's fixture, one database per run, so the
+  `locking` group runs instead of skipping. It needs a dbpantry checkout (`DBPANTRY_DIR`,
+  or `simtabi/packages/dbpantry` above this package) with `MDB_PUBLISH=direct`. CI runs
+  the same suite against its own PostgreSQL 17 and MySQL 8.4 services.
 
 Security-relevant behaviour needs a **failing-path** test, not just a passing
 one. A test proving the happy path works says nothing about whether the control

@@ -175,6 +175,7 @@ While pre-1.0 this repository keeps a single moving `v0.1.0` tag per the laranai
 composer install
 
 vendor/bin/pest                          # add IMPERSONATOR_TEST_DB=pgsql|mysql for a real driver
+composer test-db                         # the suite on PostgreSQL and MySQL, from dbpantry's fixture
 vendor/bin/phpstan analyse               # level max, no baseline
 vendor/bin/pint --test
 vendor/bin/rector process --dry-run
