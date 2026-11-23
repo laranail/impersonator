@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
 use Rector\Set\ValueObject\LevelSetList;
+use Rector\CodeQuality\Rector\If_\ExplicitNullableObjectInstanceRector;
+use Rector\Instanceof_\Rector\Ternary\FlipNegatedTernaryInstanceofRector;
 use Rector\DeadCode\Rector\MethodCall\RemoveNullArgOnNullDefaultParamRector;
 use Rector\CodeQuality\Rector\Identical\FlipTypeControlToUseExclusiveTypeRector;
+use Rector\TypeDeclaration\Rector\ArrowFunction\AddArrowFunctionReturnTypeRector;
 use Rector\CodingStyle\Rector\ArrowFunction\ArrowFunctionDelegatingCallToFirstClassCallableRector;
 
 return RectorConfig::configure()
@@ -30,6 +33,15 @@ return RectorConfig::configure()
         // Equivalent, and markedly harder to read on the nullable timestamps that
         // carry this package's whole lifecycle state.
         FlipTypeControlToUseExclusiveTypeRector::class,
+        // The same rewrite under its rector 2.8 name, and the ternary form that follows from it.
+        // The old name stays above for the rector 2.5-2.7 releases `^2.5.8` still allows.
+        ExplicitNullableObjectInstanceRector::class,
+        FlipNegatedTernaryInstanceofRector::class,
+
+        // rector 2.8 adds `: never` to arrow functions that only throw. Every such closure here
+        // is a test thunk handed to the failure policy, and the return type adds nothing a reader
+        // of `throw` does not already see.
+        AddArrowFunctionReturnTypeRector::class,
 
         // Collapses `fn () => $this->check()` into a first-class callable. Every
         // entry in the policy's check list has to be a thunk, and converting only
